@@ -30,7 +30,7 @@ public class Test {
     }
 
     @Command(name = "test", aliases = {"t"}, description = "Test command")
-    public void onCommand(@Optional int aaa) {
+    public void onCommand(@Optional String aaa) {
         System.out.println(aaa);
     }
 }

@@ -14,6 +14,7 @@ import net.octopvp.commander.platform.CommanderPlatform;
 import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.provider.impl.IntegerProvider;
 import net.octopvp.commander.provider.impl.SenderProvider;
+import net.octopvp.commander.provider.impl.StringProvider;
 import net.octopvp.commander.sender.CoreCommandSender;
 
 import java.lang.annotation.Annotation;
@@ -49,6 +50,7 @@ public class CommanderImpl implements Commander {
     public Commander init() {
         registerProvider(new IntegerProvider());
         registerProvider(new SenderProvider());
+        registerProvider(new StringProvider());
         return this;
     }
 
@@ -161,6 +163,7 @@ public class CommanderImpl implements Commander {
         }
 
         Object[] arguments = ArgumentParser.parseArguments(context,cArgs);
+
         context.getCommandInfo().getMethod().invoke(context.getCommandInfo().getInstance(), arguments);
     }
 
