@@ -224,4 +224,9 @@ public class CommanderImpl implements Commander {
         }
         return switches;
     }
+
+    @Override
+    public Map<String, CommandInfo> getCommandMap() {
+        return commandMap;
+    }
 }

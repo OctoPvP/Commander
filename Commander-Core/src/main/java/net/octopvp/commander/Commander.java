@@ -1,6 +1,7 @@
 package net.octopvp.commander;
 
 import net.octopvp.commander.command.CommandContext;
+import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.config.CommanderConfig;
 import net.octopvp.commander.exception.CommandException;
 import net.octopvp.commander.exception.CommandParseException;
@@ -35,6 +36,8 @@ public interface Commander {
     <T> Commander registerDependency(Class<T> type, T val);
 
     Map<Class<?>, Supplier<?>> getDependencies();
+
+    Map<String, CommandInfo> getCommandMap();
 
     Commander registerCommandPreProcessor(Consumer<CommandContext> preProcessor);
 

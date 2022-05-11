@@ -50,7 +50,7 @@ public class CommandInfo {
     }
 
     public String getUsage() {
-        if (usage == null || usage.equalsIgnoreCase("<<generate>>")) {
+        if (usage == null || usage.equals("<<generate>>")) {
             StringBuilder builder = new StringBuilder();
             for (ParameterInfo parameter : parameters) {
                 boolean optional = parameter.isOptional();
