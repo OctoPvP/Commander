@@ -22,7 +22,12 @@ public class CommandArgs {
 
     private final List<String> argsList;
 
+    private Deque<String> argsDeque;
+
     public Deque<String> getArgs() {
-        return new ArrayDeque<>(argsList);
+        if (argsDeque == null) {
+            argsDeque = new ArrayDeque<>(argsList);
+        }
+        return argsDeque;
     }
 }

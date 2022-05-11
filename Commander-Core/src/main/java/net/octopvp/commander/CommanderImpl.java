@@ -18,11 +18,13 @@ import net.octopvp.commander.provider.impl.StringProvider;
 import net.octopvp.commander.sender.CoreCommandSender;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class CommanderImpl implements Commander {
     private CommanderPlatform platform;
@@ -141,7 +143,7 @@ public class CommanderImpl implements Commander {
     }
 
     @Override
-    public void executeCommand(CoreCommandSender sender, String label, String[] args) throws Exception {
+    public void executeCommand(CoreCommandSender sender, String label, String[] args) throws CommandParseException {
         CommandInfo commandInfo = commandMap.get(label);
         if (commandInfo == null) {
             throw new CommandNotFoundException("Could not find command handler for " + label);
@@ -149,25 +151,36 @@ public class CommanderImpl implements Commander {
 
         String[] argsCopy = new String[args.length];
         System.arraycopy(args, 0, argsCopy, 0, args.length);
-        List<String> argsList = ArgumentParser.combineMultiWordArguments(Arrays.asList(args));
+        //List<String> argsList = ArgumentParser.combineMultiWordArguments(Arrays.asList(args));
+        List<String> argsList = new ArrayList<>(Arrays.asList(args));
 
-        CommandArgs cArgs = new CommandArgs(this, args, extractSwitches(argsList), extractFlags(argsList),argsList);
+        CommandArgs cArgs = new CommandArgs(this, args, commandInfo.hasSwitches() ? extractSwitches(argsList, commandInfo.getParameters()) : null, commandInfo.hasFlags() ? extractFlags(argsList, commandInfo.getParameters()) : null,argsList);
 
         CommandContext context = new CommandContext(commandInfo, label.toLowerCase(), argsCopy, sender, cArgs);
         for (Consumer<CommandContext> preProcessor : preProcessors) {
             preProcessor.accept(context);
         }
+        try {
+            if (commandInfo.getPermission() != null && !sender.hasPermission(commandInfo.getPermission())) {
+                throw new CommandParseException("You do not have permission to use this command.");
+            }
 
-        if (commandInfo.getPermission() != null && !sender.hasPermission(commandInfo.getPermission())) {
-            throw new CommandParseException("You do not have permission to use this command.");
+            Object[] arguments = ArgumentParser.parseArguments(context,cArgs);
+
+            try {
+                context.getCommandInfo().getMethod().invoke(context.getCommandInfo().getInstance(), arguments);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        } catch (CommandNotFoundException | CommandParseException e) {
+            platform.handleCommandException(context, e);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
         }
-
-        Object[] arguments = ArgumentParser.parseArguments(context,cArgs);
-
-        context.getCommandInfo().getMethod().invoke(context.getCommandInfo().getInstance(), arguments);
     }
 
-    private Map<String, String> extractFlags(final List<String> args) {
+    private Map<String, String> extractFlags(final List<String> args, final ParameterInfo[] params) {
+        List<ParameterInfo> paramsList = Arrays.asList(params);
         Map<String, String> flags = new HashMap<>();
         Iterator<String> iterator = args.iterator();
         while (iterator.hasNext()) {
@@ -177,6 +190,8 @@ public class CommanderImpl implements Commander {
                 if (flags.containsKey(flag)) {
                     throw new CommandParseException("Flag " + flag + " is defined multiple times.");
                 }
+                if (paramsList.stream().noneMatch(p -> p.isFlag() && p.getFlag().equals(flag)))
+                    continue;
                 iterator.remove();
                 if (iterator.hasNext()) {
                     String value = iterator.next();
@@ -189,7 +204,8 @@ public class CommanderImpl implements Commander {
         }
         return flags;
     }
-    private Map<String, Boolean> extractSwitches(final List<String> args) {
+    private Map<String, Boolean> extractSwitches(final List<String> args, final ParameterInfo[] params) {
+        List<ParameterInfo> paramsList = Arrays.asList(params);
         Map<String, Boolean> switches = new HashMap<>();
         Iterator<String> iterator = args.iterator();
         while (iterator.hasNext()) {
@@ -199,8 +215,11 @@ public class CommanderImpl implements Commander {
                 if (switches.containsKey(flag)) {
                     throw new CommandParseException("Switch " + flag + " is defined multiple times.");
                 }
+                if (paramsList.stream().noneMatch(p -> p.isSwitch() && p.getSwitch().equals(flag)))
+                    continue;
                 iterator.remove();
                 switches.put(flag, true);
+
             }
         }
         return switches;

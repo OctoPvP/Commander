@@ -1,5 +1,6 @@
 package net.octopvp.commander.provider.impl;
 
+import net.octopvp.commander.annotation.Sender;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
@@ -12,7 +13,7 @@ import java.util.List;
 public class SenderProvider implements Provider<CoreCommandSender> {
     @Override
     public CoreCommandSender provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
-        return context.getCommandSender();
+        return parameterInfo.getParameter().isAnnotationPresent(Sender.class) || parameterInfo.getParameter().getName().equalsIgnoreCase("sender") ? context.getCommandSender() : null;
     }
 
     @Override
@@ -23,5 +24,10 @@ public class SenderProvider implements Provider<CoreCommandSender> {
     @Override
     public Class<?> getType() {
         return CoreCommandSender.class;
+    }
+
+    @Override
+    public boolean matchWithInstanceOf() {
+        return true;
     }
 }

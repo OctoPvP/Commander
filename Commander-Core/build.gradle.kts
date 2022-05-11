@@ -23,3 +23,6 @@ dependencies {
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
 }
+tasks.compileJava {
+    options.compilerArgs.add("-parameters")
+}

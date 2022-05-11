@@ -2,6 +2,8 @@ package net.octopvp.commander;
 
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.config.CommanderConfig;
+import net.octopvp.commander.exception.CommandException;
+import net.octopvp.commander.exception.CommandParseException;
 import net.octopvp.commander.platform.CommanderPlatform;
 import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.sender.CoreCommandSender;
@@ -36,5 +38,5 @@ public interface Commander {
 
     Commander registerCommandPreProcessor(Consumer<CommandContext> preProcessor);
 
-    void executeCommand(CoreCommandSender sender, String label, String[] args) throws Exception;
+    void executeCommand(CoreCommandSender sender, String label, String[] args) throws CommandException;
 }

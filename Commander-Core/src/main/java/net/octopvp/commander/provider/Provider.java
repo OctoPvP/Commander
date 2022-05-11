@@ -27,4 +27,8 @@ public interface Provider<T> {
     default Class<?>[] getExtraTypes() {
         return null;
     }
+
+    default boolean matchWithInstanceOf() {
+        return false;
+    }
 }

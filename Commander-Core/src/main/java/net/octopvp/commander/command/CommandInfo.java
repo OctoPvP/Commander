@@ -69,4 +69,33 @@ public class CommandInfo {
     public <T extends Annotation> T getAnnotation(Class<T> annotation) {
         return (T) annotations.get(annotation);
     }
+
+    private boolean hasFlags, foundFlagsAlready;
+    private boolean hasSwitches, foundSwitchesAlready;
+
+    public boolean hasFlags() {
+        if (foundFlagsAlready) {
+            return hasFlags;
+        }
+        boolean b = false;
+        for (ParameterInfo parameter : parameters) {
+            if (parameter.isFlag()) {
+                b = true;
+            }
+        }
+        return hasFlags = b;
+    }
+    public boolean hasSwitches() {
+        if (foundSwitchesAlready) {
+            return hasSwitches;
+        }
+        boolean b = false;
+        for (ParameterInfo parameter : parameters) {
+            if (parameter.isSwitch()) {
+                b = true;
+            }
+        }
+        return hasSwitches = b;
+    }
+
 }

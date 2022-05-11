@@ -24,4 +24,5 @@ tasks.getByName<Test>("test") {
 tasks.compileJava {
     sourceCompatibility = "1.8"
     targetCompatibility = "1.8"
+    options.compilerArgs.add("-parameters")
 }
