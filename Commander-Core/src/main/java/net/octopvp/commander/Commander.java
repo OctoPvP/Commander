@@ -10,6 +10,7 @@ import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.sender.CoreCommandSender;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -41,5 +42,9 @@ public interface Commander {
 
     Commander registerCommandPreProcessor(Consumer<CommandContext> preProcessor);
 
+    CommandInfo getCommand(String label);
+
     void executeCommand(CoreCommandSender sender, String label, String[] args) throws CommandException;
+
+    List<String> getSuggestions(CoreCommandSender sender, String prefix);
 }

@@ -1,14 +1,16 @@
-import org.apache.tools.ant.util.JavaEnvUtils.VERSION_1_8
-
 plugins {
     id("java")
+    id("maven-publish")
+    id("signing")
 }
 
 group = "net.octopvp"
 version = "1.0-SNAPSHOT"
+description = "A universal command parsing library"
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
@@ -25,4 +27,33 @@ tasks.compileJava {
     sourceCompatibility = "1.8"
     targetCompatibility = "1.8"
     options.compilerArgs.add("-parameters")
+}
+
+subprojects {
+    apply(plugin = "java")
+    apply(plugin = "maven-publish")
+    apply(plugin = "signing")
+
+    publishing {
+        repositories {
+            maven {
+                mavenLocal()
+            }
+        }
+        publications {
+            create<MavenPublication>("maven") {
+                from(components["java"])
+
+            }
+        }
+    }
+    tasks.compileJava {
+        options.compilerArgs.add("-parameters")
+    }
+    tasks.jar {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        from({
+            configurations.runtimeClasspath.get().map { if (it.isDirectory()) it else zipTree(it) }
+        })
+    }
 }

@@ -86,4 +86,14 @@ public class ParameterInfo {
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        return "ParameterInfo{" +
+                "parameter=" + parameter +
+                ", commander=" + commander +
+                ", provider=" + provider +
+                ", alreadyFoundProvider=" + alreadyFoundProvider +
+                '}';
+    }
 }

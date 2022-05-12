@@ -83,9 +83,9 @@ public class CommanderImpl implements Commander {
                     annotations.put(distributedAnnotation.annotationType(), distributedAnnotation);
                 }
                 CommandInfo commandInfo = new CommandInfo(parameters.toArray(new ParameterInfo[0]), name, command.description(), command.usage(), command.aliases(), method, object, annotations, this);
-                commandMap.put(name, commandInfo);
+                commandMap.put(name.toLowerCase(), commandInfo);
                 for (String alias : command.aliases()) {
-                    commandMap.put(alias, commandInfo);
+                    commandMap.put(alias.toLowerCase(), commandInfo);
                 }
             }
         }
@@ -154,7 +154,7 @@ public class CommanderImpl implements Commander {
         //List<String> argsList = ArgumentParser.combineMultiWordArguments(Arrays.asList(args));
         List<String> argsList = new ArrayList<>(Arrays.asList(args));
 
-        CommandArgs cArgs = new CommandArgs(this, args, commandInfo.hasSwitches() ? extractSwitches(argsList, commandInfo.getParameters()) : null, commandInfo.hasFlags() ? extractFlags(argsList, commandInfo.getParameters()) : null,argsList);
+        CommandArgs cArgs = new CommandArgs(this, args, commandInfo.hasSwitches() ? extractSwitches(argsList, commandInfo.getParameters()) : null, commandInfo.hasFlags() ? extractFlags(argsList, commandInfo.getParameters()) : null, argsList);
 
         CommandContext context = new CommandContext(commandInfo, label.toLowerCase(), argsCopy, sender, cArgs);
         for (Consumer<CommandContext> preProcessor : preProcessors) {
@@ -165,7 +165,7 @@ public class CommanderImpl implements Commander {
                 throw new CommandParseException("You do not have permission to use this command.");
             }
 
-            Object[] arguments = ArgumentParser.parseArguments(context,cArgs);
+            Object[] arguments = ArgumentParser.parseArguments(context, cArgs);
 
             try {
                 context.getCommandInfo().getMethod().invoke(context.getCommandInfo().getInstance(), arguments);
@@ -197,13 +197,14 @@ public class CommanderImpl implements Commander {
                     String value = iterator.next();
                     iterator.remove();
                     flags.put(flag, value);
-                }else {
+                } else {
                     throw new CommandParseException("Flag " + flag + " requires a value.");
                 }
             }
         }
         return flags;
     }
+
     private Map<String, Boolean> extractSwitches(final List<String> args, final ParameterInfo[] params) {
         List<ParameterInfo> paramsList = Arrays.asList(params);
         Map<String, Boolean> switches = new HashMap<>();
@@ -228,5 +229,47 @@ public class CommanderImpl implements Commander {
     @Override
     public Map<String, CommandInfo> getCommandMap() {
         return commandMap;
+    }
+
+    @Override
+    public CommandInfo getCommand(String label) {
+        return commandMap.get(label.toLowerCase());
+    }
+
+    @Override
+    public List<String> getSuggestions(CoreCommandSender sender, final String input) {
+        int prefixLength = platform.getPrefix().length();
+        final String s = input;
+        //get the first word seperated by spaces without using split
+        int spaceIndex = input.indexOf(' ');
+        String in = spaceIndex == -1 ? input : input.substring(0, spaceIndex);
+
+        if (in.startsWith(platform.getPrefix())) {
+            in = in.substring(prefixLength);
+        }
+        boolean starts = in.startsWith(platform.getPrefix());
+        String cmd = starts ? in.substring(prefixLength) : in;
+        CommandInfo command = getCommand(cmd);
+        if (command == null) {
+            return null;
+        }
+        String rest = s.substring(in.length() + (starts ? platform.getPrefix().length() : 0));
+        List<String> suggestions = new ArrayList<>();
+        ParameterInfo[] parameters = command.getParameters();
+        //Count the spaces in rest
+        int currentArgument = (int) rest.chars().filter(c -> c == (int) ' ').count();
+        if (currentArgument == -1) {
+            currentArgument = 0;
+        }
+        ParameterInfo param = parameters[currentArgument];
+        Provider<?> provider = param.getProvider();
+        if (provider != null) {
+            List<String> suggestionsProvided = provider.provideSuggestions(input);
+            if (suggestionsProvided == null) {
+                return null;
+            }
+            suggestions.addAll(suggestionsProvided);
+        }
+        return suggestions;
     }
 }
