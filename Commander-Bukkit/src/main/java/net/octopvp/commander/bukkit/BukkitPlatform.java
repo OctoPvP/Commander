@@ -1,5 +1,6 @@
 package net.octopvp.commander.bukkit;
 
+import net.octopvp.commander.bukkit.impl.BukkitCommandWrapper;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.exception.CommandException;
@@ -55,12 +56,14 @@ public class BukkitPlatform implements CommanderPlatform, CommandExecutor {
     @Override
     public void registerCommand(CommandInfo command) {
         if (commandMap.getCommand(command.getName()) == null) {
-            //Command cmd = new BukkitCommand(command.getName(), this, plugin);
+            Command cmd = new BukkitCommandWrapper(command);
+            commandMap.register(plugin.getName(), cmd);
         }
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        return false;
+
+        return true;
     }
 }

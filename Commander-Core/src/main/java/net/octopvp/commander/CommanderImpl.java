@@ -2,26 +2,28 @@ package net.octopvp.commander;
 
 import net.octopvp.commander.annotation.Command;
 import net.octopvp.commander.annotation.DistributeOnMethods;
+import net.octopvp.commander.annotation.Range;
 import net.octopvp.commander.argument.ArgumentParser;
 import net.octopvp.commander.argument.CommandArgs;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.config.CommanderConfig;
-import net.octopvp.commander.exception.CommandNotFoundException;
-import net.octopvp.commander.exception.CommandParseException;
+import net.octopvp.commander.exception.*;
 import net.octopvp.commander.platform.CommanderPlatform;
 import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.provider.impl.IntegerProvider;
 import net.octopvp.commander.provider.impl.SenderProvider;
 import net.octopvp.commander.provider.impl.StringProvider;
 import net.octopvp.commander.sender.CoreCommandSender;
+import net.octopvp.commander.validator.Validator;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -37,6 +39,9 @@ public class CommanderImpl implements Commander {
     private Map<String, CommandInfo> commandMap = new HashMap<>();
 
     private List<Consumer<CommandContext>> preProcessors = new ArrayList<>();
+    private List<BiConsumer<CommandContext, Object>> postProcessors = new ArrayList<>();
+
+    private Map<Class<?>,Validator<Object>> validators = new HashMap<>();
 
     public CommanderImpl(CommanderPlatform platform) {
         this.platform = platform;
@@ -53,6 +58,21 @@ public class CommanderImpl implements Commander {
         registerProvider(new IntegerProvider());
         registerProvider(new SenderProvider());
         registerProvider(new StringProvider());
+        registerCommandPreProcessor(context -> { //Cooldown preprocessor
+            if (context.getCommandInfo().cooldownEnabled() && context.getCommandInfo().isOnCooldown(context.getCommandSender().getIdentifier())) {
+                throw new CooldownException(context.getCommandInfo().getCooldownSeconds(context.getCommandSender().getIdentifier()));
+            }
+        });
+        registerCommandPostProcessor((context,result) -> {
+            if (context.getCommandInfo().cooldownEnabled()) {
+                context.getCommandInfo().addCooldown(context.getCommandSender().getIdentifier());
+            }
+        });
+        registerValidator(Number.class, (value, parameter, context) -> {
+            Range range = parameter.getParameter().getAnnotation(Range.class);
+            if (range != null && (value.doubleValue() > range.max() || value.doubleValue() < range.min()))
+                throw new ValidateException("Value " + value.doubleValue() + " is not in range " + range.min() + " - " + range.max());
+        });
         return this;
     }
 
@@ -115,6 +135,23 @@ public class CommanderImpl implements Commander {
     }
 
     @Override
+    public Commander removeProvider(Class<? extends Provider<?>> clazz) {
+        this.argumentProviders.removeIf(provider -> provider.getClass().equals(clazz));
+        return this;
+    }
+
+    @Override
+    public <T> Commander registerValidator(Class<T> clazz, Validator<T> validator) {
+        this.validators.put(clazz, (Validator<Object>) validator);
+        return this;
+    }
+
+    @Override
+    public Map<Class<?>, Validator<Object>> getValidators() {
+        return validators;
+    }
+
+    @Override
     public CommanderPlatform getPlatform() {
         return platform;
     }
@@ -143,10 +180,20 @@ public class CommanderImpl implements Commander {
     }
 
     @Override
+    public Commander registerCommandPostProcessor(BiConsumer<CommandContext, Object> postProcessor) {
+        postProcessors.add(postProcessor);
+        return this;
+    }
+
+    @Override
     public void executeCommand(CoreCommandSender sender, String label, String[] args) throws CommandParseException {
         CommandInfo commandInfo = commandMap.get(label);
         if (commandInfo == null) {
             throw new CommandNotFoundException("Could not find command handler for " + label);
+        }
+
+        if (args == null) {
+            args = new String[]{};
         }
 
         String[] argsCopy = new String[args.length];
@@ -157,22 +204,26 @@ public class CommanderImpl implements Commander {
         CommandArgs cArgs = new CommandArgs(this, args, commandInfo.hasSwitches() ? extractSwitches(argsList, commandInfo.getParameters()) : null, commandInfo.hasFlags() ? extractFlags(argsList, commandInfo.getParameters()) : null, argsList);
 
         CommandContext context = new CommandContext(commandInfo, label.toLowerCase(), argsCopy, sender, cArgs);
-        for (Consumer<CommandContext> preProcessor : preProcessors) {
-            preProcessor.accept(context);
-        }
         try {
+            for (Consumer<CommandContext> preProcessor : preProcessors) {
+                preProcessor.accept(context);
+            }
             if (commandInfo.getPermission() != null && !sender.hasPermission(commandInfo.getPermission())) {
                 throw new CommandParseException("You do not have permission to use this command.");
             }
 
             Object[] arguments = ArgumentParser.parseArguments(context, cArgs);
 
+            Object result = null;
             try {
-                context.getCommandInfo().getMethod().invoke(context.getCommandInfo().getInstance(), arguments);
+                result = context.getCommandInfo().getMethod().invoke(context.getCommandInfo().getInstance(), arguments);
             } catch (IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
             }
-        } catch (CommandNotFoundException | CommandParseException e) {
+            for (BiConsumer<CommandContext, Object> postProcessor : postProcessors) {
+                postProcessor.accept(context, result);
+            }
+        } catch (CommandException e) {
             platform.handleCommandException(context, e);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
@@ -271,5 +322,11 @@ public class CommanderImpl implements Commander {
             suggestions.addAll(suggestionsProvided);
         }
         return suggestions;
+    }
+
+    @Override
+    public List<String> getSuggestions(CoreCommandSender sender, String prefix, String[] args) {
+        String full = prefix + String.join(" ", args); //Avoiding String#split at all costs because it compiles regex
+        return getSuggestions(sender, full);
     }
 }

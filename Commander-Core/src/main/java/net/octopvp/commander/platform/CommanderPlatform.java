@@ -5,6 +5,8 @@ import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.exception.CommandException;
 import net.octopvp.commander.sender.CoreCommandSender;
 
+import java.util.UUID;
+
 public interface CommanderPlatform {
     void handleMessage(String message, CoreCommandSender sender);
 

@@ -50,4 +50,9 @@ public class BukkitCommandSenderImpl implements BukkitCommandSender {
     public boolean hasPermission(String permission) {
         return commandSender.hasPermission(permission);
     }
+
+    @Override
+    public UUID getIdentifier() {
+        return getUUID();
+    }
 }

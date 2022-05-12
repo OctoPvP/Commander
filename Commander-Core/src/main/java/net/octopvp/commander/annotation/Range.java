@@ -4,14 +4,10 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.concurrent.TimeUnit;
 
-@DistributeOnMethods
+@Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.TYPE})
-public @interface Cooldown {
-    long value();
-
-    TimeUnit unit() default TimeUnit.SECONDS;
-
+public @interface Range {
+    double min() default Double.MIN_VALUE;
+    double max() default Double.MAX_VALUE;
 }

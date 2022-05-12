@@ -7,9 +7,11 @@ import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.exception.CommandParseException;
 import net.octopvp.commander.provider.Provider;
+import net.octopvp.commander.validator.Validator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class ArgumentParser {
@@ -65,9 +67,18 @@ public class ArgumentParser {
             if (obj == null && parameter.isRequired()) {
                 throw new CommandParseException("Required argument " + parameter.getParameter().getName() + " is null!");
             }
+            validate(obj, parameter, ctx);
             arguments[i] = obj;
         }
         return arguments;
+    }
+    private static void validate(Object obj, ParameterInfo parameter, CommandContext ctx) {
+        for (Map.Entry<Class<?>, Validator<Object>> entry : ctx.getCommandInfo().getCommander().getValidators().entrySet()) {
+            if (entry.getKey().isAssignableFrom(parameter.getParameter().getType())) {
+                Validator<Object> validator = entry.getValue();
+                validator.validate(obj,parameter,ctx);
+            }
+        }
     }
     /*
     TODO this
