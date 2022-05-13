@@ -22,11 +22,6 @@ public class SenderProvider implements Provider<CoreCommandSender> {
     }
 
     @Override
-    public Class<?> getType() {
-        return CoreCommandSender.class;
-    }
-
-    @Override
     public boolean matchWithInstanceOf() {
         return true;
     }

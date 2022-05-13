@@ -1,5 +1,6 @@
 package net.octopvp.commander.bukkit.providers;
 
+import net.octopvp.commander.annotation.Sender;
 import net.octopvp.commander.bukkit.BukkitCommandSender;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
@@ -13,17 +14,11 @@ import java.util.List;
 public class CommandSenderProvider implements Provider<CommandSender> {
     @Override
     public CommandSender provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
-        BukkitCommandSender sender = (BukkitCommandSender) context.getCommandSender();
-        return sender.getSender();
+        return ((BukkitCommandSender) context.getCommandSender()).getSender();
     }
 
     @Override
     public List<String> provideSuggestions(String input) {
         return null;
-    }
-
-    @Override
-    public Class<?> getType() {
-        return CommandSender.class;
     }
 }

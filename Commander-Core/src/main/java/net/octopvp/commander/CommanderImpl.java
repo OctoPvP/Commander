@@ -1,5 +1,6 @@
 package net.octopvp.commander;
 
+import lombok.val;
 import net.octopvp.commander.annotation.Command;
 import net.octopvp.commander.annotation.DistributeOnMethods;
 import net.octopvp.commander.annotation.Range;
@@ -16,6 +17,7 @@ import net.octopvp.commander.provider.impl.IntegerProvider;
 import net.octopvp.commander.provider.impl.SenderProvider;
 import net.octopvp.commander.provider.impl.StringProvider;
 import net.octopvp.commander.sender.CoreCommandSender;
+import net.octopvp.commander.util.Primitives;
 import net.octopvp.commander.validator.Validator;
 
 import java.lang.annotation.Annotation;
@@ -32,7 +34,7 @@ public class CommanderImpl implements Commander {
     private CommanderPlatform platform;
     private CommanderConfig config;
 
-    private Set<Provider<?>> argumentProviders = new HashSet<>();
+    private Map<Class<?>, Provider<?>> argumentProviders = new HashMap<>();
 
     private Map<Class<?>, Supplier<?>> dependencies = new HashMap<>();
 
@@ -41,7 +43,7 @@ public class CommanderImpl implements Commander {
     private List<Consumer<CommandContext>> preProcessors = new ArrayList<>();
     private List<BiConsumer<CommandContext, Object>> postProcessors = new ArrayList<>();
 
-    private Map<Class<?>,Validator<Object>> validators = new HashMap<>();
+    private Map<Class<?>, Validator<Object>> validators = new HashMap<>();
 
     public CommanderImpl(CommanderPlatform platform) {
         this.platform = platform;
@@ -55,23 +57,27 @@ public class CommanderImpl implements Commander {
 
     @Override
     public Commander init() {
-        registerProvider(new IntegerProvider());
-        registerProvider(new SenderProvider());
-        registerProvider(new StringProvider());
+        registerProvider(Integer.class,new IntegerProvider());
+        registerProvider(CoreCommandSender.class, new SenderProvider());
+        registerProvider(String.class, new StringProvider());
         registerCommandPreProcessor(context -> { //Cooldown preprocessor
             if (context.getCommandInfo().cooldownEnabled() && context.getCommandInfo().isOnCooldown(context.getCommandSender().getIdentifier())) {
                 throw new CooldownException(context.getCommandInfo().getCooldownSeconds(context.getCommandSender().getIdentifier()));
             }
         });
-        registerCommandPostProcessor((context,result) -> {
+        registerCommandPostProcessor((context, result) -> {
             if (context.getCommandInfo().cooldownEnabled()) {
                 context.getCommandInfo().addCooldown(context.getCommandSender().getIdentifier());
             }
         });
         registerValidator(Number.class, (value, parameter, context) -> {
             Range range = parameter.getParameter().getAnnotation(Range.class);
-            if (range != null && (value.doubleValue() > range.max() || value.doubleValue() < range.min()))
+            if (range != null && (value.doubleValue() > range.max() || value.doubleValue() < range.min())) {
+                if (value.doubleValue() == range.defaultValue()) { //All number providers should use Range#defaultValue() if the annotation is present
+                    return; //TODO we gotta find a better way to handle primitives, which cant take null
+                }
                 throw new ValidateException("Value " + value.doubleValue() + " is not in range " + range.min() + " - " + range.max());
+            }
         });
         return this;
     }
@@ -107,6 +113,7 @@ public class CommanderImpl implements Commander {
                 for (String alias : command.aliases()) {
                     commandMap.put(alias.toLowerCase(), commandInfo);
                 }
+                platform.registerCommand(commandInfo);
             }
         }
         return this;
@@ -124,25 +131,25 @@ public class CommanderImpl implements Commander {
     }
 
     @Override
-    public Collection<Provider<?>> getArgumentProviders() {
+    public Map<Class<?>, Provider<?>> getArgumentProviders() {
         return this.argumentProviders;
     }
 
     @Override
-    public Commander registerProvider(Provider<?> provider) {
-        this.argumentProviders.add(provider);
+    public Commander registerProvider(Class<?> type, Provider<?> provider) {
+        this.argumentProviders.put(Primitives.wrap(type), provider);
         return this;
     }
 
     @Override
-    public Commander removeProvider(Class<? extends Provider<?>> clazz) {
-        this.argumentProviders.removeIf(provider -> provider.getClass().equals(clazz));
+    public Commander removeProvider(Class<?> clazz) {
+        this.argumentProviders.entrySet().removeIf(e -> e.getValue().getClass().equals(clazz) || e.getKey().equals(Primitives.wrap(clazz)));
         return this;
     }
 
     @Override
     public <T> Commander registerValidator(Class<T> clazz, Validator<T> validator) {
-        this.validators.put(clazz, (Validator<Object>) validator);
+        this.validators.put(Primitives.wrap(clazz), (Validator<Object>) validator);
         return this;
     }
 

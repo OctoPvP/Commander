@@ -22,7 +22,7 @@ public class ProviderTest {
     @Test
     public void testProviders() {
         commander = new CommanderImpl(new TestPlatform())
-                .registerProvider(new TestProvider())
+                .registerProvider(CommandSender.class, new TestProvider())
                 .init();
 
         commander.register(this);
@@ -48,11 +48,6 @@ public class ProviderTest {
         @Override
         public List<String> provideSuggestions(String input) {
             return null;
-        }
-
-        @Override
-        public Class<?> getType() {
-            return CommandSender.class;
         }
     }
 }

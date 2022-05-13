@@ -27,6 +27,7 @@ public class ParameterInfo {
 
     public Provider<?> getProvider() {
         if (provider == null && !alreadyFoundProvider) {
+            /*
             provider = commander.getArgumentProviders().stream().filter(p -> {
                 boolean matchWithInstanceOf = p.matchWithInstanceOf();
                 if (matchWithInstanceOf) {
@@ -34,6 +35,17 @@ public class ParameterInfo {
                 }
                 return p.getType().equals(parameter.getType()) || (p.getExtraTypes() != null && Arrays.asList(p.getExtraTypes()).contains(parameter.getType()));
             }).findFirst().orElse(null);
+             */
+            java.util.Optional<Map.Entry<Class<?>,Provider<?>>> e = commander.getArgumentProviders().entrySet().stream().filter(entry -> {
+                Class<?> clazz = entry.getKey();
+                Provider<?> provider = entry.getValue();
+                boolean matchWithInstanceOf = provider.matchWithInstanceOf();
+                if (matchWithInstanceOf) {
+                    return parameter.getType().isAssignableFrom(clazz) || (provider.getExtraTypes() != null && Arrays.asList(provider.getExtraTypes()).stream().anyMatch(t -> parameter.getType().isAssignableFrom(t)));
+                }
+                return clazz.equals(parameter.getType()) || (provider.getExtraTypes() != null && Arrays.asList(provider.getExtraTypes()).contains(parameter.getType()));
+            }).findFirst();
+            provider = e.<Provider<?>>map(Map.Entry::getValue).orElse(null);
             alreadyFoundProvider = true;
         }
         return provider;

@@ -28,11 +28,11 @@ public interface Commander {
 
     Commander setConfig(CommanderConfig config);
 
-    Collection<Provider<?>> getArgumentProviders();
+    Map<Class<?>,Provider<?>> getArgumentProviders();
 
-    Commander registerProvider(Provider<?> provider);
+    Commander registerProvider(Class<?> type,Provider<?> provider);
 
-    Commander removeProvider(Class<? extends Provider<?>> clazz);
+    Commander removeProvider(Class<?> clazz);
 
     <T> Commander registerValidator(Class<T> clazz, Validator<T> validator);
 

@@ -1,5 +1,6 @@
 package net.octopvp.commander.provider.impl;
 
+import net.octopvp.commander.annotation.Range;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
@@ -21,8 +22,9 @@ public class IntegerProvider implements Provider<Integer> {
     }
 
     @Override
-    public Class<?> getType() {
-        return Integer.class;
+    public Integer provideDefault(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
+        if (parameterInfo.getParameter().isAnnotationPresent(Range.class)) return (int) parameterInfo.getParameter().getAnnotation(Range.class).defaultValue();
+        return -1;
     }
 
     @Override

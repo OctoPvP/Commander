@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CommanderConfig {
-    private boolean defaultRequired = false;
+    private boolean defaultRequired = true;
 
     private String optionalPrefix = "[",optionalSuffix = "]";
     private String requiredPrefix = "<",requiredSuffix = ">";

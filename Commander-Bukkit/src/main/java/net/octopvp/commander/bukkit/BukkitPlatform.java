@@ -6,19 +6,15 @@ import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.exception.CommandException;
 import net.octopvp.commander.platform.CommanderPlatform;
 import net.octopvp.commander.sender.CoreCommandSender;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandMap;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.SimplePluginManager;
 
 import java.lang.reflect.Field;
 
-public class BukkitPlatform implements CommanderPlatform, CommandExecutor {
+public class BukkitPlatform implements CommanderPlatform {
     private final Plugin plugin;
     private CommandMap commandMap;
 
@@ -59,11 +55,5 @@ public class BukkitPlatform implements CommanderPlatform, CommandExecutor {
             Command cmd = new BukkitCommandWrapper(command);
             commandMap.register(plugin.getName(), cmd);
         }
-    }
-
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-
-        return true;
     }
 }

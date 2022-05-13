@@ -24,9 +24,9 @@ public class CompleterTest {
         commander = new CommanderImpl(new TestPlatform())
                 .init()
                 .register(this)
-                .registerProvider(new TestProvider())
-                .registerProvider(new TestProvider2())
-                .registerProvider(new TestProvider3())
+                .registerProvider(TestClass.class,new TestProvider())
+                .registerProvider(TestClassTwo.class,new TestProvider2())
+                .registerProvider(TestClassThree.class, new TestProvider3())
         ;
         List<String> completions = commander.getSuggestions(new CommandSender(), "test");
         assertFalse(completions == null);
@@ -59,11 +59,6 @@ public class CompleterTest {
         public List<String> provideSuggestions(String input) {
             return Arrays.asList("Hello", "World");
         }
-
-        @Override
-        public Class<?> getType() {
-            return TestClass.class;
-        }
     }
     private static class TestProvider2 implements Provider<TestClassTwo> {
 
@@ -76,11 +71,6 @@ public class CompleterTest {
         public List<String> provideSuggestions(String input) {
             return Arrays.asList("Yes", "ABCDEFG");
         }
-
-        @Override
-        public Class<?> getType() {
-            return TestClassTwo.class;
-        }
     }
     private static class TestProvider3 implements Provider<TestClassThree> {
 
@@ -92,11 +82,6 @@ public class CompleterTest {
         @Override
         public List<String> provideSuggestions(String input) {
             return Arrays.asList("It Works!", ":)");
-        }
-
-        @Override
-        public Class<?> getType() {
-            return TestClassThree.class;
         }
     }
 

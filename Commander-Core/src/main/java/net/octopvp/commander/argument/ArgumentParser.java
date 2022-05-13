@@ -7,6 +7,7 @@ import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.exception.CommandParseException;
 import net.octopvp.commander.provider.Provider;
+import net.octopvp.commander.util.Primitives;
 import net.octopvp.commander.validator.Validator;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class ArgumentParser {
                     throw new CommandParseException("Flags are null!");
                 }
                 String f = cArgs.getFlags().get(parameter.getFlag());
+                if (f != null) validate(f, parameter, ctx);
                 arguments[i] = f;
                 continue;
             }
@@ -33,6 +35,7 @@ public class ArgumentParser {
                     throw new CommandParseException("Switches are null!");
                 }
                 Boolean b = cArgs.getSwitches().get(parameter.getSwitch());
+                if (b != null) validate(b, parameter, ctx);
                 arguments[i] = b != null && b;
                 continue;
             }
@@ -54,10 +57,15 @@ public class ArgumentParser {
             try {
                 obj = provider.provide(ctx, ctx.getCommandInfo(), parameter, cArgs.getArgs());
             } catch (Exception e) {
-                if (provider.failOnException())
+                if (provider.failOnExceptionIgnoreOptional()) {
+                    throw new CommandParseException("Failed to parse argument " + parameter.getParameter().getName(), e);
+                }
+                if (parameter.isOptional()) {
+                    obj = null;
+                } else if (provider.failOnException())
                     throw new CommandParseException("Failed to parse argument " + parameter.getParameter().getName(), e);
                 else {
-                    obj = provider.provideDefault(ctx, ctx.getCommandInfo(), parameter, cArgs.getArgs());
+                    obj = null;
                 }
             }
             if (obj == null) {
@@ -67,14 +75,15 @@ public class ArgumentParser {
             if (obj == null && parameter.isRequired()) {
                 throw new CommandParseException("Required argument " + parameter.getParameter().getName() + " is null!");
             }
-            validate(obj, parameter, ctx);
+            if (obj != null) validate(obj, parameter, ctx);
             arguments[i] = obj;
         }
         return arguments;
     }
     private static void validate(Object obj, ParameterInfo parameter, CommandContext ctx) {
+        Class<?> type = Primitives.wrap(parameter.getParameter().getType());
         for (Map.Entry<Class<?>, Validator<Object>> entry : ctx.getCommandInfo().getCommander().getValidators().entrySet()) {
-            if (entry.getKey().isAssignableFrom(parameter.getParameter().getType())) {
+            if (entry.getKey().isAssignableFrom(type)) {
                 Validator<Object> validator = entry.getValue();
                 validator.validate(obj,parameter,ctx);
             }

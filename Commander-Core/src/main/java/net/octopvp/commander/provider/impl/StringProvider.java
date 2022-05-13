@@ -18,9 +18,4 @@ public class StringProvider implements Provider<String> {
     public List<String> provideSuggestions(String input) {
         return null;
     }
-
-    @Override
-    public Class<?> getType() {
-        return String.class;
-    }
 }

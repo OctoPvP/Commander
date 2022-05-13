@@ -20,9 +20,9 @@ public interface Provider<T> {
     default boolean failOnException() {
         return true;
     }
-
-
-    Class<?> getType();
+    default boolean failOnExceptionIgnoreOptional() {
+        return false;
+    }
 
     default Class<?>[] getExtraTypes() {
         return null;

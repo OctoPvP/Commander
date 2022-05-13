@@ -1,5 +1,6 @@
 package net.octopvp.commander.provider.impl;
 
+import net.octopvp.commander.annotation.Range;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
@@ -20,8 +21,9 @@ public class LongProvider implements Provider<Long> {
     }
 
     @Override
-    public Class<?> getType() {
-        return Long.class;
+    public Long provideDefault(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
+        if (parameterInfo.getParameter().isAnnotationPresent(Range.class)) return (long) parameterInfo.getParameter().getAnnotation(Range.class).defaultValue();
+        return -1L;
     }
 
     @Override
