@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Command(name = "test", description = "test")
 public class SubCommandTest {
     private Commander commander;
-    private boolean passed = false, passed2 = false;
+    private boolean passed = false, passed2 = false, passed3 = false;
 
     @Test
     public void test() {
@@ -35,6 +35,9 @@ public class SubCommandTest {
 
         commander.executeCommand(new CommandSender(), "test", new String[]{"sub2", "hello_world!"});
         assertTrue(passed2);
+
+        commander.executeCommand(new CommandSender(), "test", new String[]{"hello_world!"});
+        assertTrue(passed3);
 
         List<String> completions = commander.getSuggestions(new CommandSender(), "test completer");
         assertNotNull(completions);
@@ -60,6 +63,12 @@ public class SubCommandTest {
     public void testSub2(String msg) {
         System.out.println("Sub command 2! " + msg);
         passed2 = msg.equals("hello_world!");
+    }
+
+    @Command(name = "", description = "Testing root level")
+    public void testRoot(String msg) {
+        System.out.println("Root command! " + msg);
+        passed3 = msg.equals("hello_world!");
     }
 
     @Command(name = "completer")

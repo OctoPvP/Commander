@@ -228,17 +228,28 @@ public class CommanderImpl implements Commander {
         }
 
         if (commandInfo.isParentCommand()) {
+            final CommandInfo parent = commandInfo;
             if (args.length == 0) {
-                throw new CommandParseException("No subcommand specified");
+                commandInfo = commandInfo.getSubCommand(""); //this might need some work...
+                if (commandInfo == null) {
+                    throw new CommandParseException("No subcommand specified");
+                }
             }
+            boolean isRootLevel = false;
             String sub = args[0];
             commandInfo = commandInfo.getSubCommand(sub);
             if (commandInfo == null) {
-                throw new CommandNotFoundException("Could not find subcommand for " + sub);
+                commandInfo = parent.getSubCommand("");
+                isRootLevel = commandInfo != null;
+                if (!isRootLevel) {
+                    throw new CommandNotFoundException("Could not find subcommand for " + sub);
+                }
             }
-            String[] newArgs = new String[args.length - 1];
-            System.arraycopy(args, 1, newArgs, 0, args.length - 1);
-            args = newArgs;
+            if (!isRootLevel) {
+                String[] newArgs = new String[args.length - 1];
+                System.arraycopy(args, 1, newArgs, 0, args.length - 1);
+                args = newArgs;
+            }
         } else if (commandInfo == null) {
             throw new CommandNotFoundException("Could not find command handler for " + label);
         }
@@ -349,13 +360,12 @@ public class CommanderImpl implements Commander {
         boolean starts = in.startsWith(platform.getPrefix());
         String cmd = starts ? in.substring(prefixLength) : in;
         CommandInfo command = getCommand(cmd);
-        String rest = s.substring(in.length() + (starts ? platform.getPrefix().length() : 0)).trim();
+        String rest = s.substring(in.length() + (starts ? platform.getPrefix().length() : 0));
         if (command == null) {
             return null;
         }
-        boolean subCommand = false;
         if (command.isParentCommand()) {
-            subCommand = true;
+            rest = rest.trim(); // fix indexOf below
             int spIndex = rest.indexOf(' ');
             String sub = spIndex == -1 ? rest : rest.substring(0, spIndex);
             command = command.getSubCommand(sub);
@@ -372,20 +382,16 @@ public class CommanderImpl implements Commander {
         if (currentArgument == -1) {
             currentArgument = 0;
         }
-        try {
-            ParameterInfo param = parameters[currentArgument];
-            Provider<?> provider = param.getProvider();
-            if (provider != null) {
-                List<String> suggestionsProvided = provider.provideSuggestions(input);
-                if (suggestionsProvided == null) {
-                    return null;
-                }
-                suggestions.addAll(suggestionsProvided);
+        ParameterInfo param = parameters[currentArgument];
+        Provider<?> provider = param.getProvider();
+        if (provider != null) {
+            List<String> suggestionsProvided = provider.provideSuggestions(input);
+            if (suggestionsProvided == null) {
+                return null;
             }
-            return suggestions;
-        } catch (Exception e) {
-            return null;
+            suggestions.addAll(suggestionsProvided);
         }
+        return suggestions;
     }
 
     @Override
