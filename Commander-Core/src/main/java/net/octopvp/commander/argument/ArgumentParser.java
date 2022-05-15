@@ -1,8 +1,6 @@
 package net.octopvp.commander.argument;
 
 import net.octopvp.commander.annotation.Dependency;
-import net.octopvp.commander.annotation.Flag;
-import net.octopvp.commander.annotation.Switch;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.exception.CommandParseException;
@@ -10,13 +8,10 @@ import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.util.Primitives;
 import net.octopvp.commander.validator.Validator;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
 public class ArgumentParser {
-    private static Object instance;
     public static Object[] parseArguments(CommandContext ctx, CommandArgs cArgs) {
         Object[] arguments = new Object[ctx.getCommandInfo().getParameters().length];
         for (int i = 0; i < ctx.getCommandInfo().getParameters().length; i++) {

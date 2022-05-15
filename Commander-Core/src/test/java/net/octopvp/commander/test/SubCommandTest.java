@@ -15,36 +15,69 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CompleterTest {
+@Command(name = "test", description = "test")
+public class SubCommandTest {
     private Commander commander;
+    private boolean passed = false, passed2 = false;
 
     @Test
-    public void testCompletions() {
+    public void test() {
         commander = new CommanderImpl(new TestPlatform())
-                .init()
-                .register(this)
-                .registerProvider(TestClass.class,new TestProvider())
-                .registerProvider(TestClassTwo.class,new TestProvider2())
+                //.init()
+                .registerProvider(String.class, new StringProvider())
+                .registerProvider(TestClass.class, new TestProvider())
+                .registerProvider(TestClassTwo.class, new TestProvider2())
                 .registerProvider(TestClassThree.class, new TestProvider3())
-        ;
-        List<String> completions = commander.getSuggestions(new CommandSender(), "test");
+                .register(this);
+
+        commander.executeCommand(new CommandSender(), "test", new String[]{"sub", "hello_world!"});
+        assertTrue(passed);
+
+        commander.executeCommand(new CommandSender(), "test", new String[]{"sub2", "hello_world!"});
+        assertTrue(passed2);
+
+        List<String> completions = commander.getSuggestions(new CommandSender(), "test completer");
         assertNotNull(completions);
-        assertFalse(completions.isEmpty());
         assertTrue(completions.contains("Hello") && completions.contains("World"));
-        System.out.println("First passed.");
-        List<String> completions2 = commander.getSuggestions(new CommandSender(), "test abcd");
+
+        List<String> completions2 = commander.getSuggestions(new CommandSender(), "test completer abcd");
         assertNotNull(completions2);
-        assertFalse(completions2.isEmpty());
         assertTrue(completions2.contains("Yes") && completions2.contains("ABCDEFG"));
-        System.out.println("Second passed.");
-        List<String> completions3 = commander.getSuggestions(new CommandSender(), "test abcd def");
+
+        List<String> completions3 = commander.getSuggestions(new CommandSender(), "test completer abcd def");
         assertNotNull(completions3);
-        assertFalse(completions3.isEmpty());
         assertTrue(completions3.contains("It Works!") && completions3.contains(":)"));
-        System.out.println("Third passed.");
     }
-    @Command(name = "test")
-    public void test(TestClass testClass, TestClassTwo testClassTwo, TestClassThree three) {
+
+
+    @Command(name = "sub", description = "Sub command!")
+    public void testSub(String msg) {
+        System.out.println("Sub command! " + msg);
+        passed = msg.equals("hello_world!");
+    }
+
+    @Command(name = "sub2", description = "Sub command 2!")
+    public void testSub2(String msg) {
+        System.out.println("Sub command 2! " + msg);
+        passed2 = msg.equals("hello_world!");
+    }
+
+    @Command(name = "completer")
+    public void testComplete(TestClass testClass, TestClassTwo testClassTwo, TestClassThree three) {
+
+    }
+
+    private class StringProvider implements Provider<String> {
+
+        @Override
+        public String provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
+            return args.pop();
+        }
+
+        @Override
+        public List<String> provideSuggestions(String input) {
+            return null;
+        }
     }
 
     private static class TestProvider implements Provider<TestClass> {
@@ -59,6 +92,7 @@ public class CompleterTest {
             return Arrays.asList("Hello", "World");
         }
     }
+
     private static class TestProvider2 implements Provider<TestClassTwo> {
 
         @Override
@@ -71,6 +105,7 @@ public class CompleterTest {
             return Arrays.asList("Yes", "ABCDEFG");
         }
     }
+
     private static class TestProvider3 implements Provider<TestClassThree> {
 
         @Override
@@ -84,15 +119,16 @@ public class CompleterTest {
         }
     }
 
-
     private static class TestClass {
         public String getString() {
             return "Hello World!";
         }
     }
+
     private static class TestClassTwo {
 
     }
+
     private static class TestClassThree {
 
     }

@@ -57,7 +57,7 @@ public class CommanderImpl implements Commander {
 
     @Override
     public Commander init() {
-        registerProvider(Integer.class,new IntegerProvider());
+        registerProvider(Integer.class, new IntegerProvider());
         registerProvider(CoreCommandSender.class, new SenderProvider());
         registerProvider(String.class, new StringProvider());
         registerCommandPreProcessor(context -> { //Cooldown preprocessor
@@ -91,6 +91,27 @@ public class CommanderImpl implements Commander {
                     distributedAnnotations.add(annotation);
                 }
             }
+            boolean classHasMainCommand = object.getClass().isAnnotationPresent(Command.class);
+            Command parent = null;
+            CommandInfo parentInfo = null;
+            if (classHasMainCommand) {
+                parent = object.getClass().getAnnotation(Command.class);
+                Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
+                for (Annotation declaredAnnotation : object.getClass().getDeclaredAnnotations()) {
+                    annotations.put(declaredAnnotation.annotationType(), declaredAnnotation);
+                }
+                for (Annotation distributedAnnotation : distributedAnnotations) {
+                    annotations.put(distributedAnnotation.annotationType(), distributedAnnotation);
+                }
+                parentInfo = new CommandInfo(null, parent.name(), parent.description(), parent.usage(), parent.aliases(), null, object, annotations, this);
+                parentInfo.setParentCommand(true);
+                parentInfo.setSubCommands(new ArrayList<>());
+                commandMap.put(parent.name().toLowerCase(), parentInfo);
+                for (String alias : parent.aliases()) {
+                    commandMap.put(alias.toLowerCase(), parentInfo);
+                }
+                platform.registerCommand(parentInfo);
+            }
             for (Method method : object.getClass().getDeclaredMethods()) {
                 if (!method.isAnnotationPresent(Command.class)) {
                     continue;
@@ -109,11 +130,17 @@ public class CommanderImpl implements Commander {
                     annotations.put(distributedAnnotation.annotationType(), distributedAnnotation);
                 }
                 CommandInfo commandInfo = new CommandInfo(parameters.toArray(new ParameterInfo[0]), name, command.description(), command.usage(), command.aliases(), method, object, annotations, this);
-                commandMap.put(name.toLowerCase(), commandInfo);
-                for (String alias : command.aliases()) {
-                    commandMap.put(alias.toLowerCase(), commandInfo);
+                commandInfo.setSubCommand(classHasMainCommand);
+                if (classHasMainCommand) {
+                    commandInfo.setParent(parentInfo);
+                    parentInfo.getSubCommands().add(commandInfo);
+                } else {
+                    commandMap.put(name.toLowerCase(), commandInfo);
+                    for (String alias : command.aliases()) {
+                        commandMap.put(alias.toLowerCase(), commandInfo);
+                    }
+                    platform.registerCommand(commandInfo);
                 }
-                platform.registerCommand(commandInfo);
             }
         }
         return this;
@@ -195,13 +222,27 @@ public class CommanderImpl implements Commander {
     @Override
     public void executeCommand(CoreCommandSender sender, String label, String[] args) throws CommandParseException {
         CommandInfo commandInfo = commandMap.get(label);
-        if (commandInfo == null) {
-            throw new CommandNotFoundException("Could not find command handler for " + label);
-        }
 
         if (args == null) {
             args = new String[]{};
         }
+
+        if (commandInfo.isParentCommand()) {
+            if (args.length == 0) {
+                throw new CommandParseException("No subcommand specified");
+            }
+            String sub = args[0];
+            commandInfo = commandInfo.getSubCommand(sub);
+            if (commandInfo == null) {
+                throw new CommandNotFoundException("Could not find subcommand for " + sub);
+            }
+            String[] newArgs = new String[args.length - 1];
+            System.arraycopy(args, 1, newArgs, 0, args.length - 1);
+            args = newArgs;
+        } else if (commandInfo == null) {
+            throw new CommandNotFoundException("Could not find command handler for " + label);
+        }
+
 
         String[] argsCopy = new String[args.length];
         System.arraycopy(args, 0, argsCopy, 0, args.length);
@@ -308,10 +349,22 @@ public class CommanderImpl implements Commander {
         boolean starts = in.startsWith(platform.getPrefix());
         String cmd = starts ? in.substring(prefixLength) : in;
         CommandInfo command = getCommand(cmd);
+        String rest = s.substring(in.length() + (starts ? platform.getPrefix().length() : 0)).trim();
         if (command == null) {
             return null;
         }
-        String rest = s.substring(in.length() + (starts ? platform.getPrefix().length() : 0));
+        boolean subCommand = false;
+        if (command.isParentCommand()) {
+            subCommand = true;
+            int spIndex = rest.indexOf(' ');
+            String sub = spIndex == -1 ? rest : rest.substring(0, spIndex);
+            command = command.getSubCommand(sub);
+            if (command == null) {
+                return null;
+            }
+        }
+
+
         List<String> suggestions = new ArrayList<>();
         ParameterInfo[] parameters = command.getParameters();
         //Count the spaces in rest
@@ -319,16 +372,20 @@ public class CommanderImpl implements Commander {
         if (currentArgument == -1) {
             currentArgument = 0;
         }
-        ParameterInfo param = parameters[currentArgument];
-        Provider<?> provider = param.getProvider();
-        if (provider != null) {
-            List<String> suggestionsProvided = provider.provideSuggestions(input);
-            if (suggestionsProvided == null) {
-                return null;
+        try {
+            ParameterInfo param = parameters[currentArgument];
+            Provider<?> provider = param.getProvider();
+            if (provider != null) {
+                List<String> suggestionsProvided = provider.provideSuggestions(input);
+                if (suggestionsProvided == null) {
+                    return null;
+                }
+                suggestions.addAll(suggestionsProvided);
             }
-            suggestions.addAll(suggestionsProvided);
+            return suggestions;
+        } catch (Exception e) {
+            return null;
         }
-        return suggestions;
     }
 
     @Override

@@ -25,6 +25,6 @@ public class TestPlatform implements CommanderPlatform {
 
     @Override
     public void registerCommand(CommandInfo command) {
-        System.out.println("Registered command: " + command.getName());
+        //System.out.println("Registered command: " + command.getName());
     }
 }

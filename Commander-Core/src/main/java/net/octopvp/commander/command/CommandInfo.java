@@ -9,9 +9,7 @@ import net.octopvp.commander.annotation.Permission;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Getter
@@ -36,12 +34,15 @@ public class CommandInfo { //This is the object that is stored in the command ma
 
     private Map<UUID, Long> cooldownMap;
 
+    private boolean subCommand = false, parentCommand = false;
+    private CommandInfo parent;
+    private List<CommandInfo> subCommands;
+
     public CommandInfo(ParameterInfo[] parameters, String name, String description, String usage, String[] aliases, Method method, Object instance, Map<Class<? extends Annotation>, Annotation> annotations, Commander commander) {
         this.parameters = parameters;
-        this.name = name;
+        this.name = name.toLowerCase();
         this.description = description;
         this.usage = usage;
-        this.aliases = aliases;
         this.method = method;
         this.instance = instance;
         this.annotations = annotations;
@@ -54,6 +55,11 @@ public class CommandInfo { //This is the object that is stored in the command ma
             this.cooldownUnit = getAnnotation(Cooldown.class).unit();
             this.cooldownMap = new HashMap<>();
         }
+        //make sure aliases are lowercase
+        this.aliases = aliases;
+        for (int i = 0; i < aliases.length; i++) {
+            this.aliases[i] = aliases[i].toLowerCase();
+        }
     }
 
     public Command getAnnotation() {
@@ -62,15 +68,26 @@ public class CommandInfo { //This is the object that is stored in the command ma
 
     public String getUsage() {
         if (usage == null || usage.equals("<<generate>>")) {
-            StringBuilder builder = new StringBuilder();
-            for (ParameterInfo parameter : parameters) {
-                boolean optional = parameter.isOptional();
-                builder.append(optional ? commander.getConfig().getOptionalPrefix() : commander.getConfig().getRequiredPrefix())
-                        .append(parameter.getName())
-                        .append(optional ? commander.getConfig().getOptionalSuffix() : commander.getConfig().getRequiredSuffix())
-                        .append(" ");
+            if (parentCommand) {
+                StringBuilder builder = new StringBuilder();
+                builder.append(commander.getConfig().getRequiredPrefix());
+                for (CommandInfo command : subCommands) {
+                    builder.append(command.getName()).append("/");
+                }
+                builder.deleteCharAt(builder.length() - 1)
+                        .append(commander.getConfig().getRequiredSuffix());
+                return builder.toString().trim();
+            } else {
+                StringBuilder builder = new StringBuilder();
+                for (ParameterInfo parameter : parameters) {
+                    boolean optional = parameter.isOptional();
+                    builder.append(optional ? commander.getConfig().getOptionalPrefix() : commander.getConfig().getRequiredPrefix())
+                            .append(parameter.getName())
+                            .append(optional ? commander.getConfig().getOptionalSuffix() : commander.getConfig().getRequiredSuffix())
+                            .append(" ");
+                }
+                this.usage = builder.toString().trim();
             }
-            this.usage = builder.toString().trim();
         }
         return usage;
     }
@@ -139,5 +156,40 @@ public class CommandInfo { //This is the object that is stored in the command ma
             return;
         }
         cooldownMap.put(uuid, System.currentTimeMillis() + cooldownUnit.toMillis((long) cooldown));
+    }
+
+    public boolean isNormalCommand() {
+        return !isSubCommand() && !isParentCommand();
+    }
+
+    public CommandInfo getSubCommand(String name) {
+        return subCommands.stream().filter(command -> command.getName().equalsIgnoreCase(name) || Arrays.asList(command.aliases).contains(name)).findFirst().orElse(null);
+    }
+
+    @Override
+    public String toString() {
+        return "CommandInfo{" +
+                "parameters=" + Arrays.toString(parameters) +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", usage='" + usage + '\'' +
+                ", aliases=" + aliases.length +
+                ", method=" + method +
+                ", instance=" + instance +
+                ", annotations=" + annotations +
+                ", commander=" + commander +
+                ", permission='" + permission + '\'' +
+                ", cooldown=" + cooldown +
+                ", cooldownUnit=" + cooldownUnit +
+                ", cooldownMap=" + cooldownMap +
+                ", subCommand=" + subCommand +
+                ", parentCommand=" + parentCommand +
+                ", parent=" + parent +
+                ", subCommands=" + subCommands.size() +
+                ", hasFlags=" + hasFlags +
+                ", foundFlagsAlready=" + foundFlagsAlready +
+                ", hasSwitches=" + hasSwitches +
+                ", foundSwitchesAlready=" + foundSwitchesAlready +
+                '}';
     }
 }
