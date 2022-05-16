@@ -9,11 +9,11 @@ import net.octopvp.commander.provider.Provider;
 import java.util.Deque;
 import java.util.List;
 
-public class IntegerProvider implements Provider<Integer> {
+public class DoubleProvider implements Provider<Double> {
     @Override
-    public Integer provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
+    public Double provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
         String arg = args.poll();
-        return Integer.parseInt(arg);
+        return Double.parseDouble(arg);
     }
 
     @Override
@@ -22,14 +22,14 @@ public class IntegerProvider implements Provider<Integer> {
     }
 
     @Override
-    public Integer provideDefault(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
-        if (parameterInfo.getParameter().isAnnotationPresent(Range.class)) return (int) parameterInfo.getParameter().getAnnotation(Range.class).defaultValue();
-        return -1;
+    public Double provideDefault(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
+        if (parameterInfo.getParameter().isAnnotationPresent(Range.class)) return parameterInfo.getParameter().getAnnotation(Range.class).defaultValue();
+        return -1d;
     }
 
     @Override
     public Class<?>[] getExtraTypes() {
-        return new Class[]{int.class};
+        return new Class[]{double.class};
     }
 
     @Override

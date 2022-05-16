@@ -1,5 +1,6 @@
 package net.octopvp.commander;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.val;
 import net.octopvp.commander.annotation.Command;
 import net.octopvp.commander.annotation.DistributeOnMethods;
@@ -13,9 +14,7 @@ import net.octopvp.commander.config.CommanderConfig;
 import net.octopvp.commander.exception.*;
 import net.octopvp.commander.platform.CommanderPlatform;
 import net.octopvp.commander.provider.Provider;
-import net.octopvp.commander.provider.impl.IntegerProvider;
-import net.octopvp.commander.provider.impl.SenderProvider;
-import net.octopvp.commander.provider.impl.StringProvider;
+import net.octopvp.commander.provider.impl.*;
 import net.octopvp.commander.sender.CoreCommandSender;
 import net.octopvp.commander.util.Primitives;
 import net.octopvp.commander.validator.Validator;
@@ -58,6 +57,10 @@ public class CommanderImpl implements Commander {
     @Override
     public Commander init() {
         registerProvider(Integer.class, new IntegerProvider());
+        registerProvider(Long.class, new LongProvider());
+        registerProvider(Double.class, new DoubleProvider());
+        registerProvider(Byte.class, new ByteProvider());
+        registerProvider(Boolean.class, new BooleanProvider());
         registerProvider(CoreCommandSender.class, new SenderProvider());
         registerProvider(String.class, new StringProvider());
         registerCommandPreProcessor(context -> { //Cooldown preprocessor

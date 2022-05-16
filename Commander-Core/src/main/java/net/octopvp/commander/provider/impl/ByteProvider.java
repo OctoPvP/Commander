@@ -9,11 +9,11 @@ import net.octopvp.commander.provider.Provider;
 import java.util.Deque;
 import java.util.List;
 
-public class IntegerProvider implements Provider<Integer> {
+public class ByteProvider implements Provider<Byte> {
     @Override
-    public Integer provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
+    public Byte provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
         String arg = args.poll();
-        return Integer.parseInt(arg);
+        return Byte.parseByte(arg);
     }
 
     @Override
@@ -22,14 +22,14 @@ public class IntegerProvider implements Provider<Integer> {
     }
 
     @Override
-    public Integer provideDefault(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
-        if (parameterInfo.getParameter().isAnnotationPresent(Range.class)) return (int) parameterInfo.getParameter().getAnnotation(Range.class).defaultValue();
+    public Byte provideDefault(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
+        if (parameterInfo.getParameter().isAnnotationPresent(Range.class)) return (byte) parameterInfo.getParameter().getAnnotation(Range.class).defaultValue();
         return -1;
     }
 
     @Override
     public Class<?>[] getExtraTypes() {
-        return new Class[]{int.class};
+        return new Class[]{byte.class};
     }
 
     @Override

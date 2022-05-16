@@ -30,4 +30,14 @@ public class LongProvider implements Provider<Long> {
     public Class<?>[] getExtraTypes() {
         return new Class<?>[]{long.class};
     }
+
+    @Override
+    public boolean failOnException() {
+        return true;
+    }
+
+    @Override
+    public boolean failOnExceptionIgnoreOptional() {
+        return true;
+    }
 }
