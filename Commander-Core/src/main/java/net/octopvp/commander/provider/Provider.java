@@ -24,6 +24,10 @@ public interface Provider<T> {
         return false;
     }
 
+    default boolean provideUsageOnException() {
+        return true;
+    }
+
     default Class<?>[] getExtraTypes() {
         return null;
     }

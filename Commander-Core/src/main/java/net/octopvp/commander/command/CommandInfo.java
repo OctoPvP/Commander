@@ -92,6 +92,10 @@ public class CommandInfo { //This is the object that is stored in the command ma
         return usage;
     }
 
+    public String getFullUsage() {
+        return commander.getConfig().getCommandPrefix() + getName() + " " + getUsage();
+    }
+
     public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
         return annotations.containsKey(annotation);
     }
@@ -165,6 +169,7 @@ public class CommandInfo { //This is the object that is stored in the command ma
     public CommandInfo getSubCommand(String name) {
         return subCommands.stream().filter(command -> command.getName().equalsIgnoreCase(name) || Arrays.asList(command.aliases).contains(name)).findFirst().orElse(null);
     }
+
 
     @Override
     public String toString() {

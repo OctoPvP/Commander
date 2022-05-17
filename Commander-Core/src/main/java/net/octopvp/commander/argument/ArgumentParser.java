@@ -1,9 +1,11 @@
 package net.octopvp.commander.argument;
 
+import net.octopvp.commander.CommanderImpl;
 import net.octopvp.commander.annotation.Dependency;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.exception.CommandParseException;
+import net.octopvp.commander.exception.InvalidArgsException;
 import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.util.Primitives;
 import net.octopvp.commander.validator.Validator;
@@ -52,6 +54,14 @@ public class ArgumentParser {
             try {
                 obj = provider.provide(ctx, ctx.getCommandInfo(), parameter, cArgs.getArgs());
             } catch (Exception e) {
+                if (e instanceof InvalidArgsException) {
+                    //cArgs.getCommander().getPlatform().getHelpService().sendHelp(ctx, ctx.getCommandSender());
+                    //return null;
+                    throw e;
+                }
+                if (provider.provideUsageOnException()) {
+                    throw new InvalidArgsException(ctx.getCommandInfo());
+                }
                 if (provider.failOnExceptionIgnoreOptional()) {
                     throw new CommandParseException("Failed to parse argument " + parameter.getParameter().getName(), e);
                 }

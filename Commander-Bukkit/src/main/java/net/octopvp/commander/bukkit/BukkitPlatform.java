@@ -1,9 +1,11 @@
 package net.octopvp.commander.bukkit;
 
 import net.octopvp.commander.bukkit.impl.BukkitCommandWrapper;
+import net.octopvp.commander.bukkit.impl.BukkitHelpService;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.exception.CommandException;
+import net.octopvp.commander.help.HelpService;
 import net.octopvp.commander.platform.CommanderPlatform;
 import net.octopvp.commander.sender.CoreCommandSender;
 import org.bukkit.ChatColor;
@@ -50,10 +52,20 @@ public class BukkitPlatform implements CommanderPlatform {
     }
 
     @Override
+    public void handleCommandException(CommandInfo info, CoreCommandSender sender, CommandException e) {
+        sender.sendMessage(ChatColor.RED + e.getMessage());
+    }
+
+    @Override
     public void registerCommand(CommandInfo command) {
         if (commandMap.getCommand(command.getName()) == null) {
             Command cmd = new BukkitCommandWrapper(command);
             commandMap.register(plugin.getName(), cmd);
         }
+    }
+
+    @Override
+    public HelpService getHelpService() {
+        return BukkitCommander.HELP_SERVICE;
     }
 }

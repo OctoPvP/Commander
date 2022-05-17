@@ -1,7 +1,5 @@
 package net.octopvp.commander.provider.impl;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import net.octopvp.commander.annotation.Range;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
@@ -30,7 +28,7 @@ public class BooleanProvider implements Provider<Boolean> {
 
     @Override
     public Class<?>[] getExtraTypes() {
-        return new Class[]{int.class};
+        return new Class[]{boolean.class};
     }
 
     @Override

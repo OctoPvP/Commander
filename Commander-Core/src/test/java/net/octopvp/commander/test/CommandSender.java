@@ -15,6 +15,11 @@ public class CommandSender implements CoreCommandSender {
         return new UUID(0,0);
     }
 
+    @Override
+    public void sendMessage(String message) {
+        System.out.println(message);
+    }
+
     public String getName() {
         return "test";
     }

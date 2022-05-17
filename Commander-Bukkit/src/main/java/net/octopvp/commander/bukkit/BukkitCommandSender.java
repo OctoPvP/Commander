@@ -22,7 +22,4 @@ public interface BukkitCommandSender extends CoreCommandSender {
     }
 
     String getName();
-
-    void sendMessage(String message);
-
 }

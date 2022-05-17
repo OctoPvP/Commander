@@ -1,7 +1,5 @@
 package net.octopvp.commander;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import lombok.val;
 import net.octopvp.commander.annotation.Command;
 import net.octopvp.commander.annotation.DistributeOnMethods;
 import net.octopvp.commander.annotation.Range;
@@ -27,7 +25,6 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public class CommanderImpl implements Commander {
     private CommanderPlatform platform;
@@ -61,6 +58,7 @@ public class CommanderImpl implements Commander {
         registerProvider(Double.class, new DoubleProvider());
         registerProvider(Byte.class, new ByteProvider());
         registerProvider(Boolean.class, new BooleanProvider());
+        registerProvider(Short.class, new ShortProvider());
         registerProvider(CoreCommandSender.class, new SenderProvider());
         registerProvider(String.class, new StringProvider());
         registerCommandPreProcessor(context -> { //Cooldown preprocessor
@@ -230,65 +228,77 @@ public class CommanderImpl implements Commander {
             args = new String[]{};
         }
 
-        if (commandInfo.isParentCommand()) {
-            final CommandInfo parent = commandInfo;
-            if (args.length == 0) {
-                commandInfo = commandInfo.getSubCommand(""); //this might need some work...
-                if (commandInfo == null) {
-                    throw new CommandParseException("No subcommand specified");
-                }
-            }
-            boolean isRootLevel = false;
-            String sub = args[0];
-            commandInfo = commandInfo.getSubCommand(sub);
-            if (commandInfo == null) {
-                commandInfo = parent.getSubCommand("");
-                isRootLevel = commandInfo != null;
-                if (!isRootLevel) {
-                    throw new CommandNotFoundException("Could not find subcommand for " + sub);
-                }
-            }
-            if (!isRootLevel) {
-                String[] newArgs = new String[args.length - 1];
-                System.arraycopy(args, 1, newArgs, 0, args.length - 1);
-                args = newArgs;
-            }
-        } else if (commandInfo == null) {
-            throw new CommandNotFoundException("Could not find command handler for " + label);
-        }
-
-
-        String[] argsCopy = new String[args.length];
-        System.arraycopy(args, 0, argsCopy, 0, args.length);
-        //List<String> argsList = ArgumentParser.combineMultiWordArguments(Arrays.asList(args));
-        List<String> argsList = new ArrayList<>(Arrays.asList(args));
-
-        CommandArgs cArgs = new CommandArgs(this, args, commandInfo.hasSwitches() ? extractSwitches(argsList, commandInfo.getParameters()) : null, commandInfo.hasFlags() ? extractFlags(argsList, commandInfo.getParameters()) : null, argsList);
-
-        CommandContext context = new CommandContext(commandInfo, label.toLowerCase(), argsCopy, sender, cArgs);
         try {
-            for (Consumer<CommandContext> preProcessor : preProcessors) {
-                preProcessor.accept(context);
-            }
-            if (commandInfo.getPermission() != null && !sender.hasPermission(commandInfo.getPermission())) {
-                throw new CommandParseException("You do not have permission to use this command.");
+            if (commandInfo.isParentCommand()) {
+                final CommandInfo parent = commandInfo;
+                if (args.length == 0) {
+                    commandInfo = commandInfo.getSubCommand(""); //this might need some work...
+                    if (commandInfo == null) {
+                        //throw new CommandParseException("No subcommand specified");
+                        getPlatform().getHelpService().sendHelp(parent, sender);
+                        return;
+                    }
+                }
+                boolean isRootLevel = false;
+                String sub = args[0];
+                commandInfo = commandInfo.getSubCommand(sub);
+                if (commandInfo == null) {
+                    if (sub.equalsIgnoreCase("help")) {
+                        getPlatform().getHelpService().sendHelp(parent, sender);
+                        return;
+                    }
+                    commandInfo = parent.getSubCommand("");
+                    isRootLevel = commandInfo != null;
+                    if (!isRootLevel) {
+                        throw new CommandNotFoundException("Could not find subcommand \"" + sub + "\" for command " + parent.getName());
+                    }
+                }
+                if (!isRootLevel) {
+                    String[] newArgs = new String[args.length - 1];
+                    System.arraycopy(args, 1, newArgs, 0, args.length - 1);
+                    args = newArgs;
+                }
+            } else if (commandInfo == null) {
+                throw new CommandNotFoundException("Could not find command handler for " + label);
             }
 
-            Object[] arguments = ArgumentParser.parseArguments(context, cArgs);
 
-            Object result = null;
+            String[] argsCopy = new String[args.length];
+            System.arraycopy(args, 0, argsCopy, 0, args.length);
+            //List<String> argsList = ArgumentParser.combineMultiWordArguments(Arrays.asList(args));
+            List<String> argsList = new ArrayList<>(Arrays.asList(args));
+
+            CommandArgs cArgs = new CommandArgs(this, args, commandInfo.hasSwitches() ? extractSwitches(argsList, commandInfo.getParameters()) : null, commandInfo.hasFlags() ? extractFlags(argsList, commandInfo.getParameters()) : null, argsList);
+
+            CommandContext context = new CommandContext(commandInfo, label.toLowerCase(), argsCopy, sender, cArgs);
             try {
-                result = context.getCommandInfo().getMethod().invoke(context.getCommandInfo().getInstance(), arguments);
-            } catch (IllegalAccessException | InvocationTargetException e) {
+                for (Consumer<CommandContext> preProcessor : preProcessors) {
+                    preProcessor.accept(context);
+                }
+                if (commandInfo.getPermission() != null && !sender.hasPermission(commandInfo.getPermission())) {
+                    throw new CommandParseException("You do not have permission to use this command.");
+                }
+
+                Object[] arguments = ArgumentParser.parseArguments(context, cArgs);
+
+                if (arguments == null) return;
+
+                Object result = null;
+                try {
+                    result = context.getCommandInfo().getMethod().invoke(context.getCommandInfo().getInstance(), arguments);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+                for (BiConsumer<CommandContext, Object> postProcessor : postProcessors) {
+                    postProcessor.accept(context, result);
+                }
+            } catch (CommandException e) {
+                platform.handleCommandException(context, e);
+            } catch (IllegalArgumentException e) {
                 e.printStackTrace();
             }
-            for (BiConsumer<CommandContext, Object> postProcessor : postProcessors) {
-                postProcessor.accept(context, result);
-            }
         } catch (CommandException e) {
-            platform.handleCommandException(context, e);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            platform.handleCommandException(commandInfo, sender, e);
         }
     }
 

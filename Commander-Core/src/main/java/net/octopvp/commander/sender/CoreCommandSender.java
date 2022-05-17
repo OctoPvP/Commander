@@ -8,4 +8,6 @@ public interface CoreCommandSender {
     boolean hasPermission(String permission);
 
     UUID getIdentifier();
+
+    void sendMessage(String message);
 }

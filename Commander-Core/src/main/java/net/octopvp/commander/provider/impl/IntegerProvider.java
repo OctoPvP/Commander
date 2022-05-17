@@ -4,6 +4,7 @@ import net.octopvp.commander.annotation.Range;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
+import net.octopvp.commander.exception.InvalidArgsException;
 import net.octopvp.commander.provider.Provider;
 
 import java.util.Deque;
@@ -12,8 +13,12 @@ import java.util.List;
 public class IntegerProvider implements Provider<Integer> {
     @Override
     public Integer provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
-        String arg = args.poll();
-        return Integer.parseInt(arg);
+        try {
+            String arg = args.poll();
+            return Integer.parseInt(arg);
+        } catch (NumberFormatException e) {
+            throw new InvalidArgsException(commandInfo);
+        }
     }
 
     @Override

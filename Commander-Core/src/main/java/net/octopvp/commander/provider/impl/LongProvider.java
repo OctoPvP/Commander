@@ -4,6 +4,7 @@ import net.octopvp.commander.annotation.Range;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
+import net.octopvp.commander.exception.InvalidArgsException;
 import net.octopvp.commander.provider.Provider;
 
 import java.util.Deque;
@@ -12,7 +13,11 @@ import java.util.List;
 public class LongProvider implements Provider<Long> {
     @Override
     public Long provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
-        return Long.parseLong(args.poll());
+        try {
+            return Long.parseLong(args.poll());
+        } catch (NumberFormatException e) {
+            throw new InvalidArgsException(commandInfo);
+        }
     }
 
     @Override
