@@ -97,7 +97,7 @@ public class CommandInfo { //This is the object that is stored in the command ma
     }
 
     public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
-        return annotations.containsKey(annotation);
+        return annotations.containsKey(annotation) || (method != null && method.isAnnotationPresent(annotation));
     }
 
     public <T extends Annotation> T getAnnotation(Class<T> annotation) {
