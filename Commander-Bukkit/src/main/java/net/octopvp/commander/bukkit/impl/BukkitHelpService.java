@@ -23,7 +23,7 @@ public class BukkitHelpService implements HelpService {
         sender.sendMessage(ChatColor.AQUA + "Help for " + ChatColor.GOLD + info.getName() + ChatColor.GRAY + " - " + info.getDescription());
         if (info.isParentCommand()) {
             for (CommandInfo subCommand : info.getSubCommands()) {
-                sender.sendMessage(ChatColor.GRAY + subCommand.getFullUsage() + (subCommand.getDescription() != null || subCommand.getDescription().isEmpty() ? ChatColor.GRAY + " - " + subCommand.getDescription() : ""));
+                sender.sendMessage(ChatColor.GRAY + subCommand.getName() + " " + subCommand.getFullUsage() + (subCommand.getDescription() != null || subCommand.getDescription().isEmpty() ? ChatColor.GRAY + " - " + subCommand.getDescription() : ""));
             }
         }
         sender.sendMessage(ChatColor.GRAY + "" + ChatColor.STRIKETHROUGH + "--------------------------------");

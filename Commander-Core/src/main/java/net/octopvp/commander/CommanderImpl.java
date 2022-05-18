@@ -131,8 +131,8 @@ public class CommanderImpl implements Commander {
                     annotations.put(distributedAnnotation.annotationType(), distributedAnnotation);
                 }
                 CommandInfo commandInfo = new CommandInfo(parameters.toArray(new ParameterInfo[0]), name, command.description(), command.usage(), command.aliases(), method, object, annotations, this);
-                commandInfo.setSubCommand(classHasMainCommand);
                 if (classHasMainCommand) {
+                    commandInfo.setSubCommand(true);
                     commandInfo.setParent(parentInfo);
                     parentInfo.getSubCommands().add(commandInfo);
                 } else {
@@ -275,7 +275,8 @@ public class CommanderImpl implements Commander {
                 for (Consumer<CommandContext> preProcessor : preProcessors) {
                     preProcessor.accept(context);
                 }
-                if (commandInfo.getPermission() != null && !sender.hasPermission(commandInfo.getPermission())) {
+
+                if ((commandInfo.getPermission() != null && !sender.hasPermission(commandInfo.getPermission())) || (commandInfo.isSubCommand() && commandInfo.getParent().getPermission() != null && !sender.hasPermission(commandInfo.getParent().getPermission()))) {
                     throw new CommandParseException("You do not have permission to use this command.");
                 }
 
