@@ -10,6 +10,8 @@ import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.util.Primitives;
 import net.octopvp.commander.validator.Validator;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -85,42 +87,55 @@ public class ArgumentParser {
         }
         return arguments;
     }
+
     private static void validate(Object obj, ParameterInfo parameter, CommandContext ctx) {
         Class<?> type = Primitives.wrap(parameter.getParameter().getType());
         for (Map.Entry<Class<?>, Validator<Object>> entry : ctx.getCommandInfo().getCommander().getValidators().entrySet()) {
             if (entry.getKey().isAssignableFrom(type)) {
                 Validator<Object> validator = entry.getValue();
-                validator.validate(obj,parameter,ctx);
+                validator.validate(obj, parameter, ctx);
             }
         }
     }
-    /*
-    TODO this
-    public static List<String> combineMultiWordArguments() {
-        String[] args = {"test", "\"test1", "test2", "test3\"", "test4"};
-        //convert this to ["test", "test1 test2 test3", "test4"]
-        List<String> list = new ArrayList<>();
+
+    public static List<String> combineArgs(List<String> in) {
+        //combine arguments that start with " or ' with the next argument until the next " or '
+        // [arg1,"arg2,arg3,arg4",arg5] -> [arg1, arg2 arg3 arg4, arg5]
+        List<String> out = new ArrayList<>();
+
+        boolean currentArgIsQuoted = false;
         StringBuilder sb = new StringBuilder();
-        for (String s : args) {
-            if (s.startsWith("\"") && s.endsWith("\"")) {
-                sb.append(s.substring(1, s.length() - 1));
+        for (String s : in) {
+            String arg = s.trim();
+            if ((!arg.startsWith("\"") && !arg.startsWith("'")) && (!arg.endsWith("\"") && !arg.endsWith("'"))) {
+                if (currentArgIsQuoted) {
+                    sb.append(" ").append(arg);
+                    continue;
+                } else {
+                    out.add(arg);
+                    continue;
+                }
             }
-            else if (s.startsWith("\"")) {
-                sb.append(s.substring(1));
+            if (arg.startsWith("\"") || arg.startsWith("'")) {
+                sb.append(arg.substring(1));
+                currentArgIsQuoted = true;
+                continue;
             }
-            else if (s.endsWith("\"")) {
-                sb.append(s.substring(0, s.length() - 1));
-                list.add(sb.toString());
+            if (arg.endsWith("\"") || arg.endsWith("'")) {
+                sb.append(" ").append(arg, 0, arg.length() - 1);
+                currentArgIsQuoted = false;
+                out.add(sb.toString().trim());
                 sb = new StringBuilder();
+                continue;
             }
-            else {
-                sb.append(s);
-            }
+        }
+        System.out.println("Out: " + out + " | " + sb);
+        if (currentArgIsQuoted) {
+            throw new CommandParseException("Unclosed quote!");
         }
         if (sb.length() > 0) {
-            list.add(sb.toString());
+            out.add(sb.toString().trim());
         }
-        return list;
+        return out;
     }
-     */
 }
