@@ -267,7 +267,12 @@ public class CommanderImpl implements Commander {
             String[] argsCopy = new String[args.length];
             System.arraycopy(args, 0, argsCopy, 0, args.length);
             //List<String> argsList = ArgumentParser.combineMultiWordArguments(Arrays.asList(args));
-            List<String> argsList = ArgumentParser.combineArgs(Arrays.asList(args));
+            List<String> argsList;
+            if (config.isJoinArgsWithQuotes()) {
+                argsList = ArgumentParser.combineArgs(Arrays.asList(args));
+            }else {
+                argsList = new ArrayList<>(Arrays.asList(args));
+            }
 
             CommandArgs cArgs = new CommandArgs(this, args, commandInfo.hasSwitches() ? extractSwitches(argsList, commandInfo.getParameters()) : null, commandInfo.hasFlags() ? extractFlags(argsList, commandInfo.getParameters()) : null, argsList);
 

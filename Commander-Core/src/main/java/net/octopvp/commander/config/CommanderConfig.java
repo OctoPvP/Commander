@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CommanderConfig {
-    private boolean defaultRequired = true;
+    private boolean defaultRequired = true, joinArgsWithQuotes = true;
 
     private String optionalPrefix = "[", optionalSuffix = "]";
     private String requiredPrefix = "<", requiredSuffix = ">";
@@ -58,6 +58,11 @@ public class CommanderConfig {
 
         public Builder setCommandPrefix(String commandPrefix) {
             config.setCommandPrefix(commandPrefix);
+            return this;
+        }
+
+        public Builder setJoinArgsWithQuotes(boolean joinArgsWithQuotes) {
+            config.setJoinArgsWithQuotes(joinArgsWithQuotes);
             return this;
         }
 
