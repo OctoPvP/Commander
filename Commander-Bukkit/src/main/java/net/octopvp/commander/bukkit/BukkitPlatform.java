@@ -1,5 +1,6 @@
 package net.octopvp.commander.bukkit;
 
+import com.google.common.collect.ImmutableSet;
 import net.octopvp.commander.bukkit.impl.BukkitCommandWrapper;
 import net.octopvp.commander.bukkit.impl.BukkitHelpService;
 import net.octopvp.commander.command.CommandContext;
@@ -13,8 +14,14 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.SimplePluginManager;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.vfs.Vfs;
 
 import java.lang.reflect.Field;
+import java.net.URL;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class BukkitPlatform implements CommanderPlatform {
     private final Plugin plugin;
@@ -67,5 +74,27 @@ public class BukkitPlatform implements CommanderPlatform {
     @Override
     public HelpService getHelpService() {
         return BukkitCommander.HELP_SERVICE;
+    }
+
+    @Override
+    public Collection<Class<?>> getClassesInPackage(String packageName) {
+        Set<Class<?>> classes = new HashSet<>();
+        for (URL url : ClasspathHelper.forClassLoader(ClasspathHelper.contextClassLoader(),
+                ClasspathHelper.staticClassLoader(), plugin
+                        .getClass().getClassLoader())) {
+            Vfs.Dir dir = Vfs.fromURL(url);
+            try {
+                for (Vfs.File file : dir.getFiles()) {
+                    String name = file.getRelativePath().replace("/", ".").replace(".class", "");
+                    if (name.startsWith(packageName))
+                        classes.add(Class.forName(name));
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            } finally {
+                dir.close();
+            }
+        }
+        return ImmutableSet.copyOf(classes);
     }
 }

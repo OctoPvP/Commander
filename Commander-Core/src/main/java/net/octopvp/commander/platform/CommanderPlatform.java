@@ -5,7 +5,10 @@ import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.exception.CommandException;
 import net.octopvp.commander.help.HelpService;
 import net.octopvp.commander.sender.CoreCommandSender;
+import org.reflections.Reflections;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 public interface CommanderPlatform {
@@ -28,4 +31,12 @@ public interface CommanderPlatform {
     }
 
     HelpService getHelpService();
+
+    default Collection<Class<?>> getClassesInPackage(String packageName){
+        return getReflections(packageName).getSubTypesOf(Object.class);
+    }
+
+    default Reflections getReflections(String packageName){
+        return new Reflections(packageName);
+    }
 }

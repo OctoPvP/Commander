@@ -29,6 +29,8 @@ dependencies {
 
     testCompileOnly("org.projectlombok:lombok:1.18.24")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.24")
+
+    implementation("org.reflections:reflections:0.10.2")
 }
 
 tasks.getByName<Test>("test") {

@@ -24,6 +24,8 @@ public interface Commander {
 
     Commander register(Object... objects);
 
+    Commander registerPackage(String packageName);
+
     CommanderConfig getConfig();
 
     Commander setConfig(CommanderConfig config);
