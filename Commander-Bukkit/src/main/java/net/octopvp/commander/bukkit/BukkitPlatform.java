@@ -1,10 +1,13 @@
 package net.octopvp.commander.bukkit;
 
 import com.google.common.collect.ImmutableSet;
+import net.octopvp.commander.annotation.Sender;
+import net.octopvp.commander.bukkit.impl.BukkitCommandSenderImpl;
 import net.octopvp.commander.bukkit.impl.BukkitCommandWrapper;
 import net.octopvp.commander.bukkit.impl.BukkitHelpService;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
+import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.exception.CommandException;
 import net.octopvp.commander.help.HelpService;
 import net.octopvp.commander.platform.CommanderPlatform;
@@ -12,6 +15,7 @@ import net.octopvp.commander.sender.CoreCommandSender;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
+import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.SimplePluginManager;
 import org.reflections.util.ClasspathHelper;
@@ -22,6 +26,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 public class BukkitPlatform implements CommanderPlatform {
     private final Plugin plugin;
@@ -69,6 +74,12 @@ public class BukkitPlatform implements CommanderPlatform {
             Command cmd = new BukkitCommandWrapper(command);
             commandMap.register(plugin.getName(), cmd);
         }
+    }
+
+    @Override
+    public boolean isSenderParameter(ParameterInfo parameterInfo) {
+        return parameterInfo.getParameter().isAnnotationPresent(Sender.class) || parameterInfo.getParameter().getName().equalsIgnoreCase("sender") || parameterInfo.getParameter().getType().equals(CoreCommandSender.class)
+                || parameterInfo.getParameter().getType().equals(BukkitCommandSender.class) || parameterInfo.getParameter().getType().equals(CommandSender.class) || parameterInfo.getParameter().getType().equals(BukkitCommandSenderImpl.class);
     }
 
     @Override

@@ -99,6 +99,10 @@ public class ParameterInfo {
         return null;
     }
 
+    public boolean hideFromUsage() {
+        return commander.getPlatform().isSenderParameter(this);
+    }
+
     @Override
     public String toString() {
         return "ParameterInfo{" +

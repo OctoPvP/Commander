@@ -402,6 +402,7 @@ public class CommanderImpl implements Commander {
 
     @Override
     public List<String> getSuggestions(CoreCommandSender sender, final String input) {
+        System.out.println("Getting suggestions for " + input);
         int prefixLength = platform.getPrefix().length();
         final String s = input;
         //get the first word seperated by spaces without using split
@@ -428,18 +429,22 @@ public class CommanderImpl implements Commander {
             }
         }
 
-
         List<String> suggestions = new ArrayList<>();
-        ParameterInfo[] parameters = command.getParameters();
+        ParameterInfo[] parameters =
+                command.getParametersExcludingSender();
+                //command.getParameters();
         //Count the spaces in rest
         int currentArgument = (int) rest.chars().filter(c -> c == (int) ' ').count();
         if (currentArgument == -1) {
             currentArgument = 0;
         }
+        if (currentArgument >= parameters.length) {
+            return null;
+        }
         ParameterInfo param = parameters[currentArgument];
         Provider<?> provider = param.getProvider();
         if (provider != null) {
-            List<String> suggestionsProvided = provider.provideSuggestions(input);
+            List<String> suggestionsProvided = provider.provideSuggestions(input,sender);
             if (suggestionsProvided == null) {
                 return null;
             }
@@ -450,7 +455,9 @@ public class CommanderImpl implements Commander {
 
     @Override
     public List<String> getSuggestions(CoreCommandSender sender, String prefix, String[] args) {
-        String full = prefix + String.join(" ", args); //Avoiding String#split at all costs because it compiles regex
-        return getSuggestions(sender, full);
+        String full = prefix + " " + String.join(" ", args); //Avoiding String#split at all costs because it compiles regex
+        List<String> suggestions = getSuggestions(sender, full);
+        System.out.println("Suggestions: " + suggestions);
+        return suggestions;
     }
 }

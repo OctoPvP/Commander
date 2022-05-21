@@ -16,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 @Setter
 public class CommandInfo { //This is the object that is stored in the command map, there should only be one instance of this object per command
     private ParameterInfo[] parameters;
+
+    private ParameterInfo[] parametersExcludingSender;
     private String name;
     private String description;
     private String usage;
@@ -80,6 +82,9 @@ public class CommandInfo { //This is the object that is stored in the command ma
             } else {
                 StringBuilder builder = new StringBuilder();
                 for (ParameterInfo parameter : parameters) {
+                    if (parameter.hideFromUsage()) {
+                        continue;
+                    }
                     boolean optional = parameter.isOptional();
                     builder.append(optional ? commander.getConfig().getOptionalPrefix() : commander.getConfig().getRequiredPrefix())
                             .append(parameter.getName())
@@ -170,6 +175,16 @@ public class CommandInfo { //This is the object that is stored in the command ma
         return subCommands.stream().filter(command -> command.getName().equalsIgnoreCase(name) || Arrays.asList(command.aliases).contains(name)).findFirst().orElse(null);
     }
 
+    public ParameterInfo[] getParametersExcludingSender() {
+        if (parametersExcludingSender != null) return parametersExcludingSender;
+        List<ParameterInfo> list = new ArrayList<>();
+        for (ParameterInfo parameter : parameters) {
+            if (!commander.getPlatform().isSenderParameter(parameter)) {
+                list.add(parameter);
+            }
+        }
+        return list.toArray(new ParameterInfo[list.size()]);
+    }
 
     @Override
     public String toString() {

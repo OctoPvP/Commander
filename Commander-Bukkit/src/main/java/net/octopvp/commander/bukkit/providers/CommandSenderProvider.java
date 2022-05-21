@@ -6,6 +6,7 @@ import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.provider.Provider;
+import net.octopvp.commander.sender.CoreCommandSender;
 import org.bukkit.command.CommandSender;
 
 import java.util.Deque;
@@ -18,7 +19,7 @@ public class CommandSenderProvider implements Provider<CommandSender> {
     }
 
     @Override
-    public List<String> provideSuggestions(String input) {
+    public List<String> provideSuggestions(String input, CoreCommandSender sender) {
         return null;
     }
 }

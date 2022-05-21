@@ -1,7 +1,9 @@
 package net.octopvp.commander.platform;
 
+import net.octopvp.commander.annotation.Sender;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
+import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.exception.CommandException;
 import net.octopvp.commander.help.HelpService;
 import net.octopvp.commander.sender.CoreCommandSender;
@@ -25,6 +27,10 @@ public interface CommanderPlatform {
     }
 
     void registerCommand(CommandInfo command);
+
+    default boolean isSenderParameter(ParameterInfo parameterInfo) {
+        return parameterInfo.getParameter().isAnnotationPresent(Sender.class) || parameterInfo.getParameter().getName().equalsIgnoreCase("sender") || parameterInfo.getParameter().getType().equals(CoreCommandSender.class);
+    }
 
     default String getPrefix(){
         return "/";

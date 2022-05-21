@@ -8,6 +8,7 @@ import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.exception.CommandException;
 import net.octopvp.commander.provider.Provider;
+import net.octopvp.commander.sender.CoreCommandSender;
 import net.octopvp.commander.validator.Validator;
 import org.junit.jupiter.api.Test;
 
@@ -56,7 +57,7 @@ public class ValidatorTest {
         }
 
         @Override
-        public List<String> provideSuggestions(String input) {
+        public List<String> provideSuggestions(String input, CoreCommandSender sender) {
             return null;
         }
     }

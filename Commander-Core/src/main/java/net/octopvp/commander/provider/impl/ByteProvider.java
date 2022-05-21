@@ -7,6 +7,7 @@ import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.exception.CommandParseException;
 import net.octopvp.commander.exception.InvalidArgsException;
 import net.octopvp.commander.provider.Provider;
+import net.octopvp.commander.sender.CoreCommandSender;
 
 import java.util.Deque;
 import java.util.List;
@@ -23,7 +24,7 @@ public class ByteProvider implements Provider<Byte> {
     }
 
     @Override
-    public List<String> provideSuggestions(String input) {
+    public List<String> provideSuggestions(String input, CoreCommandSender sender) {
         return null;
     }
 

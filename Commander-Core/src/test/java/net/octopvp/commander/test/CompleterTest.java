@@ -7,6 +7,7 @@ import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.provider.Provider;
+import net.octopvp.commander.sender.CoreCommandSender;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -55,7 +56,7 @@ public class CompleterTest {
         }
 
         @Override
-        public List<String> provideSuggestions(String input) {
+        public List<String> provideSuggestions(String input, CoreCommandSender sender) {
             return Arrays.asList("Hello", "World");
         }
     }
@@ -67,7 +68,7 @@ public class CompleterTest {
         }
 
         @Override
-        public List<String> provideSuggestions(String input) {
+        public List<String> provideSuggestions(String input, CoreCommandSender sender) {
             return Arrays.asList("Yes", "ABCDEFG");
         }
     }
@@ -79,7 +80,7 @@ public class CompleterTest {
         }
 
         @Override
-        public List<String> provideSuggestions(String input) {
+        public List<String> provideSuggestions(String input, CoreCommandSender sender) {
             return Arrays.asList("It Works!", ":)");
         }
     }

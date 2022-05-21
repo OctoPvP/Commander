@@ -17,7 +17,7 @@ public class SenderProvider implements Provider<CoreCommandSender> {
     }
 
     @Override
-    public List<String> provideSuggestions(String input) {
+    public List<String> provideSuggestions(String input, CoreCommandSender sender) {
         return null;
     }
 
