@@ -419,17 +419,20 @@ public class CommanderImpl implements Commander {
         if (command == null) {
             return null;
         }
+        CommandInfo parent;
         if (command.isParentCommand()) {
+            parent = command;
             rest = rest.trim(); // fix indexOf below
             int spIndex = rest.indexOf(' ');
             String sub = spIndex == -1 ? rest : rest.substring(0, spIndex);
             command = command.getSubCommand(sub);
             if (command == null) {
-                return null;
+                if (parent.getSubCommands() == null) return null;
+                return new ArrayList<>(Arrays.asList(parent.getSubCommands().stream().map(CommandInfo::getName).toArray(String[]::new)));
             }
         }
-
         List<String> suggestions = new ArrayList<>();
+
         ParameterInfo[] parameters =
                 command.getParametersExcludingSender();
                 //command.getParameters();
