@@ -6,8 +6,10 @@ import net.octopvp.commander.bukkit.annotation.ConsoleOnly;
 import net.octopvp.commander.bukkit.annotation.PlayerOnly;
 import net.octopvp.commander.bukkit.impl.BukkitHelpService;
 import net.octopvp.commander.bukkit.providers.CommandSenderProvider;
+import net.octopvp.commander.bukkit.providers.OfflinePlayerProvider;
 import net.octopvp.commander.bukkit.providers.PlayerProvider;
 import net.octopvp.commander.exception.CommandParseException;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -18,6 +20,7 @@ public class BukkitCommander {
         return new CommanderImpl(new BukkitPlatform(plugin))
                 .init()
                 .registerProvider(Player.class,new PlayerProvider())
+                .registerProvider(OfflinePlayer.class,new OfflinePlayerProvider())
                 .registerProvider(CommandSender.class, new CommandSenderProvider())
                 .registerCommandPreProcessor(ctx -> {
                     if (ctx.getCommandInfo().isAnnotationPresent(PlayerOnly.class)) {
