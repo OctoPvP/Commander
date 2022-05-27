@@ -100,7 +100,7 @@ public class ParameterInfo {
     }
 
     public boolean hideFromUsage() {
-        return commander.getPlatform().isSenderParameter(this);
+        return commander.getPlatform().isSenderParameter(this) || parameter.isAnnotationPresent(Dependency.class);
     }
 
     @Override

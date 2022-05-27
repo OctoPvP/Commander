@@ -3,6 +3,7 @@ package net.octopvp.commander.test;
 import net.octopvp.commander.Commander;
 import net.octopvp.commander.CommanderImpl;
 import net.octopvp.commander.annotation.Command;
+import net.octopvp.commander.annotation.Sender;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
@@ -45,7 +46,7 @@ public class CompleterTest {
         System.out.println("Third passed.");
     }
     @Command(name = "test")
-    public void test(TestClass testClass, TestClassTwo testClassTwo, TestClassThree three) {
+    public void test(@Sender CommandSender sender, TestClass testClass, TestClassTwo testClassTwo, TestClassThree three) {
     }
 
     private static class TestProvider implements Provider<TestClass> {

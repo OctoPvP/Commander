@@ -3,6 +3,7 @@ package net.octopvp.commander.test;
 import net.octopvp.commander.Commander;
 import net.octopvp.commander.CommanderImpl;
 import net.octopvp.commander.annotation.Command;
+import net.octopvp.commander.annotation.Sender;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
@@ -73,7 +74,7 @@ public class SubCommandTest {
     }
 
     @Command(name = "completer")
-    public void testComplete(TestClass testClass, TestClassTwo testClassTwo, TestClassThree three) {
+    public void testComplete(@Sender CommandSender sender, TestClass testClass, TestClassTwo testClassTwo, TestClassThree three) {
 
     }
 

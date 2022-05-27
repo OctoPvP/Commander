@@ -258,6 +258,7 @@ public class CommanderImpl implements Commander {
         }
 
         try {
+            System.out.println("a");
             if (commandInfo.isParentCommand()) {
                 final CommandInfo parent = commandInfo;
                 if (args.length == 0) {
@@ -291,6 +292,7 @@ public class CommanderImpl implements Commander {
                 throw new CommandNotFoundException("Could not find command handler for " + label);
             }
 
+            System.out.println("b");
 
             String[] argsCopy = new String[args.length];
             System.arraycopy(args, 0, argsCopy, 0, args.length);
@@ -302,6 +304,7 @@ public class CommanderImpl implements Commander {
                 argsList = new ArrayList<>(Arrays.asList(args));
             }
 
+            System.out.println("c");
             CommandArgs cArgs = new CommandArgs(this, args, commandInfo.hasSwitches() ? extractSwitches(argsList, commandInfo.getParameters()) : null, commandInfo.hasFlags() ? extractFlags(argsList, commandInfo.getParameters()) : null, argsList);
 
             CommandContext context = new CommandContext(commandInfo, label.toLowerCase(), argsCopy, sender, cArgs);
@@ -309,6 +312,7 @@ public class CommanderImpl implements Commander {
                 for (Consumer<CommandContext> preProcessor : preProcessors) {
                     preProcessor.accept(context);
                 }
+                System.out.println("d");
 
                 if (commandInfo.isSubCommand()) {
                     if (commandInfo.getPermission() != null && !sender.hasPermission(commandInfo.getPermission())) {
@@ -322,6 +326,7 @@ public class CommanderImpl implements Commander {
 
                 Object[] arguments = ArgumentParser.parseArguments(context, cArgs);
 
+                System.out.println("e");
                 if (arguments == null) return;
 
                 Object result = null;
@@ -333,6 +338,7 @@ public class CommanderImpl implements Commander {
                 for (BiConsumer<CommandContext, Object> postProcessor : postProcessors) {
                     postProcessor.accept(context, result);
                 }
+                System.out.println("f");
             } catch (CommandException e) {
                 platform.handleCommandException(context, e);
             } catch (IllegalArgumentException e) {
@@ -402,7 +408,63 @@ public class CommanderImpl implements Commander {
 
     @Override
     public List<String> getSuggestions(CoreCommandSender sender, final String input) {
-        System.out.println("Getting suggestions for " + input);
+        System.out.println("Recieved input: " + input);
+
+        String[] split = input.split(" ");
+        if (split.length == 0) {
+            System.out.println("No split");
+            return null;
+        }
+
+        String label = split[0];
+        if (label.startsWith(getPlatform().getPrefix())) label = label.substring(getPlatform().getPrefix().length());
+
+        CommandInfo command = getCommand(label), parent = null;
+        if (command == null) {
+            System.out.println("Command not found");
+            return null;
+        }
+        if (command.isParentCommand()) {
+            parent = command;
+            if (split.length == 1) {
+                System.out.println("Returning subcommands");
+                return parent.getSubCommands().stream().map(CommandInfo::getName).collect(Collectors.toList());
+            }
+            command = parent.getSubCommand(split[1]);
+            if (command == null) {
+                System.out.println("Command not found");
+                return null;
+            }
+        }
+
+        ParameterInfo[] params = command.getCommandParameters();
+
+        int diff = parent == null ? 1 : 2;
+        int index = split.length - diff;
+
+        if (index >= params.length) {
+            System.out.println("Index out of bounds");
+            return null;
+        }
+
+        ParameterInfo param = params[index];
+        Provider<?> provider = param.getProvider();
+
+        if (provider == null) {
+            System.out.println("Provider not found");
+            return null;
+        }
+
+        List<String> suggestionsProvided = provider.provideSuggestions(input, sender);
+        if (suggestionsProvided == null) {
+            System.out.println("No suggestions provided");
+            return null;
+        }
+        List<String> suggestions = new ArrayList<>(suggestionsProvided);
+        System.out.println("Suggestions for " + input + ": " + suggestions);
+        return suggestions;
+
+        /*
         int prefixLength = platform.getPrefix().length();
         final String s = input;
         //get the first word seperated by spaces without using split
@@ -417,6 +479,7 @@ public class CommanderImpl implements Commander {
         CommandInfo command = getCommand(cmd);
         String rest = s.substring(in.length() + (starts ? platform.getPrefix().length() : 0));
         if (command == null) {
+            System.out.println("Command not found");
             return null;
         }
         CommandInfo parent;
@@ -426,41 +489,51 @@ public class CommanderImpl implements Commander {
             int spIndex = rest.indexOf(' ');
             String sub = spIndex == -1 ? rest : rest.substring(0, spIndex);
             command = command.getSubCommand(sub);
-            if (command == null) {
-                if (parent.getSubCommands() == null) return null;
+            if (command == null || (command.getCommandParameters().length > 0)) {
+                if (parent.getSubCommands() == null) {
+                    System.out.println("No subcommands found");
+                    return null;
+                }
+                System.out.println("Returning sub commands");
                 return new ArrayList<>(Arrays.asList(parent.getSubCommands().stream().map(CommandInfo::getName).toArray(String[]::new)));
             }
         }
         List<String> suggestions = new ArrayList<>();
 
         ParameterInfo[] parameters =
-                command.getParametersExcludingSender();
+                command.getCommandParameters();
                 //command.getParameters();
         //Count the spaces in rest
+        System.out.println("Rest: " + rest);
         int currentArgument = (int) rest.chars().filter(c -> c == (int) ' ').count();
         if (currentArgument == -1) {
             currentArgument = 0;
         }
-        if (currentArgument >= parameters.length) {
+        System.out.println("Current arg: " + currentArgument + " | params: " + Arrays.toString(parameters));
+        if (currentArgument > parameters.length) {
+            System.out.println("No more arguments");
             return null;
         }
         ParameterInfo param = parameters[currentArgument];
         Provider<?> provider = param.getProvider();
+        System.out.println("Param #" + currentArgument + " | Param: " + param.getName() + " | Provider: " + provider);
         if (provider != null) {
             List<String> suggestionsProvided = provider.provideSuggestions(input,sender);
             if (suggestionsProvided == null) {
+                System.out.println("No suggestions provided");
                 return null;
             }
             suggestions.addAll(suggestionsProvided);
         }
+        System.out.println("Suggestions for " + input + ": " + suggestions);
         return suggestions;
+         */
     }
 
     @Override
     public List<String> getSuggestions(CoreCommandSender sender, String prefix, String[] args) {
         String full = prefix + " " + String.join(" ", args); //Avoiding String#split at all costs because it compiles regex
         List<String> suggestions = getSuggestions(sender, full);
-        System.out.println("Suggestions: " + suggestions);
         return suggestions;
     }
 }

@@ -5,6 +5,7 @@ import lombok.Setter;
 import net.octopvp.commander.Commander;
 import net.octopvp.commander.annotation.Command;
 import net.octopvp.commander.annotation.Cooldown;
+import net.octopvp.commander.annotation.Dependency;
 import net.octopvp.commander.annotation.Permission;
 
 import java.lang.annotation.Annotation;
@@ -98,6 +99,9 @@ public class CommandInfo { //This is the object that is stored in the command ma
     }
 
     public String getFullUsage() {
+        if (isSubCommand()) {
+            return commander.getConfig().getCommandPrefix() + getParent().getName() + " " + getName() + " " + getUsage();
+        }
         return commander.getConfig().getCommandPrefix() + getName() + " " + getUsage();
     }
 
@@ -175,15 +179,15 @@ public class CommandInfo { //This is the object that is stored in the command ma
         return subCommands.stream().filter(command -> command.getName().equalsIgnoreCase(name) || Arrays.asList(command.aliases).contains(name)).findFirst().orElse(null);
     }
 
-    public ParameterInfo[] getParametersExcludingSender() {
+    public ParameterInfo[] getCommandParameters() {
         if (parametersExcludingSender != null) return parametersExcludingSender;
         List<ParameterInfo> list = new ArrayList<>();
         for (ParameterInfo parameter : parameters) {
-            if (!commander.getPlatform().isSenderParameter(parameter)) {
+            if (!commander.getPlatform().isSenderParameter(parameter) && !parameter.getParameter().isAnnotationPresent(Dependency.class)) {
                 list.add(parameter);
             }
         }
-        return list.toArray(new ParameterInfo[list.size()]);
+        return parametersExcludingSender = list.toArray(new ParameterInfo[list.size()]);
     }
 
     @Override
