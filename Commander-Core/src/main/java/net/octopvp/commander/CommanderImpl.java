@@ -444,6 +444,10 @@ public class CommanderImpl implements Commander {
             }
         }
 
+        if (config.isCheckPermissionsOnSuggestion() && command.getPermission() != null && !sender.hasPermission(command.getPermission())) {
+            return null;
+        }
+
         ParameterInfo[] params = command.getCommandParameters();
 
         int diff = parent == null ? 1 : 2;

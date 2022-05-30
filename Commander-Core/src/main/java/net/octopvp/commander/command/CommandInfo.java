@@ -49,6 +49,8 @@ public class CommandInfo { //This is the object that is stored in the command ma
         this.commander = commander;
         if (isAnnotationPresent(Permission.class)) {
             this.permission = getAnnotation(Permission.class).value();
+        }else {
+            this.permission = null;
         }
         if (isAnnotationPresent(Cooldown.class)) {
             this.cooldown = getAnnotation(Cooldown.class).value();
