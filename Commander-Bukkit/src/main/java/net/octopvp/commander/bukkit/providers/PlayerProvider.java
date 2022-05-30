@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.octopvp.commander.annotation.Sender;
 import net.octopvp.commander.bukkit.BukkitCommandSender;
+import net.octopvp.commander.bukkit.annotation.DefaultSelf;
 import net.octopvp.commander.bukkit.impl.BukkitCommandSenderImpl;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
@@ -19,11 +20,17 @@ import java.util.List;
 import java.util.function.Function;
 
 public class PlayerProvider implements Provider<Player> {
-    @Getter @Setter
+    @Getter
+    @Setter
     private static Function<Player, String> playerNameFunction = player -> player.getName();
 
     @Override
     public Player provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
+        if (args.size() == 0) {
+            if (parameterInfo.getParameter().isAnnotationPresent(DefaultSelf.class))
+                return ((BukkitCommandSender) context.getCommandSender()).getPlayer();
+            return null;
+        }
         return parameterInfo.getParameter().isAnnotationPresent(Sender.class) || parameterInfo.getParameter().getName().equalsIgnoreCase("sender") ? (Player) ((BukkitCommandSender) context.getCommandSender()).getSender() : Bukkit.getPlayer(args.pop());
     }
 

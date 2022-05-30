@@ -2,6 +2,7 @@ package net.octopvp.commander.bukkit.impl;
 
 import lombok.RequiredArgsConstructor;
 import net.octopvp.commander.bukkit.BukkitCommandSender;
+import net.octopvp.commander.exception.CommandException;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -11,6 +12,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BukkitCommandSenderImpl implements BukkitCommandSender {
     private final CommandSender commandSender;
+
     @Override
     public CommandSender getSender() {
         return commandSender;
@@ -28,12 +30,13 @@ public class BukkitCommandSenderImpl implements BukkitCommandSender {
 
     @Override
     public Player getPlayer() {
+        if (!(isPlayer())) throw new CommandException("You must be a player to do this!");
         return (Player) commandSender;
     }
 
     @Override
     public UUID getUUID() {
-        return isPlayer() ? getPlayer().getUniqueId() : new UUID(0,0);
+        return isPlayer() ? getPlayer().getUniqueId() : new UUID(0, 0);
     }
 
     @Override

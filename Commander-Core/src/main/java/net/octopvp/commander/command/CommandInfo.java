@@ -3,10 +3,7 @@ package net.octopvp.commander.command;
 import lombok.Getter;
 import lombok.Setter;
 import net.octopvp.commander.Commander;
-import net.octopvp.commander.annotation.Command;
-import net.octopvp.commander.annotation.Cooldown;
-import net.octopvp.commander.annotation.Dependency;
-import net.octopvp.commander.annotation.Permission;
+import net.octopvp.commander.annotation.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -88,7 +85,7 @@ public class CommandInfo { //This is the object that is stored in the command ma
                     }
                     boolean optional = parameter.isOptional();
                     builder.append(optional ? commander.getConfig().getOptionalPrefix() : commander.getConfig().getRequiredPrefix())
-                            .append(parameter.getName())
+                            .append(parameter.getParameter().isAnnotationPresent(UsageName.class) ? parameter.getParameter().getAnnotation(UsageName.class).value() : parameter.getParameter().getName())
                             .append(optional ? commander.getConfig().getOptionalSuffix() : commander.getConfig().getRequiredSuffix())
                             .append(" ");
                 }

@@ -52,12 +52,10 @@ public class ArgumentParser {
             if (provider == null) {
                 throw new CommandParseException("No provider found for " + parameter.getParameter().getType().getName());
             }
-            System.out.println("1");
             Object obj;
             try {
                 obj = provider.provide(ctx, ctx.getCommandInfo(), parameter, cArgs.getArgs());
             } catch (Exception e) {
-                System.out.println("exception");
                 e.printStackTrace();
                 if (e instanceof InvalidArgsException) {
                     //cArgs.getCommander().getPlatform().getHelpService().sendHelp(ctx, ctx.getCommandSender());
@@ -78,7 +76,6 @@ public class ArgumentParser {
                     obj = null;
                 }
             }
-            System.out.println("2");
             if (obj == null) {
                 obj = provider.provideDefault(ctx, ctx.getCommandInfo(), parameter, cArgs.getArgs());
             }
@@ -86,11 +83,9 @@ public class ArgumentParser {
             if (obj == null && parameter.isRequired()) {
                 throw new CommandParseException("Required argument " + parameter.getParameter().getName() + " is null!");
             }
-            System.out.println("3");
             if (obj != null) validate(obj, parameter, ctx);
             arguments[i] = obj;
         }
-        System.out.println("4");
         return arguments;
     }
 
@@ -135,7 +130,6 @@ public class ArgumentParser {
                 continue;
             }
         }
-        System.out.println("Out: " + out + " | " + sb);
         if (currentArgIsQuoted) {
             throw new CommandParseException("Unclosed quote!");
         }

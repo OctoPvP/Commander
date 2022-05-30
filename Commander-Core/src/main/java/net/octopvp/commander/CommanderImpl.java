@@ -89,6 +89,9 @@ public class CommanderImpl implements Commander {
     @Override
     public Commander register(Object... objects) {
         for (Object object : objects) {
+            if (object == null) {
+                continue;
+            }
             if (object instanceof Collection) {
                 Collection<Object> objs = (Collection<Object>) object;
                 for (Object o : objs) {
@@ -102,6 +105,7 @@ public class CommanderImpl implements Commander {
     }
 
     private void registerCmd(Object object) {
+        if (object == null) return;
         List<Annotation> distributedAnnotations = new ArrayList<>();
         for (Annotation annotation : object.getClass().getDeclaredAnnotations()) {
             if (annotation.getClass().isAnnotationPresent(DistributeOnMethods.class)) {
@@ -168,6 +172,18 @@ public class CommanderImpl implements Commander {
             return true;
         }).map(clazz -> {
             try {
+                if (clazz.isEnum()) return null;
+                boolean isCommandClass = false;
+                for (Method declaredMethod : clazz.getDeclaredMethods()) {
+                    if (declaredMethod.isAnnotationPresent(Command.class)) {
+                        isCommandClass = true;
+                        break;
+                    }
+                }
+                if (!isCommandClass) isCommandClass = clazz.isAnnotationPresent(Command.class);
+
+                if (!isCommandClass) return null;
+
                 return clazz.newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
                 throw new RuntimeException(e);
@@ -258,7 +274,6 @@ public class CommanderImpl implements Commander {
         }
 
         try {
-            System.out.println("a");
             if (commandInfo.isParentCommand()) {
                 final CommandInfo parent = commandInfo;
                 if (args.length == 0) {
@@ -292,8 +307,6 @@ public class CommanderImpl implements Commander {
                 throw new CommandNotFoundException("Could not find command handler for " + label);
             }
 
-            System.out.println("b");
-
             String[] argsCopy = new String[args.length];
             System.arraycopy(args, 0, argsCopy, 0, args.length);
             //List<String> argsList = ArgumentParser.combineMultiWordArguments(Arrays.asList(args));
@@ -304,7 +317,6 @@ public class CommanderImpl implements Commander {
                 argsList = new ArrayList<>(Arrays.asList(args));
             }
 
-            System.out.println("c");
             CommandArgs cArgs = new CommandArgs(this, args, commandInfo.hasSwitches() ? extractSwitches(argsList, commandInfo.getParameters()) : null, commandInfo.hasFlags() ? extractFlags(argsList, commandInfo.getParameters()) : null, argsList);
 
             CommandContext context = new CommandContext(commandInfo, label.toLowerCase(), argsCopy, sender, cArgs);
@@ -312,7 +324,6 @@ public class CommanderImpl implements Commander {
                 for (Consumer<CommandContext> preProcessor : preProcessors) {
                     preProcessor.accept(context);
                 }
-                System.out.println("d");
 
                 if (commandInfo.isSubCommand()) {
                     if (commandInfo.getPermission() != null && !sender.hasPermission(commandInfo.getPermission())) {
@@ -326,22 +337,24 @@ public class CommanderImpl implements Commander {
 
                 Object[] arguments = ArgumentParser.parseArguments(context, cArgs);
 
-                System.out.println("e");
                 if (arguments == null) return;
 
                 Object result = null;
                 try {
                     result = context.getCommandInfo().getMethod().invoke(context.getCommandInfo().getInstance(), arguments);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
+                } catch (IllegalAccessException | IllegalArgumentException e) {
+                   e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    if (e.getCause() != null && e.getCause() instanceof CommandException) {
+                        platform.handleCommandException(context, (CommandException) e.getCause());
+                    }
                 }
                 for (BiConsumer<CommandContext, Object> postProcessor : postProcessors) {
                     postProcessor.accept(context, result);
                 }
-                System.out.println("f");
             } catch (CommandException e) {
                 platform.handleCommandException(context, e);
-            } catch (IllegalArgumentException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         } catch (CommandException e) {
@@ -408,11 +421,8 @@ public class CommanderImpl implements Commander {
 
     @Override
     public List<String> getSuggestions(CoreCommandSender sender, final String input) {
-        System.out.println("Recieved input: " + input);
-
         String[] split = input.split(" ");
         if (split.length == 0) {
-            System.out.println("No split");
             return null;
         }
 
@@ -421,18 +431,15 @@ public class CommanderImpl implements Commander {
 
         CommandInfo command = getCommand(label), parent = null;
         if (command == null) {
-            System.out.println("Command not found");
             return null;
         }
         if (command.isParentCommand()) {
             parent = command;
             if (split.length == 1) {
-                System.out.println("Returning subcommands");
                 return parent.getSubCommands().stream().map(CommandInfo::getName).collect(Collectors.toList());
             }
             command = parent.getSubCommand(split[1]);
             if (command == null) {
-                System.out.println("Command not found");
                 return null;
             }
         }
@@ -443,7 +450,6 @@ public class CommanderImpl implements Commander {
         int index = split.length - diff;
 
         if (index >= params.length) {
-            System.out.println("Index out of bounds");
             return null;
         }
 
@@ -451,17 +457,14 @@ public class CommanderImpl implements Commander {
         Provider<?> provider = param.getProvider();
 
         if (provider == null) {
-            System.out.println("Provider not found");
             return null;
         }
 
         List<String> suggestionsProvided = provider.provideSuggestions(input, sender);
         if (suggestionsProvided == null) {
-            System.out.println("No suggestions provided");
             return null;
         }
         List<String> suggestions = new ArrayList<>(suggestionsProvided);
-        System.out.println("Suggestions for " + input + ": " + suggestions);
         return suggestions;
 
         /*
