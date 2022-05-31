@@ -87,7 +87,7 @@ public class CommandInfo { //This is the object that is stored in the command ma
                     }
                     boolean optional = parameter.isOptional();
                     builder.append(optional ? commander.getConfig().getOptionalPrefix() : commander.getConfig().getRequiredPrefix())
-                            .append(parameter.getParameter().isAnnotationPresent(UsageName.class) ? parameter.getParameter().getAnnotation(UsageName.class).value() : parameter.getParameter().getName())
+                            .append(parameter.getName())
                             .append(optional ? commander.getConfig().getOptionalSuffix() : commander.getConfig().getRequiredSuffix())
                             .append(" ");
                 }
