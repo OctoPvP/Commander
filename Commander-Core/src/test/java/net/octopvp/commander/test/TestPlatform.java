@@ -6,7 +6,6 @@ import net.octopvp.commander.exception.CommandException;
 import net.octopvp.commander.help.HelpService;
 import net.octopvp.commander.platform.CommanderPlatform;
 import net.octopvp.commander.sender.CoreCommandSender;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 public class TestPlatform implements CommanderPlatform {
 
