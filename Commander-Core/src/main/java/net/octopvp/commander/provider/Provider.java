@@ -12,7 +12,7 @@ public interface Provider<T> {
 
     T provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args);
 
-    List<String> provideSuggestions(String input, CoreCommandSender sender);
+    List<String> provideSuggestions(String input, String lastArg, CoreCommandSender sender);
 
     default T provideDefault(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
         return null;

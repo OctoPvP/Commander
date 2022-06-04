@@ -1,6 +1,5 @@
 package net.octopvp.commander.argument;
 
-import net.octopvp.commander.CommanderImpl;
 import net.octopvp.commander.annotation.Dependency;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.ParameterInfo;
@@ -56,7 +55,6 @@ public class ArgumentParser {
             try {
                 obj = provider.provide(ctx, ctx.getCommandInfo(), parameter, cArgs.getArgs());
             } catch (Exception e) {
-                e.printStackTrace();
                 if (e instanceof InvalidArgsException) {
                     //cArgs.getCommander().getPlatform().getHelpService().sendHelp(ctx, ctx.getCommandSender());
                     //return null;

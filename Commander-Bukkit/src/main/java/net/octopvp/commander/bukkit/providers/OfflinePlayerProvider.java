@@ -18,7 +18,7 @@ public class OfflinePlayerProvider implements Provider<OfflinePlayer> {
     }
 
     @Override
-    public List<String> provideSuggestions(String input, CoreCommandSender sender) {
+    public List<String> provideSuggestions(String input, String lastArg, CoreCommandSender sender) {
         return null;
     }
 }

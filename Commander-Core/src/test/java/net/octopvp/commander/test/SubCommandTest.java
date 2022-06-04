@@ -7,6 +7,7 @@ import net.octopvp.commander.annotation.Sender;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
+import net.octopvp.commander.config.CommanderConfig;
 import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.sender.CoreCommandSender;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,9 @@ public class SubCommandTest {
     @Test
     public void test() {
         commander = new CommanderImpl(new TestPlatform())
-                //.init()
+                .setConfig(new CommanderConfig.Builder()
+                        .setFilterSuggestions(false)
+                        .build())
                 .registerProvider(String.class, new StringProvider())
                 .registerProvider(TestClass.class, new TestProvider())
                 .registerProvider(TestClassTwo.class, new TestProvider2())
@@ -41,15 +44,15 @@ public class SubCommandTest {
         commander.executeCommand(new CommandSender(), "test", new String[]{"hello_world!"});
         assertTrue(passed3);
 
-        List<String> completions = commander.getSuggestions(new CommandSender(), "test completer");
+        List<String> completions = commander.getSuggestions(new CommandSender(), "test completer ");
         assertNotNull(completions);
         assertTrue(completions.contains("Hello") && completions.contains("World"));
 
-        List<String> completions2 = commander.getSuggestions(new CommandSender(), "test completer abcd");
+        List<String> completions2 = commander.getSuggestions(new CommandSender(), "test completer abcd ");
         assertNotNull(completions2);
         assertTrue(completions2.contains("Yes") && completions2.contains("ABCDEFG"));
 
-        List<String> completions3 = commander.getSuggestions(new CommandSender(), "test completer abcd def");
+        List<String> completions3 = commander.getSuggestions(new CommandSender(), "test completer abcd def ");
         assertNotNull(completions3);
         assertTrue(completions3.contains("It Works!") && completions3.contains(":)"));
     }
@@ -86,7 +89,7 @@ public class SubCommandTest {
         }
 
         @Override
-        public List<String> provideSuggestions(String input, CoreCommandSender sender) {
+        public List<String> provideSuggestions(String input, String lastArg, CoreCommandSender sender) {
             return null;
         }
     }
@@ -99,7 +102,7 @@ public class SubCommandTest {
         }
 
         @Override
-        public List<String> provideSuggestions(String input, CoreCommandSender sender) {
+        public List<String> provideSuggestions(String input, String lastArg, CoreCommandSender sender) {
             return Arrays.asList("Hello", "World");
         }
     }
@@ -112,7 +115,7 @@ public class SubCommandTest {
         }
 
         @Override
-        public List<String> provideSuggestions(String input, CoreCommandSender sender) {
+        public List<String> provideSuggestions(String input, String lastArg, CoreCommandSender sender) {
             return Arrays.asList("Yes", "ABCDEFG");
         }
     }
@@ -125,7 +128,7 @@ public class SubCommandTest {
         }
 
         @Override
-        public List<String> provideSuggestions(String input, CoreCommandSender sender) {
+        public List<String> provideSuggestions(String input, String lastArg, CoreCommandSender sender) {
             return Arrays.asList("It Works!", ":)");
         }
     }

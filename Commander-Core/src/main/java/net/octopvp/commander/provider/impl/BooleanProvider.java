@@ -18,7 +18,7 @@ public class BooleanProvider implements Provider<Boolean> {
     }
 
     @Override
-    public List<String> provideSuggestions(String input, CoreCommandSender sender) {
+    public List<String> provideSuggestions(String input, String lastArg, CoreCommandSender sender) {
         return Arrays.asList("true", "false");
     }
 

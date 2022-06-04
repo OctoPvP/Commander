@@ -80,7 +80,26 @@ public class CommanderImpl implements Commander {
                 if (value.doubleValue() == range.defaultValue()) { //All number providers should use Range#defaultValue() if the annotation is present
                     return; //TODO we gotta find a better way to handle primitives, which cant take null
                 }
-                throw new ValidateException("Value " + value.doubleValue() + " is not in range " + range.min() + " - " + range.max());
+                StringBuilder minMax = new StringBuilder("(");
+                if (range.min() != Double.MIN_VALUE) {
+                    String min = range.min() + "";
+                    if (min.endsWith(".0")) {
+                        min = min.substring(0, min.length() - 2);
+                    }
+                    minMax.append("min: ").append(min);
+                }
+                if (range.max() != Double.MAX_VALUE) {
+                    if (minMax.length() > 1) {
+                        minMax.append(" | ");
+                    }
+                    String max = range.max() + "";
+                    if (max.endsWith(".0")) {
+                        max = max.substring(0, max.length() - 2);
+                    }
+                    minMax.append("max: ").append(max);
+                }
+                minMax.append(")");
+                throw new ValidateException("Value " + value.doubleValue() + " is not in valid range! " + minMax.toString());
             }
         });
         return this;
@@ -295,7 +314,7 @@ public class CommanderImpl implements Commander {
                     commandInfo = parent.getSubCommand("");
                     isRootLevel = commandInfo != null;
                     if (!isRootLevel) {
-                        throw new CommandNotFoundException("Could not find subcommand \"" + sub + "\" for command " + parent.getName());
+                        throw new CommandNotFoundException("Could not find subcommand \"" + sub.toLowerCase() + "\" for command \"" + parent.getName() + "\"");
                     }
                 }
                 if (!isRootLevel) {
@@ -304,7 +323,7 @@ public class CommanderImpl implements Commander {
                     args = newArgs;
                 }
             } else if (commandInfo == null) {
-                throw new CommandNotFoundException("Could not find command handler for " + label);
+                throw new CommandNotFoundException("Could not find command handler for \"" + label.toLowerCase() + "\"");
             }
 
             String[] argsCopy = new String[args.length];
@@ -355,6 +374,7 @@ public class CommanderImpl implements Commander {
             } catch (CommandException e) {
                 platform.handleCommandException(context, e);
             } catch (Exception e) {
+                System.err.println("An error occurred while executing command \"" + label + "\"");
                 e.printStackTrace();
             }
         } catch (CommandException e) {
@@ -453,6 +473,8 @@ public class CommanderImpl implements Commander {
         int diff = parent == null ? 1 : 2;
         int index = split.length - diff;
 
+        if (!input.endsWith(" ") && config.isShowNextSuggestionOnlyIfEndsWithSpace()) index--;
+
         if (index >= params.length) {
             return null;
         }
@@ -464,11 +486,16 @@ public class CommanderImpl implements Commander {
             return null;
         }
 
-        List<String> suggestionsProvided = provider.provideSuggestions(input, sender);
+        String lastArg = split[split.length - 1];
+
+        List<String> suggestionsProvided = provider.provideSuggestions(input, lastArg, sender);
         if (suggestionsProvided == null) {
             return null;
         }
         List<String> suggestions = new ArrayList<>(suggestionsProvided);
+        if (config.isFilterSuggestions() && !input.endsWith(" ")) {
+            suggestions.removeIf(s -> !s.trim().toLowerCase().startsWith(lastArg.trim().toLowerCase()));
+        }
         return suggestions;
 
         /*

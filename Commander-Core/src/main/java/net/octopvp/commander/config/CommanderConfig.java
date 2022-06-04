@@ -9,7 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CommanderConfig {
-    private boolean defaultRequired = true, joinArgsWithQuotes = true, checkPermissionsOnSuggestion = true;
+    private boolean defaultRequired = true, joinArgsWithQuotes = true, checkPermissionsOnSuggestion = true, showNextSuggestionOnlyIfEndsWithSpace = true,
+    filterSuggestions = true;
 
     private String optionalPrefix = "[", optionalSuffix = "]";
     private String requiredPrefix = "<", requiredSuffix = ">";
@@ -68,6 +69,16 @@ public class CommanderConfig {
 
         public Builder setCheckPermissionsOnSuggestion(boolean checkPermissionsOnSuggestion) {
             config.setCheckPermissionsOnSuggestion(checkPermissionsOnSuggestion);
+            return this;
+        }
+
+        public Builder setShowNextSuggestionOnlyIfEndsWithSpace(boolean showNextSuggestionOnlyIfEndsWithSpace) {
+            config.setShowNextSuggestionOnlyIfEndsWithSpace(showNextSuggestionOnlyIfEndsWithSpace);
+            return this;
+        }
+
+        public Builder setFilterSuggestions(boolean filterSuggestions) {
+            config.setFilterSuggestions(filterSuggestions);
             return this;
         }
 
