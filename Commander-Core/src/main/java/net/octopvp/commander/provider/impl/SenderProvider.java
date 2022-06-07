@@ -13,7 +13,7 @@ import java.util.List;
 public class SenderProvider implements Provider<CoreCommandSender> {
     @Override
     public CoreCommandSender provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
-        return parameterInfo.getParameter().isAnnotationPresent(Sender.class) || parameterInfo.getParameter().getName().equalsIgnoreCase("sender") ? context.getCommandSender() : null;
+        return commandInfo.getCommander().getPlatform().isSenderParameter(parameterInfo) ? context.getCommandSender() : null;
     }
 
     @Override

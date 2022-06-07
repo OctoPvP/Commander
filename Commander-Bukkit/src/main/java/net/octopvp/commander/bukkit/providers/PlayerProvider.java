@@ -26,12 +26,13 @@ public class PlayerProvider implements Provider<Player> {
 
     @Override
     public Player provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
+        if (commandInfo.getCommander().getPlatform().isSenderParameter(parameterInfo)) return (Player) ((BukkitCommandSender) context.getCommandSender()).getSender();
         if (args.size() == 0) {
             if (parameterInfo.getParameter().isAnnotationPresent(DefaultSelf.class))
                 return ((BukkitCommandSender) context.getCommandSender()).getPlayer();
             return null;
         }
-        return parameterInfo.getParameter().isAnnotationPresent(Sender.class) || parameterInfo.getParameter().getName().equalsIgnoreCase("sender") ? (Player) ((BukkitCommandSender) context.getCommandSender()).getSender() : Bukkit.getPlayer(args.pop());
+        return Bukkit.getPlayer(args.pop());
     }
 
     @Override
