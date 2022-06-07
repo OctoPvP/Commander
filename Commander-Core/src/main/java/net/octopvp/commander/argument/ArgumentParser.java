@@ -1,14 +1,19 @@
 package net.octopvp.commander.argument;
 
 import net.octopvp.commander.annotation.Dependency;
+import net.octopvp.commander.annotation.Sender;
 import net.octopvp.commander.command.CommandContext;
+import net.octopvp.commander.command.CommandInfo;
+import net.octopvp.commander.command.CompleterInfo;
 import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.exception.CommandParseException;
 import net.octopvp.commander.exception.InvalidArgsException;
 import net.octopvp.commander.provider.Provider;
+import net.octopvp.commander.sender.CoreCommandSender;
 import net.octopvp.commander.util.Primitives;
 import net.octopvp.commander.validator.Validator;
 
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +88,43 @@ public class ArgumentParser {
             }
             if (obj != null) validate(obj, parameter, ctx);
             arguments[i] = obj;
+        }
+        return arguments;
+    }
+
+    public static Object[] parseCompleterArguments(CompleterInfo completerInfo, CommandInfo commandInfo, CoreCommandSender sender, Parameter[] parameters, String input, String label, String lastArg, String[] split, int index) {
+        Object[] arguments = new Object[parameters.length];
+        int paramIndex = 0;
+        for (int i = 0; i < parameters.length; i++) {
+            Parameter parameter = parameters[i];
+            if (parameter.isAnnotationPresent(Dependency.class)) {
+                Class<?> classType = parameter.getType();
+                Supplier<?> supplier = commandInfo.getCommander().getDependencies().get(classType);
+                if (supplier == null) {
+                    throw new CommandParseException("Dependency not found for " + classType.getName()); //maybe let the user control this?
+                }
+                arguments[i] = supplier.get();
+                continue;
+            }
+
+            if (parameter.isAnnotationPresent(Sender.class) || parameter.getName().equalsIgnoreCase("sender")) {
+                arguments[i] = sender;
+                continue;
+            }
+
+            switch (paramIndex++) {
+                case 0: {
+                    arguments[i] = input;
+                    break;
+                }
+                case 1: {
+                    arguments[i] = lastArg;
+                    break;
+                }
+                default: {
+                    throw new CommandParseException("Too many arguments! Completer Usage: (String input, String lastArg) @Dependency & @Sender also works.");
+                }
+            }
         }
         return arguments;
     }

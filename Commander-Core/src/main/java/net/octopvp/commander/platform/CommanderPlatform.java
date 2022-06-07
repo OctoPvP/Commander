@@ -29,7 +29,9 @@ public interface CommanderPlatform {
     void registerCommand(CommandInfo command);
 
     default boolean isSenderParameter(ParameterInfo parameterInfo) {
-        return parameterInfo.getParameter().isAnnotationPresent(Sender.class) || parameterInfo.getParameter().getName().equalsIgnoreCase("sender") || parameterInfo.getParameter().getType().equals(CoreCommandSender.class);
+        return parameterInfo.getParameter().isAnnotationPresent(Sender.class) ||
+                parameterInfo.getParameter().getName().equalsIgnoreCase("sender") ||
+                parameterInfo.getParameter().getType().equals(CoreCommandSender.class);
     }
 
     default String getPrefix(){

@@ -2,7 +2,6 @@ package net.octopvp.commander.bukkit.providers;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.octopvp.commander.annotation.Sender;
 import net.octopvp.commander.bukkit.BukkitCommandSender;
 import net.octopvp.commander.bukkit.annotation.DefaultSelf;
 import net.octopvp.commander.bukkit.impl.BukkitCommandSenderImpl;
@@ -31,7 +30,18 @@ public class PlayerProvider implements Provider<Player> {
                 return ((BukkitCommandSender) context.getCommandSender()).getPlayer();
             return null;
         }
-        return parameterInfo.getParameter().isAnnotationPresent(Sender.class) || parameterInfo.getParameter().getName().equalsIgnoreCase("sender") ? (Player) ((BukkitCommandSender) context.getCommandSender()).getSender() : Bukkit.getPlayer(args.pop());
+        if (parameterInfo.getCommander().getPlatform().isSenderParameter(parameterInfo)) {
+            return (Player) ((BukkitCommandSender) context.getCommandSender()).getSender();
+        }
+        return Bukkit.getPlayer(args.pop());
+    }
+
+    @Override
+    public Player provideDefault(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
+        if (parameterInfo.getCommander().getPlatform().isSenderParameter(parameterInfo)) {
+            return (Player) ((BukkitCommandSender) context.getCommandSender()).getSender();
+        }
+        return null;
     }
 
     @Override

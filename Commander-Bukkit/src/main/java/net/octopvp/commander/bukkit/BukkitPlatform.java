@@ -78,8 +78,13 @@ public class BukkitPlatform implements CommanderPlatform {
 
     @Override
     public boolean isSenderParameter(ParameterInfo parameterInfo) {
-        return parameterInfo.getParameter().isAnnotationPresent(Sender.class) || parameterInfo.getParameter().getName().equalsIgnoreCase("sender") || parameterInfo.getParameter().getType().equals(CoreCommandSender.class)
-                || parameterInfo.getParameter().getType().equals(BukkitCommandSender.class) || parameterInfo.getParameter().getType().equals(CommandSender.class) || parameterInfo.getParameter().getType().equals(BukkitCommandSenderImpl.class);
+        return parameterInfo.getParameter().isAnnotationPresent(Sender.class) ||
+                parameterInfo.getParameter().getName().equalsIgnoreCase("sender") ||
+                parameterInfo.getParameter().getType().equals(CoreCommandSender.class) ||
+                parameterInfo.getParameter().getType().equals(BukkitCommandSender.class) ||
+                parameterInfo.getParameter().getType().equals(CommandSender.class) ||
+                parameterInfo.getParameter().getType().equals(BukkitCommandSenderImpl.class)
+                ;
     }
 
     @Override

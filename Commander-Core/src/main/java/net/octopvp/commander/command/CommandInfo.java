@@ -38,6 +38,8 @@ public class CommandInfo { //This is the object that is stored in the command ma
     private CommandInfo parent;
     private List<CommandInfo> subCommands;
 
+    private Map<Integer, CompleterInfo> completers = new HashMap<>();
+
     public CommandInfo(ParameterInfo[] parameters, String name, String description, String usage, String[] aliases, Method method, Object instance, Map<Class<? extends Annotation>, Annotation> annotations, Commander commander) {
         this.parameters = parameters;
         this.name = name.toLowerCase();

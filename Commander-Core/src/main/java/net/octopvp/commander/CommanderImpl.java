@@ -1,13 +1,11 @@
 package net.octopvp.commander;
 
-import net.octopvp.commander.annotation.Command;
-import net.octopvp.commander.annotation.DistributeOnMethods;
-import net.octopvp.commander.annotation.DontAutoInit;
-import net.octopvp.commander.annotation.Range;
+import net.octopvp.commander.annotation.*;
 import net.octopvp.commander.argument.ArgumentParser;
 import net.octopvp.commander.argument.CommandArgs;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
+import net.octopvp.commander.command.CompleterInfo;
 import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.config.CommanderConfig;
 import net.octopvp.commander.exception.*;
@@ -107,6 +105,7 @@ public class CommanderImpl implements Commander {
 
     @Override
     public Commander register(Object... objects) {
+        if (objects == null) return this;
         for (Object object : objects) {
             if (object == null) {
                 continue;
@@ -120,8 +119,11 @@ public class CommanderImpl implements Commander {
             }
             registerCmd(object);
         }
+        registerCompleters();
         return this;
     }
+
+    private Map<Method, Object> completerCache = new HashMap<>();
 
     private void registerCmd(Object object) {
         if (object == null) return;
@@ -153,35 +155,102 @@ public class CommanderImpl implements Commander {
             platform.registerCommand(parentInfo);
         }
         for (Method method : object.getClass().getDeclaredMethods()) {
-            if (!method.isAnnotationPresent(Command.class)) {
-                continue;
-            }
-            Command command = method.getAnnotation(Command.class);
-            String name = command.name();
-            List<ParameterInfo> parameters = new ArrayList<>();
-            for (Parameter parameter : method.getParameters()) {
-                parameters.add(new ParameterInfo(parameter, this));
-            }
-            Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
-            for (Annotation declaredAnnotation : method.getDeclaredAnnotations()) {
-                annotations.put(declaredAnnotation.annotationType(), declaredAnnotation);
-            }
-            for (Annotation distributedAnnotation : distributedAnnotations) {
-                annotations.put(distributedAnnotation.annotationType(), distributedAnnotation);
-            }
-            CommandInfo commandInfo = new CommandInfo(parameters.toArray(new ParameterInfo[0]), name, command.description(), command.usage(), command.aliases(), method, object, annotations, this);
-            if (classHasMainCommand) {
-                commandInfo.setSubCommand(true);
-                commandInfo.setParent(parentInfo);
-                parentInfo.getSubCommands().add(commandInfo);
-            } else {
-                commandMap.put(name.toLowerCase(), commandInfo);
-                for (String alias : command.aliases()) {
-                    commandMap.put(alias.toLowerCase(), commandInfo);
+            if (method.isAnnotationPresent(Command.class)) {
+                Command command = method.getAnnotation(Command.class);
+                String name = command.name();
+                List<ParameterInfo> parameters = new ArrayList<>();
+                for (Parameter parameter : method.getParameters()) {
+                    parameters.add(new ParameterInfo(parameter, this));
                 }
-                platform.registerCommand(commandInfo);
+                Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
+                for (Annotation declaredAnnotation : method.getDeclaredAnnotations()) {
+                    annotations.put(declaredAnnotation.annotationType(), declaredAnnotation);
+                }
+                for (Annotation distributedAnnotation : distributedAnnotations) {
+                    annotations.put(distributedAnnotation.annotationType(), distributedAnnotation);
+                }
+                CommandInfo commandInfo = new CommandInfo(parameters.toArray(new ParameterInfo[0]), name, command.description(), command.usage(), command.aliases(), method, object, annotations, this);
+                if (classHasMainCommand) {
+                    commandInfo.setSubCommand(true);
+                    commandInfo.setParent(parentInfo);
+                    parentInfo.getSubCommands().add(commandInfo);
+                } else {
+                    commandMap.put(name.toLowerCase(), commandInfo);
+                    for (String alias : command.aliases()) {
+                        commandMap.put(alias.toLowerCase(), commandInfo);
+                    }
+                    platform.registerCommand(commandInfo);
+                }
+            } else if (method.isAnnotationPresent(Completer.class)) {
+                completerCache.put(method, object);
             }
         }
+    }
+
+    private void registerCompleters() {
+        Iterator<Map.Entry<Method, Object>> iterator = completerCache.entrySet().iterator();
+        while (iterator.hasNext()) {
+            try {
+                Map.Entry<Method, Object> entry = iterator.next();
+                iterator.remove();
+                Method method = entry.getKey();
+                Completer completer = method.getAnnotation(Completer.class);
+                String targetCommand = completer.name();
+                int[] indexes = completer.index();
+                for (int index : indexes) {
+                    if (index < 0) {
+                        throw new IllegalArgumentException("Completer index must be greater than 0!");
+                    }
+                }
+                if (targetCommand.equals("")) {
+                    throw new IllegalArgumentException("Completer name cannot be empty!");
+                }
+                String[] split = targetCommand.toLowerCase().split(" ");
+                boolean isSubCommand = split.length > 1;
+
+                CommandInfo command = getCommand(split[0]), parent;
+                if (command == null) return;
+
+                if (isSubCommand && !command.isParentCommand())
+                    throw new IllegalArgumentException("Completer references a subcommand, where the command is not a parent command!");
+                if (!isSubCommand && command.isParentCommand())
+                    throw new IllegalArgumentException("Completer references a parent command, which cannot be tab-completed!");
+
+                CompleterInfo completerInfo;
+                if (isSubCommand) {
+                    parent = command;
+                    command = parent.getSubCommand(split[1]);
+                    if (command == null)
+                        throw new IllegalArgumentException("Completer references a subcommand, which does not exist!");
+                    completerInfo = new CompleterInfo(
+                            command,
+                            entry.getValue(),
+                            method,
+                            completer,
+                            parent
+                    );
+                } else {
+                    completerInfo = new CompleterInfo(
+                            command,
+                            entry.getValue(),
+                            method,
+                            completer
+                    );
+                }
+                if (indexes.length == 0) {
+                    command.getCompleters().put(-1, completerInfo); //This means the completer will be called for every parameter, not recommended but it's there if you want it
+                } else {
+                    for (int index : indexes) {
+                        command.getCompleters().put(index, completerInfo);
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to register completer!");
+                e.printStackTrace();
+            }
+        }
+
+        completerCache.clear(); //try to remove any leftover completers in case of an exception/concurrent modification
     }
 
     @Override
@@ -362,7 +431,7 @@ public class CommanderImpl implements Commander {
                 try {
                     result = context.getCommandInfo().getMethod().invoke(context.getCommandInfo().getInstance(), arguments);
                 } catch (IllegalAccessException | IllegalArgumentException e) {
-                   e.printStackTrace();
+                    e.printStackTrace();
                 } catch (InvocationTargetException e) {
                     if (e.getCause() != null && e.getCause() instanceof CommandException) {
                         platform.handleCommandException(context, (CommandException) e.getCause());
@@ -472,26 +541,53 @@ public class CommanderImpl implements Commander {
 
         int diff = parent == null ? 1 : 2;
         int index = split.length - diff;
+        String lastArg = split[split.length - 1];
+
 
         if (!input.endsWith(" ") && config.isShowNextSuggestionOnlyIfEndsWithSpace()) index--;
 
-        if (index >= params.length) {
-            return null;
+        CompleterInfo customCompleter = command.getCompleters().get(index);
+        boolean allParams = false;
+        if (customCompleter == null) {
+            customCompleter = command.getCompleters().get(-1);
+            allParams = true;
+        }
+        Collection<String> customReturn = null;
+        if (customCompleter != null) {
+            Method method = customCompleter.getMethod();
+            Object[] args = ArgumentParser.parseCompleterArguments(customCompleter, command, sender, method.getParameters(), input, label, lastArg, split, allParams ? -1 : index);
+            if (args == null) return null;
+            try {
+                Object result = method.invoke(customCompleter.getInstance(), args);
+                if (result instanceof Collection) {
+                    customReturn = (Collection<String>) result;
+                }else {
+                    throw new SuggestionException("Completer method must return a collection of strings.");
+                }
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                throw new SuggestionException("Failed to invoke completer method.", e);
+            }
         }
 
-        ParameterInfo param = params[index];
-        Provider<?> provider = param.getProvider();
+        Collection<String> suggestionsProvided;
+        if (customReturn == null) {
+            if (index >= params.length) {
+                return null;
+            }
 
-        if (provider == null) {
-            return null;
-        }
+            ParameterInfo param = params[index];
+            Provider<?> provider = param.getProvider();
 
-        String lastArg = split[split.length - 1];
+            if (provider == null) {
+                return null;
+            }
 
-        List<String> suggestionsProvided = provider.provideSuggestions(input, lastArg, sender);
-        if (suggestionsProvided == null) {
-            return null;
-        }
+
+            suggestionsProvided = provider.provideSuggestions(input, lastArg, sender);
+            if (suggestionsProvided == null) {
+                return null;
+            }
+        }else suggestionsProvided = customReturn;
         List<String> suggestions = new ArrayList<>(suggestionsProvided);
         if (config.isFilterSuggestions() && !input.endsWith(" ")) {
             suggestions.removeIf(s -> !s.trim().toLowerCase().startsWith(lastArg.trim().toLowerCase()));

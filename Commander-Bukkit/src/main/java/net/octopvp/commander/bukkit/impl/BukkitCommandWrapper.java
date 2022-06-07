@@ -1,6 +1,5 @@
 package net.octopvp.commander.bukkit.impl;
 
-import net.octopvp.commander.Commander;
 import net.octopvp.commander.command.CommandInfo;
 import org.bukkit.command.CommandSender;
 
