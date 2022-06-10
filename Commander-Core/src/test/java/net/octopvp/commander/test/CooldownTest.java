@@ -14,7 +14,7 @@ public class CooldownTest {
     private int runs = 0;
     private Commander commander;
     @Test
-    public void testCooldown() {
+    public void testCooldown() throws InterruptedException {
         commander = new CommanderImpl(new TestPlatform())
                 .init()
                 .register(this);
@@ -22,12 +22,13 @@ public class CooldownTest {
         commander.executeCommand(new CommandSender(), "test", null);
         assertEquals(1, runs);
         commander.executeCommand(new CommandSender(), "test", null);
-        try {
-        } catch (Exception ignored) {}
         assertEquals(1, runs);
+        Thread.sleep(1500);
+        commander.executeCommand(new CommandSender(), "test", null);
+        assertEquals(2, runs);
     }
     @Command(name = "test")
-    @Cooldown(10)
+    @Cooldown(1)
     public void testCommand() {
         runs++;
     }

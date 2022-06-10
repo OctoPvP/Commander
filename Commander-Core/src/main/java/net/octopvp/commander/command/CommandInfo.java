@@ -149,7 +149,14 @@ public class CommandInfo { //This is the object that is stored in the command ma
         if (cooldownMap == null) {
             return false;
         }
-        return cooldownMap.containsKey(uuid);
+        //check if they are on a cooldown, if so, check if it has expired, if it has expired, remove
+        Long time = cooldownMap.get(uuid);
+        if (time == null) return false;
+        if (time - System.currentTimeMillis() <= 0) { // Cooldown expired
+            cooldownMap.remove(uuid);
+            return false;
+        }
+        return true;
     }
 
     public double getCooldownMillis(UUID uuid) {
