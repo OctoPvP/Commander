@@ -149,15 +149,7 @@ public class CommandInfo { //This is the object that is stored in the command ma
         if (cooldownMap == null) {
             return false;
         }
-
-        long l = cooldownMap.getOrDefault(uuid, -1L);
-        if (l == -1) {
-            return false;
-        }
-        boolean b = System.currentTimeMillis() - l <= 0;
-        if (b)
-            cooldownMap.remove(uuid);
-        return b;
+        return cooldownMap.containsKey(uuid);
     }
 
     public double getCooldownMillis(UUID uuid) {

@@ -449,15 +449,13 @@ public class CommanderImpl implements Commander {
         String label = split[0];
         if (label.startsWith(getPlatform().getPrefix())) label = label.substring(getPlatform().getPrefix().length());
 
-        //System.out.println("Suggestions - " + label + " | " + input);
-
         CommandInfo command = getCommand(label), parent = null;
         if (command == null) {
             return null;
         }
         if (command.isParentCommand()) {
             parent = command;
-            if (split.length == 1 && !input.endsWith(" ")) {
+            if (split.length == 1) {
                 return parent.getSubCommands().stream().map(CommandInfo::getName).collect(Collectors.toList());
             }
             command = parent.getSubCommand(split[1]);
@@ -480,8 +478,6 @@ public class CommanderImpl implements Commander {
         if (index >= params.length) {
             return null;
         }
-
-        if (index < 0) return null;
 
         ParameterInfo param = params[index];
         Provider<?> provider = param.getProvider();

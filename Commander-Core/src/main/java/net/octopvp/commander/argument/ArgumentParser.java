@@ -134,7 +134,7 @@ public class ArgumentParser {
                 continue;
             }
         }
-        if (currentArgIsQuoted) { // Maybe have a config for this
+        if (currentArgIsQuoted) {
             throw new CommandParseException("Unclosed quote!");
         }
         if (sb.length() > 0) {
