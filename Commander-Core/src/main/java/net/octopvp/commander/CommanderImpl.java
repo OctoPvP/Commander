@@ -458,6 +458,11 @@ public class CommanderImpl implements Commander {
             if (split.length == 1) {
                 return parent.getSubCommands().stream().map(CommandInfo::getName).collect(Collectors.toList());
             }
+            else if (split.length == 2 && !input.endsWith(" ")){
+                List<String> suggestions = parent.getSubCommands().stream().map(CommandInfo::getName).collect(Collectors.toList());
+                suggestions.removeIf(s -> !s.trim().toLowerCase().startsWith(split[1].trim().toLowerCase()));
+                return suggestions;
+            }
             command = parent.getSubCommand(split[1]);
             if (command == null) {
                 return null;
@@ -475,7 +480,7 @@ public class CommanderImpl implements Commander {
 
         if (!input.endsWith(" ") && config.isShowNextSuggestionOnlyIfEndsWithSpace()) index--;
 
-        if (index >= params.length) {
+        if (index >= params.length || index < 0) {
             return null;
         }
 
