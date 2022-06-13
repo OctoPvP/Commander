@@ -29,6 +29,11 @@ public class BukkitCommandSenderImpl implements BukkitCommandSender {
     }
 
     @Override
+    public boolean isOp() {
+        return commandSender.isOp();
+    }
+
+    @Override
     public Player getPlayer() {
         if (!(isPlayer())) throw new CommandException("You must be a player to do this!");
         return (Player) commandSender;

@@ -13,6 +13,8 @@ public interface BukkitCommandSender extends CoreCommandSender {
 
     boolean isConsole();
 
+    boolean isOp();
+
     Player getPlayer();
 
     UUID getUUID();
