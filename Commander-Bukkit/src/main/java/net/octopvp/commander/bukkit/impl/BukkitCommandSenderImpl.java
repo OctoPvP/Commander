@@ -55,6 +55,11 @@ public class BukkitCommandSenderImpl implements BukkitCommandSender {
     }
 
     @Override
+    public boolean isOperator() {
+        return commandSender.isOp();
+    }
+
+    @Override
     public UUID getIdentifier() {
         return getUUID();
     }

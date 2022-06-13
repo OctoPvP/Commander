@@ -3,6 +3,7 @@ package net.octopvp.commander.bukkit;
 import net.octopvp.commander.Commander;
 import net.octopvp.commander.CommanderImpl;
 import net.octopvp.commander.bukkit.annotation.ConsoleOnly;
+import net.octopvp.commander.bukkit.annotation.OperatorOnly;
 import net.octopvp.commander.bukkit.annotation.PlayerOnly;
 import net.octopvp.commander.bukkit.impl.BukkitCommandSenderImpl;
 import net.octopvp.commander.bukkit.impl.BukkitHelpService;
@@ -10,6 +11,7 @@ import net.octopvp.commander.bukkit.providers.CommandSenderProviders;
 import net.octopvp.commander.bukkit.providers.OfflinePlayerProvider;
 import net.octopvp.commander.bukkit.providers.PlayerProvider;
 import net.octopvp.commander.exception.CommandParseException;
+import net.octopvp.commander.exception.NoPermissionException;
 import net.octopvp.commander.sender.CoreCommandSender;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -37,6 +39,13 @@ public class BukkitCommander {
                         BukkitCommandSender sender = (BukkitCommandSender) ctx.getCommandSender();
                         if (!sender.isConsole()) {
                             throw new CommandParseException("You must be a console to use this command.");
+                        }
+                    }
+
+                    if(ctx.getCommandInfo().isAnnotationPresent(OperatorOnly.class)) {
+                        BukkitCommandSender sender = (BukkitCommandSender) ctx.getCommandSender();
+                        if(!sender.isOperator()) {
+                            throw new NoPermissionException();
                         }
                     }
                 })

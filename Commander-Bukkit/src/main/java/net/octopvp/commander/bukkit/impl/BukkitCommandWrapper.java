@@ -1,6 +1,5 @@
 package net.octopvp.commander.bukkit.impl;
 
-import net.octopvp.commander.Commander;
 import net.octopvp.commander.command.CommandInfo;
 import org.bukkit.command.CommandSender;
 
@@ -9,7 +8,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class BukkitCommandWrapper extends org.bukkit.command.Command {
-    private CommandInfo commandInfo;
+    private final CommandInfo commandInfo;
 
     public BukkitCommandWrapper(CommandInfo command) {
         super(command.getName(), command.getDescription(), command.getUsage(), Arrays.asList(command.getAliases()));
@@ -17,7 +16,7 @@ public class BukkitCommandWrapper extends org.bukkit.command.Command {
     }
 
     //strip the plugin:command from the command if it exists
-    private static final Pattern PLUGIN_PREFIX_PATTERN = Pattern.compile("^(?:[a-zA-Z0-9_]*:)?([a-zA-Z0-9_]+)");
+    private static final Pattern PLUGIN_PREFIX_PATTERN = Pattern.compile("^(?:/w*:)?(/w+)");
     @Override
     public boolean execute(CommandSender sender, String commandLabel, String[] args) {
         String label = PLUGIN_PREFIX_PATTERN.matcher(commandLabel).replaceFirst("$1");
