@@ -27,15 +27,6 @@ public class ParameterInfo {
 
     public Provider<?> getProvider() {
         if (provider == null && !alreadyFoundProvider) {
-            /*
-            provider = commander.getArgumentProviders().stream().filter(p -> {
-                boolean matchWithInstanceOf = p.matchWithInstanceOf();
-                if (matchWithInstanceOf) {
-                    return parameter.getType().isAssignableFrom(p.getType()) || (p.getExtraTypes() != null && Arrays.asList(p.getExtraTypes()).stream().anyMatch(t -> parameter.getType().isAssignableFrom(t)));
-                }
-                return p.getType().equals(parameter.getType()) || (p.getExtraTypes() != null && Arrays.asList(p.getExtraTypes()).contains(parameter.getType()));
-            }).findFirst().orElse(null);
-             */
             java.util.Optional<Map.Entry<Class<?>,Provider<?>>> e = commander.getArgumentProviders().entrySet().stream().filter(entry -> {
                 Class<?> clazz = entry.getKey();
                 Provider<?> provider = entry.getValue();
@@ -55,9 +46,11 @@ public class ParameterInfo {
         if (parameter.isAnnotationPresent(Optional.class)) {
             return true;
         }
+
         if (parameter.isAnnotationPresent(Required.class)) {
             return false;
         }
+
         return !commander.getConfig().isDefaultRequired();
     }
 
@@ -65,32 +58,38 @@ public class ParameterInfo {
         if (parameter.isAnnotationPresent(Required.class)) {
             return true;
         }
+
         if (parameter.isAnnotationPresent(Optional.class)) {
             return false;
         }
+
         return commander.getConfig().isDefaultRequired();
     }
 
     public String getName() {
         if (parameter.isAnnotationPresent(Name.class))
             return parameter.getAnnotation(Name.class).value();
+
         return parameter.getName();
     }
 
     public boolean isFlag() {
         return parameter.isAnnotationPresent(Flag.class);
     }
+
     public String getFlag() {
         if (parameter.isAnnotationPresent(Flag.class)) {
             Flag f = parameter.getAnnotation(Flag.class);
             return f.value() == null || f.value().isEmpty() ? parameter.getName() : f.value();
         }
+
         return null;
     }
 
     public boolean isSwitch() {
         return parameter.isAnnotationPresent(Switch.class);
     }
+
     public String getSwitch() {
         if (parameter.isAnnotationPresent(Switch.class)) {
             Switch s = parameter.getAnnotation(Switch.class);

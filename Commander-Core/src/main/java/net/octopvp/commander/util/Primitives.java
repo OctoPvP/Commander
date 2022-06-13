@@ -1,6 +1,7 @@
 package net.octopvp.commander.util;
 
 import lombok.experimental.UtilityClass;
+import lombok.val;
 
 import java.lang.reflect.*;
 import java.util.Collections;
@@ -13,6 +14,7 @@ import java.util.Map;
  *
  * @author revxrsal
  */
+
 @UtilityClass
 public final class Primitives {
     private static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER;
@@ -64,7 +66,7 @@ public final class Primitives {
      */
     public static <T> Class<T> unwrap(Class<T> type) {
         notNull(type, "type");
-        Class<T> unwrapped = (Class<T>) WRAPPER_TO_PRIMITIVE.get(type);
+        final Class<T> unwrapped = (Class<T>) WRAPPER_TO_PRIMITIVE.get(type);
         return (unwrapped == null) ? type : unwrapped;
     }
 
@@ -151,7 +153,7 @@ public final class Primitives {
         backward.put(value, key);
     }
 
-    public static void notNull(Object o, String name) {
+    public static void notNull(Type o, String name) {
         if (o == null) {
             throw new NullPointerException(name + " cannot be null");
         }

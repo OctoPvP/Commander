@@ -1,6 +1,5 @@
 package net.octopvp.commander.config;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,7 +19,7 @@ public class CommanderConfig {
     private String commandPrefix = "/";
 
     public static class Builder {
-        private CommanderConfig config = new CommanderConfig();
+        private final CommanderConfig config = new CommanderConfig();
 
         public Builder setDefaultRequired(boolean defaultRequired) {
             config.setDefaultRequired(defaultRequired);

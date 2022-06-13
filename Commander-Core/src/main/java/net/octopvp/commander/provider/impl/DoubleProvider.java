@@ -16,6 +16,7 @@ public class DoubleProvider implements Provider<Double> {
     public Double provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
         try {
             String arg = args.poll();
+            assert arg != null;
             return Double.parseDouble(arg);
         } catch (NumberFormatException e) {
             throw new InvalidArgsException(commandInfo);

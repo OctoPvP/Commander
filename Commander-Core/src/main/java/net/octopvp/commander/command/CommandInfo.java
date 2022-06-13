@@ -23,7 +23,7 @@ public class CommandInfo { //This is the object that is stored in the command ma
     private Method method;
     private Object instance; // Nullable; if null, the method is static
 
-    private Map<Class<? extends Annotation>, Annotation> annotations;
+    private Map<Class<? extends Annotation>, Annotation> annotations; // Creates a map of annotations used.
 
     private Commander commander;
 
@@ -48,15 +48,17 @@ public class CommandInfo { //This is the object that is stored in the command ma
         this.annotations = annotations;
         this.commander = commander;
         if (isAnnotationPresent(Permission.class)) {
-            this.permission = getAnnotation(Permission.class).value();
-        }else {
+            this.permission = getAnnotation(Permission.class).value(); // Grabs the value of the permission
+        } else {
             this.permission = null;
         }
+
         if (isAnnotationPresent(Cooldown.class)) {
             this.cooldown = getAnnotation(Cooldown.class).value();
             this.cooldownUnit = getAnnotation(Cooldown.class).unit();
             this.cooldownMap = new HashMap<>();
         }
+
         //make sure aliases are lowercase
         this.aliases = aliases;
         for (int i = 0; i < aliases.length; i++) {
@@ -70,8 +72,8 @@ public class CommandInfo { //This is the object that is stored in the command ma
 
     public String getUsage() {
         if (usage == null || usage.equals("<<generate>>")) {
+            StringBuilder builder = new StringBuilder();
             if (parentCommand) {
-                StringBuilder builder = new StringBuilder();
                 builder.append(commander.getConfig().getRequiredPrefix());
                 for (CommandInfo command : subCommands) {
                     builder.append(command.getName()).append("/");
@@ -80,7 +82,6 @@ public class CommandInfo { //This is the object that is stored in the command ma
                         .append(commander.getConfig().getRequiredSuffix());
                 return builder.toString().trim();
             } else {
-                StringBuilder builder = new StringBuilder();
                 for (ParameterInfo parameter : parameters) {
                     if (parameter.hideFromUsage()) {
                         continue;
@@ -177,10 +178,6 @@ public class CommandInfo { //This is the object that is stored in the command ma
         cooldownMap.put(uuid, System.currentTimeMillis() + cooldownUnit.toMillis((long) cooldown));
     }
 
-    public boolean isNormalCommand() {
-        return !isSubCommand() && !isParentCommand();
-    }
-
     public CommandInfo getSubCommand(String name) {
         return subCommands.stream().filter(command -> command.getName().equalsIgnoreCase(name) || Arrays.asList(command.aliases).contains(name)).findFirst().orElse(null);
     }
@@ -193,7 +190,7 @@ public class CommandInfo { //This is the object that is stored in the command ma
                 list.add(parameter);
             }
         }
-        return parametersExcludingSender = list.toArray(new ParameterInfo[list.size()]);
+        return parametersExcludingSender = list.toArray(new ParameterInfo[0]);
     }
 
     @Override

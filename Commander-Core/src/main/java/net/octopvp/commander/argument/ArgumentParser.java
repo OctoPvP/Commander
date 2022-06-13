@@ -58,8 +58,6 @@ public class ArgumentParser {
                     obj = provider.provide(ctx, ctx.getCommandInfo(), parameter, cArgs.getArgs());
                 } catch (Exception e) {
                     if (e instanceof InvalidArgsException) {
-                        //cArgs.getCommander().getPlatform().getHelpService().sendHelp(ctx, ctx.getCommandSender());
-                        //return null;
                         throw e;
                     }
                     if (provider.provideUsageOnException()) {
@@ -115,11 +113,10 @@ public class ArgumentParser {
             if ((!arg.startsWith("\"") && !arg.startsWith("'")) && (!arg.endsWith("\"") && !arg.endsWith("'"))) {
                 if (currentArgIsQuoted) {
                     sb.append(" ").append(arg);
-                    continue;
                 } else {
                     out.add(arg);
-                    continue;
                 }
+                continue;
             }
             if (arg.startsWith("\"") || arg.startsWith("'")) {
                 sb.append(arg.substring(1));
@@ -131,7 +128,6 @@ public class ArgumentParser {
                 currentArgIsQuoted = false;
                 out.add(sb.toString().trim());
                 sb = new StringBuilder();
-                continue;
             }
         }
         if (currentArgIsQuoted) {

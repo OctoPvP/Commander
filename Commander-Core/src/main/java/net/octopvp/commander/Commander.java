@@ -1,17 +1,14 @@
 package net.octopvp.commander;
 
-import net.octopvp.commander.annotation.Command;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.config.CommanderConfig;
 import net.octopvp.commander.exception.CommandException;
-import net.octopvp.commander.exception.CommandParseException;
 import net.octopvp.commander.platform.CommanderPlatform;
 import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.sender.CoreCommandSender;
 import net.octopvp.commander.validator.Validator;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -30,15 +27,15 @@ public interface Commander {
 
     Commander setConfig(CommanderConfig config);
 
-    Map<Class<?>,Provider<?>> getArgumentProviders();
+    Map<Class<?>, Provider<?>> getArgumentProviders();
 
-    Commander registerProvider(Class<?> type,Provider<?> provider);
+    Commander registerProvider(Class<?> type, Provider<?> provider);
 
     Commander removeProvider(Class<?> clazz);
 
     <T> Commander registerValidator(Class<T> clazz, Validator<T> validator);
 
-    Map<Class<?>,Validator<Object>> getValidators();
+    Map<Class<?>, Validator<Object>> getValidators();
 
     CommanderPlatform getPlatform();
 
@@ -52,7 +49,7 @@ public interface Commander {
 
     Commander registerCommandPreProcessor(Consumer<CommandContext> preProcessor);
 
-    Commander registerCommandPostProcessor(BiConsumer<CommandContext, Object> postProcessor);
+    void registerCommandPostProcessor(BiConsumer<CommandContext, Object> postProcessor);
 
     CommandInfo getCommand(String label);
 

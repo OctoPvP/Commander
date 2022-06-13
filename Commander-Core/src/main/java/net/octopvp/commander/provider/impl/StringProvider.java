@@ -25,6 +25,7 @@ public class StringProvider implements Provider<String> {
 
             return String.join(" ", args);
         }
+
         return args.poll();
     }
 
@@ -34,6 +35,7 @@ public class StringProvider implements Provider<String> {
             System.out.println("def");
             throw new InvalidArgsException(commandInfo);
         }
+
         return null;
     }
 

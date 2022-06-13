@@ -1,6 +1,5 @@
 package net.octopvp.commander.provider.impl;
 
-import net.octopvp.commander.annotation.Sender;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;

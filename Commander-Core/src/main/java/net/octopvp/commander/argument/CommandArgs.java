@@ -28,6 +28,7 @@ public class CommandArgs {
         if (argsDeque == null) {
             argsDeque = new ArrayDeque<>(argsList);
         }
+
         return argsDeque;
     }
 }
