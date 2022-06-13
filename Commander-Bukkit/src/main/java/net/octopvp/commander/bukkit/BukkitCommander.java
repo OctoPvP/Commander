@@ -11,6 +11,7 @@ import net.octopvp.commander.bukkit.providers.CommandSenderProviders;
 import net.octopvp.commander.bukkit.providers.OfflinePlayerProvider;
 import net.octopvp.commander.bukkit.providers.PlayerProvider;
 import net.octopvp.commander.exception.CommandParseException;
+import net.octopvp.commander.exception.NoPermissionException;
 import net.octopvp.commander.sender.CoreCommandSender;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -42,7 +43,7 @@ public class BukkitCommander {
                     } else if (ctx.getCommandInfo().isAnnotationPresent(OperatorOnly.class)) {
                         BukkitCommandSender sender = (BukkitCommandSender) ctx.getCommandSender();
                         if (!sender.isOperator()) {
-                            throw new CommandParseException("You must be a console to use this command.");
+                            throw new NoPermissionException();
                         }
                     }
                 })
