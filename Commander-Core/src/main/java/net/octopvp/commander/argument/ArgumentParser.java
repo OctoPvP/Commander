@@ -21,15 +21,17 @@ public class ArgumentParser {
             Object[] arguments = new Object[ctx.getCommandInfo().getParameters().length];
             for (int i = 0; i < ctx.getCommandInfo().getParameters().length; i++) {
                 ParameterInfo parameter = ctx.getCommandInfo().getParameters()[i];
+                Provider<?> provider = parameter.getProvider();
+                Object obj;
+
                 if (parameter.isFlag()) {
-                    if (cArgs.getFlags() == null) {
-                        throw new CommandParseException("Flags are null!");
-                    }
+                    if (cArgs.getFlags() == null) throw new CommandParseException("Flags are null!");
                     String f = cArgs.getFlags().get(parameter.getFlag());
                     if (f != null) validate(f, parameter, ctx);
                     arguments[i] = f;
                     continue;
                 }
+
                 if (parameter.isSwitch()) {
                     if (cArgs.getSwitches() == null) {
                         throw new CommandParseException("Switches are null!");
@@ -39,6 +41,7 @@ public class ArgumentParser {
                     arguments[i] = b != null && b;
                     continue;
                 }
+
                 if (parameter.getParameter().isAnnotationPresent(Dependency.class)) {
                     Class<?> classType = parameter.getParameter().getType();
                     Supplier<?> supplier = cArgs.getCommander().getDependencies().get(classType);
@@ -48,34 +51,35 @@ public class ArgumentParser {
                     arguments[i] = supplier.get();
                     continue;
                 }
-                Provider<?> provider = parameter.getProvider();
 
                 if (provider == null) {
                     throw new CommandParseException("No provider found for " + parameter.getParameter().getType().getName());
                 }
-                Object obj;
+
                 try {
                     obj = provider.provide(ctx, ctx.getCommandInfo(), parameter, cArgs.getArgs());
                 } catch (Exception e) {
                     if (e instanceof InvalidArgsException) {
-                        //cArgs.getCommander().getPlatform().getHelpService().sendHelp(ctx, ctx.getCommandSender());
-                        //return null;
                         throw e;
                     }
+
                     if (provider.provideUsageOnException()) {
                         throw new InvalidArgsException(ctx.getCommandInfo());
                     }
+
                     if (provider.failOnExceptionIgnoreOptional()) {
                         throw new CommandParseException("Failed to parse argument " + parameter.getName(), e);
                     }
-                    if (parameter.isOptional()) {
+
+                    if (!parameter.isOptional()) {
                         obj = null;
-                    } else if (provider.failOnException())
+                    } else if (provider.failOnException()) {
                         throw new CommandParseException("Failed to parse argument " + parameter.getName(), e);
-                    else {
+                    } else {
                         obj = null;
                     }
                 }
+
                 if (obj == null) {
                     obj = provider.provideDefault(ctx, ctx.getCommandInfo(), parameter, cArgs.getArgs());
                 }
@@ -83,6 +87,7 @@ public class ArgumentParser {
                 if (obj == null && parameter.isRequired()) {
                     throw new CommandParseException("Required argument " + parameter.getName() + " is null!");
                 }
+
                 if (obj != null) validate(obj, parameter, ctx);
                 arguments[i] = obj;
             }
@@ -90,6 +95,7 @@ public class ArgumentParser {
         } catch (CommandException e) {
             ctx.getCommandInfo().getCommander().getPlatform().handleCommandException(ctx, e);
         }
+
         return null;
     }
 
@@ -115,23 +121,23 @@ public class ArgumentParser {
             if ((!arg.startsWith("\"") && !arg.startsWith("'")) && (!arg.endsWith("\"") && !arg.endsWith("'"))) {
                 if (currentArgIsQuoted) {
                     sb.append(" ").append(arg);
-                    continue;
                 } else {
                     out.add(arg);
-                    continue;
                 }
+                continue;
             }
+
             if (arg.startsWith("\"") || arg.startsWith("'")) {
                 sb.append(arg.substring(1));
                 currentArgIsQuoted = true;
                 continue;
             }
+
             if (arg.endsWith("\"") || arg.endsWith("'")) {
                 sb.append(" ").append(arg, 0, arg.length() - 1);
                 currentArgIsQuoted = false;
                 out.add(sb.toString().trim());
                 sb = new StringBuilder();
-                continue;
             }
         }
         if (currentArgIsQuoted) {

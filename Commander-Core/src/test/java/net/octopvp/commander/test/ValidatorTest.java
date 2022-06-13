@@ -9,7 +9,6 @@ import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.exception.CommandException;
 import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.sender.CoreCommandSender;
-import net.octopvp.commander.validator.Validator;
 import org.junit.jupiter.api.Test;
 
 import java.util.Deque;
@@ -18,11 +17,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ValidatorTest {
-    private Commander commander;
     private boolean success = true;
     @Test
     public void validateTest() {
-        commander = new CommanderImpl(new TestPlatform())
+        Commander commander = new CommanderImpl(new TestPlatform())
                 .init()
                 .register(this)
                 .registerProvider(TestClass.class, new TestClassProvider())
@@ -30,8 +28,7 @@ public class ValidatorTest {
                     if (value.getStr().equals("1337 h4x0r")) {
                         throw new CommandException("It works lol");
                     }
-                })
-                ;
+                });
 
         commander.executeCommand(new CommandSender(), "test", new String[]{"1337 h4x0r"});
         assertTrue(success);

@@ -16,6 +16,7 @@ public class IntegerProvider implements Provider<Integer> {
     public Integer provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
         try {
             String arg = args.poll();
+            assert arg != null;
             return Integer.parseInt(arg);
         } catch (NumberFormatException e) {
             throw new InvalidArgsException(commandInfo);

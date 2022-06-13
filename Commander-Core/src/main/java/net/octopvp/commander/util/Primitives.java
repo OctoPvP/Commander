@@ -1,7 +1,6 @@
 package net.octopvp.commander.util;
 
 import lombok.experimental.UtilityClass;
-
 import java.lang.reflect.*;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -85,8 +84,7 @@ public final class Primitives {
             // type is a normal class.
             return (Class<?>) type;
 
-        } else if (type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) type;
+        } else if (type instanceof ParameterizedType parameterizedType) {
 
             // I'm not exactly sure why getRawType() returns Type instead of Class.
             // Neal isn't either but suspects some pathological case related

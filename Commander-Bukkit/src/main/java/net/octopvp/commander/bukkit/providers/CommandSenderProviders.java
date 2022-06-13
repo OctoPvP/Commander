@@ -1,6 +1,5 @@
 package net.octopvp.commander.bukkit.providers;
 
-import net.octopvp.commander.annotation.Sender;
 import net.octopvp.commander.bukkit.BukkitCommandSender;
 import net.octopvp.commander.bukkit.impl.BukkitCommandSenderImpl;
 import net.octopvp.commander.command.CommandContext;

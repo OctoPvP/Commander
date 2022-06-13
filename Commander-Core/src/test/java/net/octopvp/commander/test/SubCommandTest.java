@@ -20,12 +20,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Command(name = "test", description = "test")
 public class SubCommandTest {
-    private Commander commander;
     private boolean passed = false, passed2 = false, passed3 = false;
 
     @Test
     public void test() {
-        commander = new CommanderImpl(new TestPlatform())
+        Commander commander = new CommanderImpl(new TestPlatform())
                 .setConfig(new CommanderConfig.Builder()
                         .setFilterSuggestions(false)
                         .build())
@@ -81,7 +80,7 @@ public class SubCommandTest {
 
     }
 
-    private class StringProvider implements Provider<String> {
+    private static class StringProvider implements Provider<String> {
 
         @Override
         public String provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {

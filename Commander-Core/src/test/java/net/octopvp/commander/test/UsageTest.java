@@ -11,10 +11,9 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UsageTest {
-    private Commander commander;
     @Test
     public void testUsage() {
-        commander = new CommanderImpl(new TestPlatform())
+        Commander commander = new CommanderImpl(new TestPlatform())
                 .init()
                 .register(this);
         assertEquals("<arg1> [arg2]", commander.getCommandMap().get("test").getUsage());

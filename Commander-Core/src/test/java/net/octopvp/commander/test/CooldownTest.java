@@ -6,16 +6,14 @@ import net.octopvp.commander.annotation.Command;
 import net.octopvp.commander.annotation.Cooldown;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.TimeUnit;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CooldownTest {
     private int runs = 0;
-    private Commander commander;
+
     @Test
     public void testCooldown() throws InterruptedException {
-        commander = new CommanderImpl(new TestPlatform())
+        Commander commander = new CommanderImpl(new TestPlatform())
                 .init()
                 .register(this);
 

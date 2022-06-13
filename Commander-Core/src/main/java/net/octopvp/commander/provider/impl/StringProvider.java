@@ -15,17 +15,14 @@ import java.util.List;
 public class StringProvider implements Provider<String> {
     @Override
     public String provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
-        if (parameterInfo.getParameter().isAnnotationPresent(JoinStrings.class)) {
-            if (args.size() == 0) {
-                if (parameterInfo.getParameter().isAnnotationPresent(Required.class)) {
-                    throw new InvalidArgsException(commandInfo);
-                }
-                return null;
+        if (!parameterInfo.getParameter().isAnnotationPresent(JoinStrings.class)) return args.poll();
+        if (args.size() == 0) {
+            if (parameterInfo.getParameter().isAnnotationPresent(Required.class)) {
+                throw new InvalidArgsException(commandInfo);
             }
-
-            return String.join(" ", args);
+            return null;
         }
-        return args.poll();
+        return String.join(" ", args);
     }
 
     @Override
@@ -34,6 +31,7 @@ public class StringProvider implements Provider<String> {
             System.out.println("def");
             throw new InvalidArgsException(commandInfo);
         }
+
         return null;
     }
 

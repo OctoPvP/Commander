@@ -17,12 +17,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ProviderTest {
-    private Commander commander;
     private String name;
     private int i;
     @Test
     public void testProviders() {
-        commander = new CommanderImpl(new TestPlatform())
+        Commander commander = new CommanderImpl(new TestPlatform())
                 .registerProvider(CommandSender.class, new TestProvider())
                 .init();
 
@@ -39,7 +38,7 @@ public class ProviderTest {
         name = sender.getName();
         this.i = i;
     }
-    private class TestProvider implements Provider<CommandSender> {
+    private static class TestProvider implements Provider<CommandSender> {
 
         @Override
         public CommandSender provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {

@@ -4,7 +4,6 @@ import net.octopvp.commander.annotation.Range;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
-import net.octopvp.commander.exception.CommandParseException;
 import net.octopvp.commander.exception.InvalidArgsException;
 import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.sender.CoreCommandSender;
@@ -17,6 +16,7 @@ public class ByteProvider implements Provider<Byte> {
     public Byte provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
         try {
             String arg = args.poll();
+            assert arg != null;
             return Byte.parseByte(arg);
         } catch (NumberFormatException e) {
             throw new InvalidArgsException(commandInfo);

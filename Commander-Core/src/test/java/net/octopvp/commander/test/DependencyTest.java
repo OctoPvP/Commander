@@ -12,14 +12,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DependencyTest {
-    private Commander commander;
-    private static TestStaticDependency staticDep = new TestStaticDependency();
+    private static final TestStaticDependency staticDep = new TestStaticDependency();
     private String arg;
     private boolean passedDep1, passedDep2;
     private static String s;
     @Test
     public void testDependency() {
-        commander = new CommanderImpl(new TestPlatform())
+        Commander commander = new CommanderImpl(new TestPlatform())
                 .init()
                 .registerDependency(TestStaticDependency.class, staticDep)
                 .registerDependency(TestDependency.class, (Supplier<TestDependency>) TestDependency::new)

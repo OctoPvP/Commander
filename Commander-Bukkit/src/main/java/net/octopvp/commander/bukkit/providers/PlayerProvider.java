@@ -2,7 +2,6 @@ package net.octopvp.commander.bukkit.providers;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.octopvp.commander.annotation.Sender;
 import net.octopvp.commander.bukkit.BukkitCommandSender;
 import net.octopvp.commander.bukkit.annotation.DefaultSelf;
 import net.octopvp.commander.bukkit.impl.BukkitCommandSenderImpl;

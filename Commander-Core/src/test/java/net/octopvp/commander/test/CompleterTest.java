@@ -19,20 +19,18 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CompleterTest {
-    private Commander commander;
 
     @Test
     public void testCompletions() {
-        commander = new CommanderImpl(new TestPlatform())
+        Commander commander = new CommanderImpl(new TestPlatform())
                 .setConfig(new CommanderConfig.Builder()
                         .setFilterSuggestions(false)
                         .build())
                 .init()
                 .register(this)
-                .registerProvider(TestClass.class,new TestProvider())
-                .registerProvider(TestClassTwo.class,new TestProvider2())
-                .registerProvider(TestClassThree.class, new TestProvider3())
-        ;
+                .registerProvider(TestClass.class, new TestProvider())
+                .registerProvider(TestClassTwo.class, new TestProvider2())
+                .registerProvider(TestClassThree.class, new TestProvider3());
         List<String> completions = commander.getSuggestions(new CommandSender(), "test ");
         assertNotNull(completions);
         assertFalse(completions.isEmpty());

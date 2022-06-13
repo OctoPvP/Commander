@@ -12,7 +12,7 @@ import java.util.List;
 public class StringArrayProvider implements Provider<String[]> {
     @Override
     public String[] provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
-        String[] array = args.toArray(new String[args.size()]);
+        String[] array = args.toArray(new String[0]);
         args.clear();
         return array;
     }

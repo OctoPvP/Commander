@@ -5,8 +5,6 @@ import lombok.Setter;
 import net.octopvp.commander.argument.CommandArgs;
 import net.octopvp.commander.sender.CoreCommandSender;
 
-import java.util.Deque;
-
 @Getter
 @Setter
 public class CommandContext {

@@ -9,7 +9,6 @@ import net.octopvp.commander.annotation.Switch;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CommanderArgsTest {
     private Commander commander;

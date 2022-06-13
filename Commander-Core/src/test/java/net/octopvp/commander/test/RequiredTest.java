@@ -10,11 +10,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RequiredTest {
-    private Commander commander;
     private boolean passed;
     @Test
     public void testRequired() {
-        commander = new CommanderImpl(new TestPlatform()).init();
+        Commander commander = new CommanderImpl(new TestPlatform()).init();
 
         commander.register(this);
         commander.executeCommand(new CommandSender(), "test", new String[]{"HelloWorld!"});

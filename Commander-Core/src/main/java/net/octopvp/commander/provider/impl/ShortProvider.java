@@ -14,6 +14,7 @@ public class ShortProvider implements Provider<Short> {
     @Override
     public Short provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
         String arg = args.poll();
+        assert arg != null;
         return Short.parseShort(arg);
     }
 

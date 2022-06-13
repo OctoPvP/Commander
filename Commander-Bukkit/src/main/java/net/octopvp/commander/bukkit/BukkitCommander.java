@@ -3,6 +3,7 @@ package net.octopvp.commander.bukkit;
 import net.octopvp.commander.Commander;
 import net.octopvp.commander.CommanderImpl;
 import net.octopvp.commander.bukkit.annotation.ConsoleOnly;
+import net.octopvp.commander.bukkit.annotation.OperatorOnly;
 import net.octopvp.commander.bukkit.annotation.PlayerOnly;
 import net.octopvp.commander.bukkit.impl.BukkitCommandSenderImpl;
 import net.octopvp.commander.bukkit.impl.BukkitHelpService;
@@ -36,6 +37,11 @@ public class BukkitCommander {
                     }else if (ctx.getCommandInfo().isAnnotationPresent(ConsoleOnly.class)) {
                         BukkitCommandSender sender = (BukkitCommandSender) ctx.getCommandSender();
                         if (!sender.isConsole()) {
+                            throw new CommandParseException("You must be a console to use this command.");
+                        }
+                    } else if (ctx.getCommandInfo().isAnnotationPresent(OperatorOnly.class)) {
+                        BukkitCommandSender sender = (BukkitCommandSender) ctx.getCommandSender();
+                        if (!sender.isOperator()) {
                             throw new CommandParseException("You must be a console to use this command.");
                         }
                     }

@@ -70,8 +70,8 @@ public class CommandInfo { //This is the object that is stored in the command ma
 
     public String getUsage() {
         if (usage == null || usage.equals("<<generate>>")) {
+            StringBuilder builder = new StringBuilder();
             if (parentCommand) {
-                StringBuilder builder = new StringBuilder();
                 builder.append(commander.getConfig().getRequiredPrefix());
                 for (CommandInfo command : subCommands) {
                     builder.append(command.getName()).append("/");
@@ -80,7 +80,6 @@ public class CommandInfo { //This is the object that is stored in the command ma
                         .append(commander.getConfig().getRequiredSuffix());
                 return builder.toString().trim();
             } else {
-                StringBuilder builder = new StringBuilder();
                 for (ParameterInfo parameter : parameters) {
                     if (parameter.hideFromUsage()) {
                         continue;
@@ -152,7 +151,7 @@ public class CommandInfo { //This is the object that is stored in the command ma
         //check if they are on a cooldown, if so, check if it has expired, if it has expired, remove
         Long time = cooldownMap.get(uuid);
         if (time == null) return false;
-        if (time - System.currentTimeMillis() <= 0) { // Cooldown expired
+        if (time - System.currentTimeMillis() <= 0) {
             cooldownMap.remove(uuid);
             return false;
         }
@@ -163,6 +162,7 @@ public class CommandInfo { //This is the object that is stored in the command ma
         if (cooldownMap == null) {
             return 0;
         }
+
         return cooldownMap.get(uuid) - System.currentTimeMillis();
     }
 
@@ -174,6 +174,7 @@ public class CommandInfo { //This is the object that is stored in the command ma
         if (cooldownMap == null) {
             return;
         }
+
         cooldownMap.put(uuid, System.currentTimeMillis() + cooldownUnit.toMillis((long) cooldown));
     }
 
@@ -193,7 +194,8 @@ public class CommandInfo { //This is the object that is stored in the command ma
                 list.add(parameter);
             }
         }
-        return parametersExcludingSender = list.toArray(new ParameterInfo[list.size()]);
+
+        return parametersExcludingSender = list.toArray(new ParameterInfo[0]);
     }
 
     @Override

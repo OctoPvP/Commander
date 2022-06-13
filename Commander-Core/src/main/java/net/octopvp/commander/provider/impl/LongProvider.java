@@ -10,12 +10,13 @@ import net.octopvp.commander.sender.CoreCommandSender;
 
 import java.util.Deque;
 import java.util.List;
+import java.util.Objects;
 
 public class LongProvider implements Provider<Long> {
     @Override
     public Long provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
         try {
-            return Long.parseLong(args.poll());
+            return Long.parseLong(Objects.requireNonNull(args.poll()));
         } catch (NumberFormatException e) {
             throw new InvalidArgsException(commandInfo);
         }

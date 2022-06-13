@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableSet;
 import net.octopvp.commander.annotation.Sender;
 import net.octopvp.commander.bukkit.impl.BukkitCommandSenderImpl;
 import net.octopvp.commander.bukkit.impl.BukkitCommandWrapper;
-import net.octopvp.commander.bukkit.impl.BukkitHelpService;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
@@ -26,7 +25,6 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 public class BukkitPlatform implements CommanderPlatform {
     private final Plugin plugin;

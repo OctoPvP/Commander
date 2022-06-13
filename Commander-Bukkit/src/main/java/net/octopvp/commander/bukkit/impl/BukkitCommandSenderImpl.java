@@ -24,6 +24,11 @@ public class BukkitCommandSenderImpl implements BukkitCommandSender {
     }
 
     @Override
+    public boolean isOperator() {
+        return commandSender.isOp();
+    }
+
+    @Override
     public boolean isConsole() {
         return commandSender instanceof ConsoleCommandSender;
     }

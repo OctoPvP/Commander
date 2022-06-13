@@ -1,7 +1,6 @@
 package net.octopvp.commander.test;
 
 import net.octopvp.commander.sender.CoreCommandSender;
-
 import java.util.UUID;
 
 public class CommandSender implements CoreCommandSender {
