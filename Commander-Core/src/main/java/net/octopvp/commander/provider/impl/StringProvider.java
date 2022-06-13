@@ -25,7 +25,11 @@ public class StringProvider implements Provider<String> {
 
             return String.join(" ", args);
         }
-        return args.poll();
+        String str = args.poll();
+        if (str == null && parameterInfo.getParameter().isAnnotationPresent(Required.class)) {
+            throw new InvalidArgsException(commandInfo);
+        }
+        return str;
     }
 
     @Override
