@@ -80,7 +80,8 @@ public class ArgumentParser {
                 }
 
                 if (obj == null && parameter.isRequired()) {
-                    throw new CommandParseException("Required argument " + parameter.getName() + " is null!");
+                    throw new InvalidArgsException(ctx.getCommandInfo());
+                    //throw new CommandParseException("Required argument " + parameter.getName() + " is null!");
                 }
                 if (obj != null) validate(obj, parameter, ctx);
                 arguments[i] = obj;
