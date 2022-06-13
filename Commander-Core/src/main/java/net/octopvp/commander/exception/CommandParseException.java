@@ -11,6 +11,6 @@ public class CommandParseException extends CommandException{
         super(message, cause);
     }
     public CommandParseException(Throwable cause) {
-        super(cause);
+        super(cause.getMessage());
     }
 }

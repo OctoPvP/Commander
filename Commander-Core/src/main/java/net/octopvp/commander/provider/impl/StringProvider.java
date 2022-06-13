@@ -31,7 +31,6 @@ public class StringProvider implements Provider<String> {
     @Override
     public String provideDefault(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
         if (args.size() == 0 && parameterInfo.getParameter().isAnnotationPresent(Required.class)) {
-            System.out.println("def");
             throw new InvalidArgsException(commandInfo);
         }
         return null;
