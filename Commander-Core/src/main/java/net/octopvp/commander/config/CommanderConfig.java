@@ -1,16 +1,18 @@
 package net.octopvp.commander.config;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import net.octopvp.commander.lang.ResponseHandler;
+
+import java.util.Locale;
 
 @Getter
 @Setter
 @NoArgsConstructor
 public class CommanderConfig {
     private boolean defaultRequired = true, joinArgsWithQuotes = true, checkPermissionsOnSuggestion = true, showNextSuggestionOnlyIfEndsWithSpace = true,
-    filterSuggestions = true;
+            filterSuggestions = true;
 
     private String optionalPrefix = "[", optionalSuffix = "]";
     private String requiredPrefix = "<", requiredSuffix = ">";
@@ -19,8 +21,12 @@ public class CommanderConfig {
 
     private String commandPrefix = "/";
 
+    private ResponseHandler responseHandler;
+
+    private Locale locale;
+
     public static class Builder {
-        private CommanderConfig config = new CommanderConfig();
+        private final CommanderConfig config = new CommanderConfig();
 
         public Builder setDefaultRequired(boolean defaultRequired) {
             config.setDefaultRequired(defaultRequired);
@@ -79,6 +85,16 @@ public class CommanderConfig {
 
         public Builder setFilterSuggestions(boolean filterSuggestions) {
             config.setFilterSuggestions(filterSuggestions);
+            return this;
+        }
+
+        public Builder setResponseHandler(ResponseHandler responseHandler) {
+            config.setResponseHandler(responseHandler);
+            return this;
+        }
+
+        public Builder setLocale(Locale locale) {
+            config.setLocale(locale);
             return this;
         }
 

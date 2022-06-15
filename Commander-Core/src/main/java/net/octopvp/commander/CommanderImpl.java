@@ -11,6 +11,8 @@ import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.config.CommanderConfig;
 import net.octopvp.commander.exception.*;
+import net.octopvp.commander.lang.DefaultResponseHandler;
+import net.octopvp.commander.lang.ResponseHandler;
 import net.octopvp.commander.platform.CommanderPlatform;
 import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.provider.impl.*;
@@ -43,14 +45,24 @@ public class CommanderImpl implements Commander {
 
     private final Map<Class<?>, Validator<Object>> validators = new HashMap<>();
 
+    private final ResponseHandler responseHandler;
+
     public CommanderImpl(CommanderPlatform platform) {
-        this.platform = platform;
-        this.config = new CommanderConfig();
+        this(platform, new CommanderConfig());
     }
 
     public CommanderImpl(CommanderPlatform platform, CommanderConfig config) {
         this.platform = platform;
         this.config = config;
+        Locale locale = config.getLocale();
+        if (locale == null) {
+            locale = Locale.getDefault();
+        }
+        if (config.getResponseHandler() == null) {
+            this.responseHandler = new DefaultResponseHandler(locale);
+        } else {
+            this.responseHandler = config.getResponseHandler();
+        }
     }
 
     @Override
@@ -247,6 +259,11 @@ public class CommanderImpl implements Commander {
     @Override
     public Map<Class<?>, Validator<Object>> getValidators() {
         return validators;
+    }
+
+    @Override
+    public ResponseHandler getResponseHandler() {
+        return responseHandler;
     }
 
     @Override
