@@ -1,5 +1,6 @@
 package net.octopvp.commander.bukkit.impl;
 
+import net.octopvp.commander.annotation.Hidden;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.help.HelpService;
@@ -23,6 +24,9 @@ public class BukkitHelpService implements HelpService {
         sender.sendMessage(ChatColor.AQUA + "Help for " + ChatColor.GOLD + info.getName() + ChatColor.GRAY + " - " + info.getDescription());
         if (info.isParentCommand()) {
             for (CommandInfo subCommand : info.getSubCommands()) {
+                if (subCommand.getMethod().isAnnotationPresent(Hidden.class)) {
+                    continue;
+                }
                 sender.sendMessage(ChatColor.GRAY + " " + subCommand.getFullUsage() + (subCommand.getDescription() != null || subCommand.getDescription().isEmpty() ? ChatColor.GRAY + " - " + subCommand.getDescription() : ""));
             }
         }

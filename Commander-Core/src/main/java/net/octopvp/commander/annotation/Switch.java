@@ -9,5 +9,8 @@ import java.lang.annotation.Target;
 @Target({ElementType.PARAMETER})
 public @interface Switch {
     String value() default "";
+
+    String[] aliases() default {};
+
     boolean defaultValue() default false;
 }

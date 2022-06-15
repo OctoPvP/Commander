@@ -6,12 +6,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.PARAMETER})
-public @interface GetArgumentFor {
-    /**
-     * The index of the processed user-entered argument to get. Starting at 0
-     *
-     * @return
-     */
-    int value();
+@Target({ElementType.PARAMETER, ElementType.METHOD})
+public @interface Hidden {
 }

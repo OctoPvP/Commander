@@ -3,7 +3,10 @@ package net.octopvp.commander.command;
 import lombok.Getter;
 import lombok.Setter;
 import net.octopvp.commander.Commander;
-import net.octopvp.commander.annotation.*;
+import net.octopvp.commander.annotation.Command;
+import net.octopvp.commander.annotation.Cooldown;
+import net.octopvp.commander.annotation.Dependency;
+import net.octopvp.commander.annotation.Permission;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -37,6 +40,8 @@ public class CommandInfo { //This is the object that is stored in the command ma
     private boolean subCommand = false, parentCommand = false;
     private CommandInfo parent;
     private List<CommandInfo> subCommands;
+    private boolean hasFlags, foundFlagsAlready;
+    private boolean hasSwitches, foundSwitchesAlready;
 
     public CommandInfo(ParameterInfo[] parameters, String name, String description, String usage, String[] aliases, Method method, Object instance, Map<Class<? extends Annotation>, Annotation> annotations, Commander commander) {
         this.parameters = parameters;
@@ -49,7 +54,7 @@ public class CommandInfo { //This is the object that is stored in the command ma
         this.commander = commander;
         if (isAnnotationPresent(Permission.class)) {
             this.permission = getAnnotation(Permission.class).value();
-        }else {
+        } else {
             this.permission = null;
         }
         if (isAnnotationPresent(Cooldown.class)) {
@@ -70,6 +75,8 @@ public class CommandInfo { //This is the object that is stored in the command ma
 
     public String getUsage() {
         if (usage == null || usage.equals("<<generate>>")) {
+            String optionalPrefix = commander.getConfig().getOptionalPrefix(), requiredPrefix = commander.getConfig().getRequiredPrefix(),
+                    optionalSuffix = commander.getConfig().getOptionalSuffix(), requiredSuffix = commander.getConfig().getRequiredSuffix();
             if (parentCommand) {
                 StringBuilder builder = new StringBuilder();
                 builder.append(commander.getConfig().getRequiredPrefix());
@@ -85,11 +92,23 @@ public class CommandInfo { //This is the object that is stored in the command ma
                     if (parameter.hideFromUsage()) {
                         continue;
                     }
-                    boolean optional = parameter.isOptional();
-                    builder.append(optional ? commander.getConfig().getOptionalPrefix() : commander.getConfig().getRequiredPrefix())
-                            .append(parameter.getName())
-                            .append(optional ? commander.getConfig().getOptionalSuffix() : commander.getConfig().getRequiredSuffix())
-                            .append(" ");
+                    if (parameter.isSwitch()) {
+                        builder.append(optionalPrefix)
+                                .append("-").append(parameter.getSwitchUsageName())
+                                .append(optionalSuffix)
+                                .append(" ");
+                    } else if (parameter.isFlag()) {
+                        builder.append(optionalPrefix)
+                                .append("-").append(parameter.getFlagUsageName())
+                                .append(optionalSuffix)
+                                .append(" ");
+                    } else {
+                        boolean optional = parameter.isOptional();
+                        builder.append(optional ? optionalPrefix : requiredPrefix)
+                                .append(parameter.getName())
+                                .append(optional ? optionalSuffix : requiredSuffix)
+                                .append(" ");
+                    }
                 }
                 this.usage = builder.toString().trim();
             }
@@ -111,9 +130,6 @@ public class CommandInfo { //This is the object that is stored in the command ma
     public <T extends Annotation> T getAnnotation(Class<T> annotation) {
         return (T) annotations.get(annotation);
     }
-
-    private boolean hasFlags, foundFlagsAlready;
-    private boolean hasSwitches, foundSwitchesAlready;
 
     public boolean hasFlags() {
         if (foundFlagsAlready) {

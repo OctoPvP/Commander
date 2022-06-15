@@ -10,6 +10,7 @@ import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.util.Primitives;
 import net.octopvp.commander.validator.Validator;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,16 +26,31 @@ public class ArgumentParser {
                     if (cArgs.getFlags() == null) {
                         throw new CommandParseException("Flags are null!");
                     }
-                    String f = cArgs.getFlags().get(parameter.getFlag());
-                    if (f != null) validate(f, parameter, ctx);
-                    arguments[i] = f;
+                    List<String> paramFlags = parameter.getFlags();
+                    for (String paramFlag : paramFlags) {
+                        String f = cArgs.getFlags().get(paramFlag);
+                        if (f == null) {
+                            arguments[i] = Primitives.getDefaultValue(parameter.getParameter().getType());
+                            break;
+                        }
+                        ArrayDeque<String> deque = new ArrayDeque<>();
+                        deque.add(f);
+                        Object value = parameter.getProvider().provide(ctx, ctx.getCommandInfo(), parameter, deque);
+                        if (value != null) {
+                            validate(value, parameter, ctx);
+                            arguments[i] = value;
+                            break;
+                        }
+                    }
                     continue;
                 }
                 if (parameter.isSwitch()) {
                     if (cArgs.getSwitches() == null) {
                         throw new CommandParseException("Switches are null!");
                     }
-                    Boolean b = cArgs.getSwitches().get(parameter.getSwitch());
+                    List<String> switches = parameter.getSwitches();
+                    Boolean b = cArgs.getSwitches().entrySet().stream().filter(e -> switches.contains(e.getKey())).map(Map.Entry::getValue).findFirst().orElse(null);
+                    //Boolean b = cArgs.getSwitches().get(parameter.getSwitches());
                     if (b != null) validate(b, parameter, ctx);
                     arguments[i] = b != null && b;
                     continue;

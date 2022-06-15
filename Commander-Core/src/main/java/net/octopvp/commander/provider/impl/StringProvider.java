@@ -18,7 +18,7 @@ public class StringProvider implements Provider<String> {
     public String provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
         if (parameterInfo.getParameter().isAnnotationPresent(GetArgumentFor.class)) {
             int index = parameterInfo.getParameter().getAnnotation(GetArgumentFor.class).value();
-            if (index >= args.size()) {
+            if (index >= context.getArgs().getPreservedArgs().size()) {
                 throw new InvalidArgsException("Missing argument for " + parameterInfo.getParameter().getName());
             }
             return context.getArgs().getPreservedArgs().get(index);

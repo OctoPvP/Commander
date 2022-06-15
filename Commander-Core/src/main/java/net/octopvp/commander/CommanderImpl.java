@@ -29,19 +29,19 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class CommanderImpl implements Commander {
-    private CommanderPlatform platform;
+    private final CommanderPlatform platform;
     private CommanderConfig config;
 
-    private Map<Class<?>, Provider<?>> argumentProviders = new HashMap<>();
+    private final Map<Class<?>, Provider<?>> argumentProviders = new HashMap<>();
 
-    private Map<Class<?>, Supplier<?>> dependencies = new HashMap<>();
+    private final Map<Class<?>, Supplier<?>> dependencies = new HashMap<>();
 
-    private Map<String, CommandInfo> commandMap = new HashMap<>();
+    private final Map<String, CommandInfo> commandMap = new HashMap<>();
 
-    private List<Consumer<CommandContext>> preProcessors = new ArrayList<>();
-    private List<BiConsumer<CommandContext, Object>> postProcessors = new ArrayList<>();
+    private final List<Consumer<CommandContext>> preProcessors = new ArrayList<>();
+    private final List<BiConsumer<CommandContext, Object>> postProcessors = new ArrayList<>();
 
-    private Map<Class<?>, Validator<Object>> validators = new HashMap<>();
+    private final Map<Class<?>, Validator<Object>> validators = new HashMap<>();
 
     public CommanderImpl(CommanderPlatform platform) {
         this.platform = platform;
@@ -99,7 +99,7 @@ public class CommanderImpl implements Commander {
                     minMax.append("max: ").append(max);
                 }
                 minMax.append(")");
-                throw new ValidateException("Value " + value.doubleValue() + " is not in valid range! " + minMax.toString());
+                throw new ValidateException("Value " + value.doubleValue() + " is not in valid range! " + minMax);
             }
         });
         return this;
@@ -187,8 +187,7 @@ public class CommanderImpl implements Commander {
     @Override
     public Commander registerPackage(String packageName) {
         register(platform.getClassesInPackage(packageName).stream().filter(clazz -> {
-            if (clazz.isAnnotationPresent(DontAutoInit.class)) return false;
-            return true;
+            return !clazz.isAnnotationPresent(DontAutoInit.class);
         }).map(clazz -> {
             try {
                 if (clazz.isEnum()) return null;
@@ -362,7 +361,7 @@ public class CommanderImpl implements Commander {
                 try {
                     result = context.getCommandInfo().getMethod().invoke(context.getCommandInfo().getInstance(), arguments);
                 } catch (IllegalAccessException | IllegalArgumentException e) {
-                   e.printStackTrace();
+                    e.printStackTrace();
                 } catch (InvocationTargetException e) {
                     if (e.getCause() != null && e.getCause() instanceof CommandException) {
                         platform.handleCommandException(context, (CommandException) e.getCause());
@@ -393,7 +392,7 @@ public class CommanderImpl implements Commander {
                 if (flags.containsKey(flag)) {
                     throw new CommandParseException("Flag " + flag + " is defined multiple times.");
                 }
-                if (paramsList.stream().noneMatch(p -> p.isFlag() && p.getFlag().equals(flag)))
+                if (paramsList.stream().noneMatch(p -> p.isFlag() && p.getFlags().contains(flag)))
                     continue;
                 iterator.remove();
                 if (iterator.hasNext()) {
@@ -419,7 +418,7 @@ public class CommanderImpl implements Commander {
                 if (switches.containsKey(flag)) {
                     throw new CommandParseException("Switch " + flag + " is defined multiple times.");
                 }
-                if (paramsList.stream().noneMatch(p -> p.isSwitch() && p.getSwitch().equals(flag)))
+                if (paramsList.stream().noneMatch(p -> p.isSwitch() && p.getSwitches().contains(flag)))
                     continue;
                 iterator.remove();
                 switches.put(flag, true);
@@ -457,8 +456,7 @@ public class CommanderImpl implements Commander {
             parent = command;
             if (split.length == 1) {
                 return parent.getSubCommands().stream().map(CommandInfo::getName).collect(Collectors.toList());
-            }
-            else if (split.length == 2 && !input.endsWith(" ")){
+            } else if (split.length == 2 && !input.endsWith(" ")) {
                 List<String> suggestions = parent.getSubCommands().stream().map(CommandInfo::getName).collect(Collectors.toList());
                 suggestions.removeIf(s -> !s.trim().toLowerCase().startsWith(split[1].trim().toLowerCase()));
                 return suggestions;
@@ -480,11 +478,34 @@ public class CommanderImpl implements Commander {
 
         if (!input.endsWith(" ") && config.isShowNextSuggestionOnlyIfEndsWithSpace()) index--;
 
+        //remove switches and flags from the index
+        for (int i = 0; i < index; i++) {
+            if (split[i].startsWith(config.getFlagPrefix())) {
+                index--;
+            } else if (split[i].startsWith(config.getSwitchPrefix())) {
+                index--;
+            }
+        }
+
         if (index >= params.length || index < 0) {
             return null;
         }
 
-        ParameterInfo param = params[index];
+        ParameterInfo param = null;
+        boolean found = false;
+        while (!found) {
+            param = params[index];
+            if (param.isFlag() || param.isSwitch()) { //TODO add support for flag and switch suggestions
+                if (++index >= params.length) {
+                    return null;
+                }
+                if (param.isFlag()) {
+                    param = params[index];
+                }
+            } else {
+                found = true;
+            }
+        }
         Provider<?> provider = param.getProvider();
 
         if (provider == null) {

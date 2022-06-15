@@ -1,6 +1,5 @@
 package net.octopvp.commander.command;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -8,9 +7,10 @@ import net.octopvp.commander.Commander;
 import net.octopvp.commander.annotation.*;
 import net.octopvp.commander.provider.Provider;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -80,10 +80,19 @@ public class ParameterInfo {
     public boolean isFlag() {
         return parameter.isAnnotationPresent(Flag.class);
     }
-    public String getFlag() {
+
+    public List<String> getFlags() {
         if (parameter.isAnnotationPresent(Flag.class)) {
             Flag f = parameter.getAnnotation(Flag.class);
-            return f.value() == null || f.value().isEmpty() ? parameter.getName() : f.value();
+            List<String> flags = new ArrayList<>();
+            flags.add(f.value());
+            for (String alias : f.aliases()) {
+                if (alias != null && !alias.isEmpty()) {
+                    flags.add(alias);
+                }
+            }
+            return flags;
+            //return f.value() == null || f.value().isEmpty() ? parameter.getName() : f.value();
         }
         return null;
     }
@@ -91,16 +100,42 @@ public class ParameterInfo {
     public boolean isSwitch() {
         return parameter.isAnnotationPresent(Switch.class);
     }
-    public String getSwitch() {
+
+    public List<String> getSwitches() {
         if (parameter.isAnnotationPresent(Switch.class)) {
             Switch s = parameter.getAnnotation(Switch.class);
-            return s.value() == null || s.value().isEmpty() ? parameter.getName() : s.value();
+            List<String> switches = new ArrayList<>();
+            for (String alias : s.aliases()) {
+                if (alias != null && !alias.isEmpty()) {
+                    switches.add(alias);
+                }
+            }
+            if (s.value() != null && !s.value().isEmpty()) {
+                switches.add(s.value());
+            }
+            return switches;
+        }
+        return null;
+    }
+
+    public String getSwitchUsageName() {
+        if (parameter.isAnnotationPresent(Switch.class)) {
+            Switch s = parameter.getAnnotation(Switch.class);
+            return s.value();
+        }
+        return null;
+    }
+
+    public String getFlagUsageName() {
+        if (parameter.isAnnotationPresent(Flag.class)) {
+            Flag f = parameter.getAnnotation(Flag.class);
+            return f.value();
         }
         return null;
     }
 
     public boolean hideFromUsage() {
-        return commander.getPlatform().isSenderParameter(this) || parameter.isAnnotationPresent(Dependency.class);
+        return commander.getPlatform().isSenderParameter(this) || parameter.isAnnotationPresent(Dependency.class) || parameter.isAnnotationPresent(GetArgumentFor.class) || parameter.isAnnotationPresent(Hidden.class);
     }
 
     @Override
