@@ -4,12 +4,12 @@ import com.google.common.collect.ImmutableSet;
 import net.octopvp.commander.annotation.Sender;
 import net.octopvp.commander.bukkit.impl.BukkitCommandSenderImpl;
 import net.octopvp.commander.bukkit.impl.BukkitCommandWrapper;
-import net.octopvp.commander.bukkit.impl.BukkitHelpService;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.exception.CommandException;
 import net.octopvp.commander.help.HelpService;
+import net.octopvp.commander.lang.LocalizedCommandException;
 import net.octopvp.commander.platform.CommanderPlatform;
 import net.octopvp.commander.sender.CoreCommandSender;
 import org.bukkit.ChatColor;
@@ -26,7 +26,6 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 public class BukkitPlatform implements CommanderPlatform {
     private final Plugin plugin;
@@ -65,6 +64,9 @@ public class BukkitPlatform implements CommanderPlatform {
 
     @Override
     public void handleCommandException(CommandInfo info, CoreCommandSender sender, CommandException e) {
+        if (e instanceof LocalizedCommandException) {
+            sender.sendMessage(ChatColor.RED + info.getCommander().getResponseHandler().getMessage(e));
+        }
         sender.sendMessage(ChatColor.RED + e.getMessage());
     }
 

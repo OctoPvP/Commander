@@ -6,6 +6,7 @@ import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.exception.CommandException;
 import net.octopvp.commander.exception.CommandParseException;
 import net.octopvp.commander.exception.InvalidArgsException;
+import net.octopvp.commander.lang.LocalizedCommandException;
 import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.util.Primitives;
 import net.octopvp.commander.validator.Validator;
@@ -104,6 +105,7 @@ public class ArgumentParser {
             }
             return arguments;
         } catch (CommandException e) {
+            LocalizedCommandException.checkResponseHandlerNull(e, ctx.getCommandInfo().getCommander().getResponseHandler());
             ctx.getCommandInfo().getCommander().getPlatform().handleCommandException(ctx, e);
         }
         return null;

@@ -8,15 +8,30 @@ import net.octopvp.commander.exception.CommandException;
 @Setter
 public class LocalizedCommandException extends CommandException {
     private final String key;
-    private final ResponseHandler responseHandler;
+    private ResponseHandler responseHandler;
 
     public LocalizedCommandException(String key, ResponseHandler responseHandler) {
         this.key = key;
         this.responseHandler = responseHandler;
     }
 
+    public LocalizedCommandException(String key) {
+        this(key, null);
+    }
+
+    public static void checkResponseHandlerNull(Exception e, ResponseHandler responseHandler) {
+        if (e instanceof LocalizedCommandException) {
+            LocalizedCommandException le = (LocalizedCommandException) e;
+            if (le.getResponseHandler() == null) {
+                le.setResponseHandler(responseHandler);
+            }
+        }
+    }
+
     @Override
     public String getLocalizedMessage() {
-        return responseHandler.getMessage(this);
+        if (responseHandler != null)
+            return responseHandler.getMessage(this);
+        return super.getLocalizedMessage();
     }
 }

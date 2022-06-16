@@ -12,6 +12,7 @@ import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.config.CommanderConfig;
 import net.octopvp.commander.exception.*;
 import net.octopvp.commander.lang.DefaultResponseHandler;
+import net.octopvp.commander.lang.LocalizedCommandException;
 import net.octopvp.commander.lang.ResponseHandler;
 import net.octopvp.commander.platform.CommanderPlatform;
 import net.octopvp.commander.provider.Provider;
@@ -388,12 +389,14 @@ public class CommanderImpl implements Commander {
                     postProcessor.accept(context, result);
                 }
             } catch (CommandException e) {
+                LocalizedCommandException.checkResponseHandlerNull(e, getResponseHandler());
                 platform.handleCommandException(context, e);
             } catch (Exception e) {
                 System.err.println("An error occurred while executing command \"" + label + "\"");
                 e.printStackTrace();
             }
         } catch (CommandException e) {
+            LocalizedCommandException.checkResponseHandlerNull(e, getResponseHandler());
             platform.handleCommandException(commandInfo, sender, e);
         }
     }
