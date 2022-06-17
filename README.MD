@@ -8,6 +8,9 @@ This project uses [Gradle](https://gradle.org/).
 
 # Important
 To allow command argument names to work correctly, you need to pass `-parameters` to your compiler <br/>
+Alternatively, you can use the [@Name](https://github.com/OctoPvP/Commander/blob/master/Commander-Core/src/main/java/net/octopvp/commander/annotation/Name.java) annotation.
+
+
 Maven:
 ```xml
 <plugins>
