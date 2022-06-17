@@ -4,7 +4,7 @@
 # Building
 This project uses [Gradle](https://gradle.org/).
 1. Clone this [repository](https://gihub.com/OctoPvP/Commander): `git clone https://github.com/OctoPvP/Commander`
-2. Run `./gradlew build`, optionally add `publishToMavenLocal` if you would oike it to install into your ~/.m2 directory
+2. Run `./gradlew build`, optionally add `publishToMavenLocal` if you would like to install it into your ~/.m2 (Maven cache) directory
 
 # Important
 To allow command argument names to work correctly, you need to pass `-parameters` to your compiler <br/>
