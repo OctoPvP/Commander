@@ -18,10 +18,10 @@ public class DefaultResponseHandler implements ResponseHandler {
     }
 
     @Override
-    public String getMessage(Exception e) {
+    public String getMessage(Exception e, Object... placeholders) {
         if (e instanceof LocalizedCommandException) {
             LocalizedCommandException le = (LocalizedCommandException) e;
-            return getMessage(le.getKey());
+            return getMessage(le.getKey(), placeholders);
         }
         return e.getMessage();
     }

@@ -1,7 +1,9 @@
 package net.octopvp.commander.exception;
 
-public class ValidateException extends CommandException {
-    public ValidateException(String message) {
-        super(message);
+import net.octopvp.commander.lang.LocalizedCommandException;
+
+public class ValidateException extends LocalizedCommandException {
+    public ValidateException(String key, Object... placeholders) {
+        super(key, placeholders);
     }
 }

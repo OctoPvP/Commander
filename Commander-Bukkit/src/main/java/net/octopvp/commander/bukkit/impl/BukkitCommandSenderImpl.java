@@ -2,7 +2,7 @@ package net.octopvp.commander.bukkit.impl;
 
 import lombok.RequiredArgsConstructor;
 import net.octopvp.commander.bukkit.BukkitCommandSender;
-import net.octopvp.commander.exception.CommandException;
+import net.octopvp.commander.lang.LocalizedCommandException;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -35,7 +35,7 @@ public class BukkitCommandSenderImpl implements BukkitCommandSender {
 
     @Override
     public Player getPlayer() {
-        if (!(isPlayer())) throw new CommandException("You must be a player to do this!");
+        if (!(isPlayer())) throw new LocalizedCommandException("must-be.player");
         return (Player) commandSender;
     }
 

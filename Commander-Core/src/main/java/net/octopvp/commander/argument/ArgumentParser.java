@@ -25,7 +25,7 @@ public class ArgumentParser {
                 ParameterInfo parameter = ctx.getCommandInfo().getParameters()[i];
                 if (parameter.isFlag()) {
                     if (cArgs.getFlags() == null) {
-                        throw new CommandParseException("Flags are null!");
+                        throw new CommandParseException("flags.null");
                     }
                     List<String> paramFlags = parameter.getFlags();
                     for (String paramFlag : paramFlags) {
@@ -47,7 +47,7 @@ public class ArgumentParser {
                 }
                 if (parameter.isSwitch()) {
                     if (cArgs.getSwitches() == null) {
-                        throw new CommandParseException("Switches are null!");
+                        throw new CommandParseException("switches.null");
                     }
                     List<String> switches = parameter.getSwitches();
                     Boolean b = cArgs.getSwitches().entrySet().stream().filter(e -> switches.contains(e.getKey())).map(Map.Entry::getValue).findFirst().orElse(null);
@@ -60,7 +60,7 @@ public class ArgumentParser {
                     Class<?> classType = parameter.getParameter().getType();
                     Supplier<?> supplier = cArgs.getCommander().getDependencies().get(classType);
                     if (supplier == null) {
-                        throw new CommandParseException("Dependency not found for " + classType.getName()); //maybe let the user control this?
+                        throw new CommandParseException("dependency.not-found", classType.getName()); //maybe let the user control this?
                     }
                     arguments[i] = supplier.get();
                     continue;
@@ -68,7 +68,7 @@ public class ArgumentParser {
                 Provider<?> provider = parameter.getProvider();
 
                 if (provider == null) {
-                    throw new CommandParseException("No provider found for " + parameter.getParameter().getType().getName());
+                    throw new CommandParseException("provider.not-found", parameter.getParameter().getType().getName());
                 }
                 Object obj;
                 try {
@@ -82,12 +82,12 @@ public class ArgumentParser {
                         throw new InvalidArgsException(ctx.getCommandInfo());
                     }
                     if (provider.failOnExceptionIgnoreOptional()) {
-                        throw new CommandParseException("Failed to parse argument " + parameter.getName(), e);
+                        throw new CommandParseException(parameter.getName(), e);
                     }
                     if (parameter.isOptional()) {
                         obj = null;
                     } else if (provider.failOnException())
-                        throw new CommandParseException("Failed to parse argument " + parameter.getName(), e);
+                        throw new CommandParseException(parameter.getName(), e);
                     else {
                         obj = null;
                     }
@@ -152,7 +152,7 @@ public class ArgumentParser {
             }
         }
         if (currentArgIsQuoted) {
-            throw new CommandParseException("Unclosed quote!");
+            throw new CommandParseException("quote.unclosed");
         }
         if (sb.length() > 0) {
             out.add(sb.toString().trim());

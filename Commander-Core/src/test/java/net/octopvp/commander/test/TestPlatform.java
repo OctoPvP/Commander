@@ -23,18 +23,19 @@ public class TestPlatform implements CommanderPlatform {
 
     @Override
     public void handleCommandException(CommandContext ctx, CommandException e) {
-        if (e instanceof LocalizedCommandException) handleLocale(e, ctx.getCommandInfo().getCommander());
+        if (e instanceof LocalizedCommandException)
+            handleLocale((LocalizedCommandException) e, ctx.getCommandInfo().getCommander());
         else e.printStackTrace();
     }
 
     @Override
     public void handleCommandException(CommandInfo info, CoreCommandSender sender, CommandException e) {
-        if (e instanceof LocalizedCommandException) handleLocale(e, info.getCommander());
+        if (e instanceof LocalizedCommandException) handleLocale((LocalizedCommandException) e, info.getCommander());
         else e.printStackTrace();
     }
 
-    public void handleLocale(Exception e, Commander commander) {
-        System.err.println(commander.getResponseHandler().getMessage(e));
+    public void handleLocale(LocalizedCommandException e, Commander commander) {
+        System.err.println(commander.getResponseHandler().getMessage(e, e.getPlaceholders()));
     }
 
     @Override

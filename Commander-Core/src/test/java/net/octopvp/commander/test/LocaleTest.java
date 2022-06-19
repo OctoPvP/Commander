@@ -20,7 +20,7 @@ public class LocaleTest {
     public void test() {
         commander = new CommanderImpl(new TestPlatform() {
             @Override
-            public void handleLocale(Exception e, Commander commander) {
+            public void handleLocale(LocalizedCommandException e, Commander commander) {
                 String s = commander.getResponseHandler().getMessage(e);
                 System.out.println("Localized: " + s);
                 if (s.equals("Hello World!")) {

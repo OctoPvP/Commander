@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 public interface ResponseHandler {
-    String getMessage(Exception e);
+    String getMessage(Exception e, Object... placeholders);
 
     String getMessage(String key, Object... placeholders);
 

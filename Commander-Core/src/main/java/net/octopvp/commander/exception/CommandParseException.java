@@ -1,16 +1,25 @@
 package net.octopvp.commander.exception;
 
-public class CommandParseException extends CommandException{
-    public CommandParseException(String message) {
-        super(message);
-    }
-    public CommandParseException() {
+import net.octopvp.commander.lang.LocalizedCommandException;
 
+public class CommandParseException extends LocalizedCommandException {
+    public CommandParseException() {
+        super("parse.fail");
     }
-    public CommandParseException(String message, Throwable cause) {
-        super(message, cause);
+
+    public CommandParseException(Exception cause) {
+        super("parse.fail", cause);
     }
-    public CommandParseException(Throwable cause) {
-        super(cause.getMessage());
+
+    public CommandParseException(Object... placeholders) {
+        super("parse.fail", placeholders);
+    }
+
+    public CommandParseException(String key) {
+        super(key);
+    }
+
+    public CommandParseException(String key, Object... placeholders) {
+        super(key, placeholders);
     }
 }

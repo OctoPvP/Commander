@@ -4,19 +4,25 @@ import lombok.Getter;
 import lombok.Setter;
 import net.octopvp.commander.exception.CommandException;
 
+import java.util.Arrays;
+
 @Getter
 @Setter
 public class LocalizedCommandException extends CommandException {
     private final String key;
     private ResponseHandler responseHandler;
 
-    public LocalizedCommandException(String key, ResponseHandler responseHandler) {
+    private Object[] placeholders;
+
+    public LocalizedCommandException(String key, Object... placeholders) {
         this.key = key;
-        this.responseHandler = responseHandler;
+        this.placeholders = placeholders;
     }
 
-    public LocalizedCommandException(String key) {
-        this(key, null);
+    public LocalizedCommandException(String key, Exception cause, Object... placeholders) {
+        super(cause);
+        this.key = key;
+        this.placeholders = placeholders;
     }
 
     public static void checkResponseHandlerNull(Exception e, ResponseHandler responseHandler) {
@@ -30,8 +36,10 @@ public class LocalizedCommandException extends CommandException {
 
     @Override
     public String getLocalizedMessage() {
-        if (responseHandler != null)
-            return responseHandler.getMessage(this);
+        System.out.println("Placeholders: " + Arrays.toString(this.placeholders));
+        if (responseHandler != null) {
+            return responseHandler.getMessage(this, placeholders);
+        }
         return super.getLocalizedMessage();
     }
 }
