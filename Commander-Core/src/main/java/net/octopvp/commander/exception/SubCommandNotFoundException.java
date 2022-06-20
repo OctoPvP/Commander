@@ -21,6 +21,7 @@
  * SOFTWARE.
  *
  */
+
 package net.octopvp.commander.exception;
 
 public class SubCommandNotFoundException extends CommandException {
