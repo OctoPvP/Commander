@@ -80,8 +80,7 @@ public class BukkitPlatform implements CommanderPlatform {
                 return;
             }
             sender.sendMessage(ChatColor.RED + handler.getMessage(lce, lce.getPlaceholders()));
-        }
-        sender.sendMessage(ChatColor.RED + e.getMessage());
+        } else sender.sendMessage(ChatColor.RED + e.getMessage());
     }
 
     @Override
