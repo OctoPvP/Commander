@@ -4,8 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import net.octopvp.commander.exception.CommandException;
 
-import java.util.Arrays;
-
 @Getter
 @Setter
 public class LocalizedCommandException extends CommandException {
@@ -36,7 +34,6 @@ public class LocalizedCommandException extends CommandException {
 
     @Override
     public String getLocalizedMessage() {
-        System.out.println("Placeholders: " + Arrays.toString(this.placeholders));
         if (responseHandler != null) {
             return responseHandler.getMessage(this, placeholders);
         }

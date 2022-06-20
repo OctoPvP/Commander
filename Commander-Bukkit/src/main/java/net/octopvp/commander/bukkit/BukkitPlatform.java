@@ -1,6 +1,9 @@
 package net.octopvp.commander.bukkit;
 
 import com.google.common.collect.ImmutableSet;
+import lombok.Getter;
+import lombok.Setter;
+import net.octopvp.commander.Commander;
 import net.octopvp.commander.annotation.Sender;
 import net.octopvp.commander.bukkit.impl.BukkitCommandSenderImpl;
 import net.octopvp.commander.bukkit.impl.BukkitCommandWrapper;
@@ -10,8 +13,10 @@ import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.exception.CommandException;
 import net.octopvp.commander.help.HelpService;
 import net.octopvp.commander.lang.LocalizedCommandException;
+import net.octopvp.commander.lang.ResponseHandler;
 import net.octopvp.commander.platform.CommanderPlatform;
 import net.octopvp.commander.sender.CoreCommandSender;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
@@ -27,8 +32,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+@Getter
+@Setter
 public class BukkitPlatform implements CommanderPlatform {
     private final Plugin plugin;
+    private Commander commander;
     private CommandMap commandMap;
 
     public BukkitPlatform(Plugin plugin) {
@@ -65,7 +73,13 @@ public class BukkitPlatform implements CommanderPlatform {
     @Override
     public void handleCommandException(CommandInfo info, CoreCommandSender sender, CommandException e) {
         if (e instanceof LocalizedCommandException) {
-            sender.sendMessage(ChatColor.RED + info.getCommander().getResponseHandler().getMessage(e));
+            LocalizedCommandException lce = (LocalizedCommandException) e;
+            ResponseHandler handler = lce.getResponseHandler();
+            if (handler == null) {
+                Bukkit.getLogger().severe("Could not find a instance of ResponseHandler to handle command exception: " + e.getClass().getName());
+                return;
+            }
+            sender.sendMessage(ChatColor.RED + handler.getMessage(lce, lce.getPlaceholders()));
         }
         sender.sendMessage(ChatColor.RED + e.getMessage());
     }

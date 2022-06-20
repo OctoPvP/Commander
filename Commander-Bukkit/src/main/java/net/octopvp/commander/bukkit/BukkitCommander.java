@@ -22,7 +22,8 @@ import java.util.ResourceBundle;
 public class BukkitCommander {
     public static BukkitHelpService HELP_SERVICE = BukkitHelpService.INSTANCE;
     public static Commander getCommander(Plugin plugin) {
-        Commander impl = new CommanderImpl(new BukkitPlatform(plugin))
+        BukkitPlatform platform = new BukkitPlatform(plugin);
+        Commander impl = new CommanderImpl(platform)
                 .init()
                 .registerProvider(Player.class, new PlayerProvider())
                 .registerProvider(OfflinePlayer.class, new OfflinePlayerProvider())
@@ -48,6 +49,7 @@ public class BukkitCommander {
                         }
                     }
                 });
+        platform.setCommander(impl);
         impl.getResponseHandler().addBundle(ResourceBundle.getBundle("bukkit", impl.getResponseHandler().getLocale()));
         return impl;
     }
