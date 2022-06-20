@@ -29,8 +29,8 @@ import net.octopvp.commander.annotation.Range;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
-import net.octopvp.commander.exception.CommandParseException;
 import net.octopvp.commander.exception.InvalidArgsException;
+import net.octopvp.commander.lang.LocalizedCommandException;
 import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.sender.CoreCommandSender;
 import net.octopvp.commander.util.CommanderUtilities;
@@ -46,15 +46,11 @@ public class LongProvider implements Provider<Long> {
             Duration duration = parameterInfo.getParameter().getAnnotation(Duration.class);
             if (arg.equalsIgnoreCase("perm") || arg.equalsIgnoreCase("permanent")) {
                 if (!duration.allowPermanent()) {
-                    throw new CommandParseException("Permanent is not allowed for this parameter.");
+                    throw new LocalizedCommandException("permanent.not.allowed");
                 }
                 return -1L;
             }
-            try {
-                return CommanderUtilities.parseTime(arg == null || arg.isEmpty() ? duration.defaultValue() : arg, duration.future());
-            } catch (Exception e) {
-                throw new CommandParseException(e);
-            }
+            return CommanderUtilities.parseTime(arg == null || arg.isEmpty() ? duration.defaultValue() : arg, duration.future());
         }
         try {
             return Long.parseLong(arg);
@@ -72,11 +68,7 @@ public class LongProvider implements Provider<Long> {
     public Long provideDefault(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
         if (parameterInfo.getParameter().isAnnotationPresent(Duration.class)) {
             Duration duration = parameterInfo.getParameter().getAnnotation(Duration.class);
-            try {
-                return CommanderUtilities.parseTime(duration.defaultValue(), duration.future());
-            } catch (Exception e) {
-                throw new CommandParseException(e);
-            }
+            return CommanderUtilities.parseTime(duration.defaultValue(), duration.future());
         }
         if (parameterInfo.getParameter().isAnnotationPresent(Range.class))
             return (long) parameterInfo.getParameter().getAnnotation(Range.class).defaultValue();

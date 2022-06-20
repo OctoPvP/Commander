@@ -34,20 +34,23 @@ import net.octopvp.commander.bukkit.impl.BukkitHelpService;
 import net.octopvp.commander.bukkit.providers.CommandSenderProviders;
 import net.octopvp.commander.bukkit.providers.OfflinePlayerProvider;
 import net.octopvp.commander.bukkit.providers.PlayerProvider;
-import net.octopvp.commander.exception.CommandParseException;
+import net.octopvp.commander.lang.LocalizedCommandException;
 import net.octopvp.commander.sender.CoreCommandSender;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import java.util.ResourceBundle;
+
 public class BukkitCommander {
     public static BukkitHelpService HELP_SERVICE = BukkitHelpService.INSTANCE;
     public static Commander getCommander(Plugin plugin) {
-        return new CommanderImpl(new BukkitPlatform(plugin))
+        BukkitPlatform platform = new BukkitPlatform(plugin);
+        Commander impl = new CommanderImpl(platform)
                 .init()
-                .registerProvider(Player.class,new PlayerProvider())
-                .registerProvider(OfflinePlayer.class,new OfflinePlayerProvider())
+                .registerProvider(Player.class, new PlayerProvider())
+                .registerProvider(OfflinePlayer.class, new OfflinePlayerProvider())
                 .registerProvider(CommandSender.class, new CommandSenderProviders.CommandSenderProvider())
                 .registerProvider(BukkitCommandSender.class, new CommandSenderProviders.BukkitCoreCommandSenderProvider())
                 .registerProvider(BukkitCommandSenderImpl.class, new CommandSenderProviders.BukkitCoreCommandSenderImplProvider())
@@ -56,20 +59,22 @@ public class BukkitCommander {
                     if (ctx.getCommandInfo().isAnnotationPresent(PlayerOnly.class)) {
                         BukkitCommandSender sender = (BukkitCommandSender) ctx.getCommandSender();
                         if (!sender.isPlayer()) {
-                            throw new CommandParseException("You must be a player to use this command.");
+                            throw new LocalizedCommandException("must-be.player");
                         }
                     }else if (ctx.getCommandInfo().isAnnotationPresent(ConsoleOnly.class)) {
                         BukkitCommandSender sender = (BukkitCommandSender) ctx.getCommandSender();
                         if (!sender.isConsole()) {
-                            throw new CommandParseException("You must be a console to use this command.");
+                            throw new LocalizedCommandException("must-be.console");
                         }
-                    }else if (ctx.getCommandInfo().isAnnotationPresent(OpOnly.class)) {
+                    } else if (ctx.getCommandInfo().isAnnotationPresent(OpOnly.class)) {
                         BukkitCommandSender sender = (BukkitCommandSender) ctx.getCommandSender();
                         if (!sender.isOp()) {
-                            throw new CommandParseException("You must be a console to use this command.");
+                            throw new LocalizedCommandException("must-be.op");
                         }
                     }
-                })
-                ;
+                });
+        platform.setCommander(impl);
+        impl.getResponseHandler().addBundle(ResourceBundle.getBundle("bukkit", impl.getResponseHandler().getLocale()));
+        return impl;
     }
 }

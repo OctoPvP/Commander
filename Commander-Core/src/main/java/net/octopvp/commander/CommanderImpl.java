@@ -35,6 +35,9 @@ import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.config.CommanderConfig;
 import net.octopvp.commander.exception.*;
+import net.octopvp.commander.lang.DefaultResponseHandler;
+import net.octopvp.commander.lang.LocalizedCommandException;
+import net.octopvp.commander.lang.ResponseHandler;
 import net.octopvp.commander.platform.CommanderPlatform;
 import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.provider.impl.*;
@@ -54,27 +57,31 @@ import java.util.stream.Collectors;
 
 public class CommanderImpl implements Commander {
     private final CommanderPlatform platform;
-    private CommanderConfig config;
-
     private final Map<Class<?>, Provider<?>> argumentProviders = new HashMap<>();
-
     private final Map<Class<?>, Supplier<?>> dependencies = new HashMap<>();
-
     private final Map<String, CommandInfo> commandMap = new HashMap<>();
-
     private final List<Consumer<CommandContext>> preProcessors = new ArrayList<>();
     private final List<BiConsumer<CommandContext, Object>> postProcessors = new ArrayList<>();
-
     private final Map<Class<?>, Validator<Object>> validators = new HashMap<>();
+    private final ResponseHandler responseHandler;
+    private CommanderConfig config;
 
     public CommanderImpl(CommanderPlatform platform) {
-        this.platform = platform;
-        this.config = new CommanderConfig();
+        this(platform, new CommanderConfig());
     }
 
     public CommanderImpl(CommanderPlatform platform, CommanderConfig config) {
         this.platform = platform;
         this.config = config;
+        Locale locale = config.getLocale();
+        if (locale == null) {
+            locale = Locale.getDefault();
+        }
+        if (config.getResponseHandler() == null) {
+            this.responseHandler = new DefaultResponseHandler(locale);
+        } else {
+            this.responseHandler = config.getResponseHandler();
+        }
     }
 
     @Override
@@ -123,7 +130,8 @@ public class CommanderImpl implements Commander {
                     minMax.append("max: ").append(max);
                 }
                 minMax.append(")");
-                throw new ValidateException("Value " + value.doubleValue() + " is not in valid range! " + minMax);
+                //throw new ValidateException("Value " + value.doubleValue() + " is not in valid range! " + minMax);
+                throw new ValidateException("validate.exception", value.doubleValue(), minMax.toString());
             }
         });
         return this;
@@ -274,6 +282,11 @@ public class CommanderImpl implements Commander {
     }
 
     @Override
+    public ResponseHandler getResponseHandler() {
+        return responseHandler;
+    }
+
+    @Override
     public CommanderPlatform getPlatform() {
         return platform;
     }
@@ -337,7 +350,7 @@ public class CommanderImpl implements Commander {
                     commandInfo = parent.getSubCommand("");
                     isRootLevel = commandInfo != null;
                     if (!isRootLevel) {
-                        throw new CommandNotFoundException("Could not find subcommand \"" + sub.toLowerCase() + "\" for command \"" + parent.getName() + "\"");
+                        throw new CommandNotFoundException("subcommand.not-found", sub.toLowerCase(), parent.getName());
                     }
                 }
                 if (!isRootLevel) {
@@ -346,7 +359,7 @@ public class CommanderImpl implements Commander {
                     args = newArgs;
                 }
             } else if (commandInfo == null) {
-                throw new CommandNotFoundException("Could not find command handler for \"" + label.toLowerCase() + "\"");
+                throw new CommandNotFoundException("handler.not-found", label.toLowerCase());
             }
 
             String[] argsCopy = new String[args.length];
@@ -395,12 +408,14 @@ public class CommanderImpl implements Commander {
                     postProcessor.accept(context, result);
                 }
             } catch (CommandException e) {
+                LocalizedCommandException.checkResponseHandlerNull(e, getResponseHandler());
                 platform.handleCommandException(context, e);
             } catch (Exception e) {
                 System.err.println("An error occurred while executing command \"" + label + "\"");
                 e.printStackTrace();
             }
         } catch (CommandException e) {
+            LocalizedCommandException.checkResponseHandlerNull(e, getResponseHandler());
             platform.handleCommandException(commandInfo, sender, e);
         }
     }
@@ -414,7 +429,7 @@ public class CommanderImpl implements Commander {
             if (arg.startsWith(config.getFlagPrefix())) {
                 String flag = arg.substring(config.getFlagPrefix().length());
                 if (flags.containsKey(flag)) {
-                    throw new CommandParseException("Flag " + flag + " is defined multiple times.");
+                    throw new CommandParseException("flags.multiple", flag);
                 }
                 if (paramsList.stream().noneMatch(p -> p.isFlag() && p.getFlags().contains(flag)))
                     continue;
@@ -424,7 +439,7 @@ public class CommanderImpl implements Commander {
                     iterator.remove();
                     flags.put(flag, value);
                 } else {
-                    throw new CommandParseException("Flag " + flag + " requires a value.");
+                    throw new CommandParseException("flags.requires-value", flag);
                 }
             }
         }
@@ -438,14 +453,14 @@ public class CommanderImpl implements Commander {
         while (iterator.hasNext()) {
             String arg = iterator.next();
             if (arg.startsWith(config.getSwitchPrefix())) {
-                String flag = arg.substring(config.getSwitchPrefix().length());
-                if (switches.containsKey(flag)) {
-                    throw new CommandParseException("Switch " + flag + " is defined multiple times.");
+                String commandSwitch = arg.substring(config.getSwitchPrefix().length());
+                if (switches.containsKey(commandSwitch)) {
+                    throw new CommandParseException("switches.multiple", commandSwitch);
                 }
-                if (paramsList.stream().noneMatch(p -> p.isSwitch() && p.getSwitches().contains(flag)))
+                if (paramsList.stream().noneMatch(p -> p.isSwitch() && p.getSwitches().contains(commandSwitch)))
                     continue;
                 iterator.remove();
-                switches.put(flag, true);
+                switches.put(commandSwitch, true);
 
             }
         }

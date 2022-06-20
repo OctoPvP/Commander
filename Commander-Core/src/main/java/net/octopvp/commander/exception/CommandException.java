@@ -24,15 +24,19 @@
 
 package net.octopvp.commander.exception;
 
-public class CommandException extends RuntimeException{
-    public CommandException(String message){
+public class CommandException extends RuntimeException {
+    public CommandException(String message) {
         super(message);
     }
-    public CommandException(String message, Throwable cause){
+
+    public CommandException(String message, Throwable cause) {
         super(message, cause);
     }
-    public CommandException(Throwable cause){
+
+    public CommandException(Throwable cause) {
         super(cause);
     }
-    public CommandException() {}
+
+    public CommandException() {
+    }
 }

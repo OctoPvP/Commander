@@ -24,12 +24,10 @@
 
 package net.octopvp.commander.exception;
 
-public class NoPermissionException extends CommandException {
-    public NoPermissionException() {
-        super("You do not have permission to perform this command.");
-    }
+import net.octopvp.commander.lang.LocalizedCommandException;
 
-    public NoPermissionException(String message) {
-        super(message);
+public class NoPermissionException extends LocalizedCommandException {
+    public NoPermissionException() {
+        super("no-permission");
     }
 }

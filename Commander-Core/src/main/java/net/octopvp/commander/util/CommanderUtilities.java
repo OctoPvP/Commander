@@ -24,6 +24,8 @@
 
 package net.octopvp.commander.util;
 
+import net.octopvp.commander.exception.CommandParseException;
+
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.regex.Matcher;
@@ -33,13 +35,12 @@ public class CommanderUtilities {
     private static final Pattern timePattern = Pattern.compile("(?:([0-9]+)\\s*y[a-z]*[,\\s]*)?(?:([0-9]+)\\s*mo[a-z]*[,\\s]*)?(?:([0-9]+)\\s*w[a-z]*[,\\s]*)?(?:([0-9]+)\\s*d[a-z]*[,\\s]*)?(?:([0-9]+)\\s*h[a-z]*[,\\s]*)?(?:([0-9]+)\\s*m[a-z]*[,\\s]*)?(?:([0-9]+)\\s*(?:s[a-z]*)?)?", 2);
 
     /**
-     * @author Don't know who to give credit to for this method, found it somewhere a while ago.
      * @param time
      * @param future
      * @return
-     * @throws Exception
+     * @author Don't know who to give credit to for this method, found it somewhere a while ago.
      */
-    public static long parseTime(String time, boolean future) throws Exception {
+    public static long parseTime(String time, boolean future) {
         Matcher matcher = timePattern.matcher(time);
 
         int years = 0;
@@ -76,7 +77,7 @@ public class CommanderUtilities {
             break;
         }
 
-        if (!found) throw new Exception("Illegal Date");
+        if (!found) throw new CommandParseException("illegal.date");
 
         GregorianCalendar calendar = new GregorianCalendar();
 

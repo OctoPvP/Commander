@@ -24,10 +24,12 @@
 
 package net.octopvp.commander.test;
 
+import net.octopvp.commander.Commander;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.exception.CommandException;
 import net.octopvp.commander.help.HelpService;
+import net.octopvp.commander.lang.LocalizedCommandException;
 import net.octopvp.commander.platform.CommanderPlatform;
 import net.octopvp.commander.sender.CoreCommandSender;
 
@@ -45,12 +47,19 @@ public class TestPlatform implements CommanderPlatform {
 
     @Override
     public void handleCommandException(CommandContext ctx, CommandException e) {
-        e.printStackTrace();
+        if (e instanceof LocalizedCommandException)
+            handleLocale((LocalizedCommandException) e, ctx.getCommandInfo().getCommander());
+        else e.printStackTrace();
     }
 
     @Override
     public void handleCommandException(CommandInfo info, CoreCommandSender sender, CommandException e) {
-        e.printStackTrace();
+        if (e instanceof LocalizedCommandException) handleLocale((LocalizedCommandException) e, info.getCommander());
+        else e.printStackTrace();
+    }
+
+    public void handleLocale(LocalizedCommandException e, Commander commander) {
+        System.err.println(commander.getResponseHandler().getMessage(e, e.getPlaceholders()));
     }
 
     @Override
