@@ -27,19 +27,19 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class CommanderImpl implements Commander {
-    private CommanderPlatform platform;
+    private final CommanderPlatform platform;
     private CommanderConfig config;
 
-    private Map<Class<?>, Provider<?>> argumentProviders = new HashMap<>();
+    private final Map<Class<?>, Provider<?>> argumentProviders = new HashMap<>();
 
-    private Map<Class<?>, Supplier<?>> dependencies = new HashMap<>();
+    private final Map<Class<?>, Supplier<?>> dependencies = new HashMap<>();
 
-    private Map<String, CommandInfo> commandMap = new HashMap<>();
+    private final Map<String, CommandInfo> commandMap = new HashMap<>();
 
-    private List<Consumer<CommandContext>> preProcessors = new ArrayList<>();
-    private List<BiConsumer<CommandContext, Object>> postProcessors = new ArrayList<>();
+    private final List<Consumer<CommandContext>> preProcessors = new ArrayList<>();
+    private final List<BiConsumer<CommandContext, Object>> postProcessors = new ArrayList<>();
 
-    private Map<Class<?>, Validator<Object>> validators = new HashMap<>();
+    private final Map<Class<?>, Validator<Object>> validators = new HashMap<>();
 
     public CommanderImpl(CommanderPlatform platform) {
         this.platform = platform;
@@ -49,6 +49,28 @@ public class CommanderImpl implements Commander {
     public CommanderImpl(CommanderPlatform platform, CommanderConfig config) {
         this.platform = platform;
         this.config = config;
+    }
+
+    private final Map<Method, Object> completerCache = new HashMap<>();
+
+    @Override
+    public Commander register(Object... objects) {
+        if (objects == null) return this;
+        for (Object object : objects) {
+            if (object == null) {
+                continue;
+            }
+            if (object instanceof Collection) {
+                Collection<Object> objs = (Collection<Object>) object;
+                for (Object o : objs) {
+                    registerCmd(o);
+                }
+                continue;
+            }
+            registerCmd(object);
+        }
+        registerCompleters();
+        return this;
     }
 
     @Override
@@ -97,33 +119,11 @@ public class CommanderImpl implements Commander {
                     minMax.append("max: ").append(max);
                 }
                 minMax.append(")");
-                throw new ValidateException("Value " + value.doubleValue() + " is not in valid range! " + minMax.toString());
+                throw new ValidateException("Value " + value.doubleValue() + " is not in valid range! " + minMax);
             }
         });
         return this;
     }
-
-    @Override
-    public Commander register(Object... objects) {
-        if (objects == null) return this;
-        for (Object object : objects) {
-            if (object == null) {
-                continue;
-            }
-            if (object instanceof Collection) {
-                Collection<Object> objs = (Collection<Object>) object;
-                for (Object o : objs) {
-                    registerCmd(o);
-                }
-                continue;
-            }
-            registerCmd(object);
-        }
-        registerCompleters();
-        return this;
-    }
-
-    private Map<Method, Object> completerCache = new HashMap<>();
 
     private void registerCmd(Object object) {
         if (object == null) return;
@@ -256,8 +256,7 @@ public class CommanderImpl implements Commander {
     @Override
     public Commander registerPackage(String packageName) {
         register(platform.getClassesInPackage(packageName).stream().filter(clazz -> {
-            if (clazz.isAnnotationPresent(DontAutoInit.class)) return false;
-            return true;
+            return !clazz.isAnnotationPresent(DontAutoInit.class);
         }).map(clazz -> {
             try {
                 if (clazz.isEnum()) return null;
@@ -543,8 +542,17 @@ public class CommanderImpl implements Commander {
         int index = split.length - diff;
         String lastArg = split[split.length - 1];
 
-
         if (!input.endsWith(" ") && config.isShowNextSuggestionOnlyIfEndsWithSpace()) index--;
+
+        //remove switches and flags from the index
+        for (int i = 0; i < index; i++) {
+            if (split[i].startsWith(config.getFlagPrefix())) {
+                index--;
+            } else if (split[i].startsWith(config.getSwitchPrefix())) {
+                index--;
+            }
+        }
+
 
         CompleterInfo customCompleter = command.getCompleters().get(index);
         boolean allParams = false;
@@ -571,17 +579,30 @@ public class CommanderImpl implements Commander {
 
         Collection<String> suggestionsProvided;
         if (customReturn == null) {
-            if (index >= params.length) {
+            if (index >= params.length || index < 0) {
                 return null;
             }
 
-            ParameterInfo param = params[index];
+            ParameterInfo param = null;
+            boolean found = false;
+            while (!found) {
+                param = params[index];
+                if (param.isFlag() || param.isSwitch()) { //TODO add support for flag and switch suggestions
+                    if (++index >= params.length) {
+                        return null;
+                    }
+                    if (param.isFlag()) {
+                        param = params[index];
+                    }
+                } else {
+                    found = true;
+                }
+            }
             Provider<?> provider = param.getProvider();
 
             if (provider == null) {
                 return null;
             }
-
 
             suggestionsProvided = provider.provideSuggestions(input, lastArg, sender);
             if (suggestionsProvided == null) {

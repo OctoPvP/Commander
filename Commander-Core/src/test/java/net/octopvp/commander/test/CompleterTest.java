@@ -66,7 +66,7 @@ public class CompleterTest {
     public void t(@Sender CommandSender sender, String s, String a, String b) {
     }
 
-    @Completer(name = "t", index = 21)
+    @Completer(name = "t", index = 2)
     public List<String> t2(@Sender CommandSender sender, String input, String lastArg) {
         return Arrays.asList("b");
     }
