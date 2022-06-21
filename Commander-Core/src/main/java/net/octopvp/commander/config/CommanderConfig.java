@@ -35,7 +35,7 @@ import java.util.Locale;
 @Setter
 @NoArgsConstructor
 public class CommanderConfig {
-    private boolean defaultRequired = true, joinArgsWithQuotes = true, checkPermissionsOnSuggestion = true, showNextSuggestionOnlyIfEndsWithSpace = true,
+    private boolean defaultRequired = true, joinArgsWithQuotes = false, checkPermissionsOnSuggestion = true, showNextSuggestionOnlyIfEndsWithSpace = true,
             filterSuggestions = true;
 
     private String optionalPrefix = "[", optionalSuffix = "]";
