@@ -149,7 +149,7 @@ public class ArgumentParser {
                 Class<?> classType = parameter.getType();
                 Supplier<?> supplier = commandInfo.getCommander().getDependencies().get(classType);
                 if (supplier == null) {
-                    throw new CommandParseException("Dependency not found for " + classType.getName()); //maybe let the user control this?
+                    throw new CommandParseException("dependency.not-found", classType.getName()); //maybe let the user control this?
                 }
                 arguments[i] = supplier.get();
                 continue;
@@ -170,7 +170,7 @@ public class ArgumentParser {
                     break;
                 }
                 default: {
-                    throw new CommandParseException("Too many arguments! Completer Usage: (String input, String lastArg) @Dependency & @Sender also works.");
+                    throw new CommandParseException("dependency.too-many-args");
                 }
             }
         }

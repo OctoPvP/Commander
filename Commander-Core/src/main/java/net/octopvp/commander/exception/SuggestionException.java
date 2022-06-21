@@ -1,11 +1,9 @@
 package net.octopvp.commander.exception;
 
-public class SuggestionException extends CommandException {
-    public SuggestionException(String message) {
-        super(message);
-    }
+import net.octopvp.commander.lang.LocalizedCommandException;
 
-    public SuggestionException(String message, Throwable cause) {
-        super(message, cause);
+public class SuggestionException extends LocalizedCommandException {
+    public SuggestionException(String key, Object... args) {
+        super(key, args);
     }
 }

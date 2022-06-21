@@ -614,10 +614,11 @@ public class CommanderImpl implements Commander {
                 if (result instanceof Collection) {
                     customReturn = (Collection<String>) result;
                 }else {
-                    throw new SuggestionException("Completer method must return a collection of strings.");
+                    throw new SuggestionException("suggestion.completer-must-return-string");
                 }
             } catch (InvocationTargetException | IllegalAccessException e) {
-                throw new SuggestionException("Failed to invoke completer method.", e);
+                e.printStackTrace();
+                throw new SuggestionException("suggestion.failed-to-invoke");
             }
         }
 
