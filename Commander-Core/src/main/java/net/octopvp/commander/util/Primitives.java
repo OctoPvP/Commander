@@ -1,3 +1,27 @@
+/*
+ * Copyright (c) Badbird5907 2022.
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package net.octopvp.commander.util;
 
 import lombok.experimental.UtilityClass;
@@ -17,6 +41,24 @@ import java.util.Map;
 public final class Primitives {
     private static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER;
     private static final Map<Class<?>, Class<?>> WRAPPER_TO_PRIMITIVE;
+
+    static {
+        Map<Class<?>, Class<?>> primToWrap = new LinkedHashMap<>(16);
+        Map<Class<?>, Class<?>> wrapToPrim = new LinkedHashMap<>(16);
+
+        add(primToWrap, wrapToPrim, boolean.class, Boolean.class);
+        add(primToWrap, wrapToPrim, byte.class, Byte.class);
+        add(primToWrap, wrapToPrim, char.class, Character.class);
+        add(primToWrap, wrapToPrim, double.class, Double.class);
+        add(primToWrap, wrapToPrim, float.class, Float.class);
+        add(primToWrap, wrapToPrim, int.class, Integer.class);
+        add(primToWrap, wrapToPrim, long.class, Long.class);
+        add(primToWrap, wrapToPrim, short.class, Short.class);
+        add(primToWrap, wrapToPrim, void.class, Void.class);
+
+        PRIMITIVE_TO_WRAPPER = Collections.unmodifiableMap(primToWrap);
+        WRAPPER_TO_PRIMITIVE = Collections.unmodifiableMap(wrapToPrim);
+    }
 
     /**
      * Returns the type of the given object
@@ -124,22 +166,29 @@ public final class Primitives {
         }
     }
 
-    static {
-        Map<Class<?>, Class<?>> primToWrap = new LinkedHashMap<>(16);
-        Map<Class<?>, Class<?>> wrapToPrim = new LinkedHashMap<>(16);
-
-        add(primToWrap, wrapToPrim, boolean.class, Boolean.class);
-        add(primToWrap, wrapToPrim, byte.class, Byte.class);
-        add(primToWrap, wrapToPrim, char.class, Character.class);
-        add(primToWrap, wrapToPrim, double.class, Double.class);
-        add(primToWrap, wrapToPrim, float.class, Float.class);
-        add(primToWrap, wrapToPrim, int.class, Integer.class);
-        add(primToWrap, wrapToPrim, long.class, Long.class);
-        add(primToWrap, wrapToPrim, short.class, Short.class);
-        add(primToWrap, wrapToPrim, void.class, Void.class);
-
-        PRIMITIVE_TO_WRAPPER = Collections.unmodifiableMap(primToWrap);
-        WRAPPER_TO_PRIMITIVE = Collections.unmodifiableMap(wrapToPrim);
+    public static Object getDefaultValue(Class<?> type) {
+        notNull(type, "type");
+        if (type.isPrimitive()) {
+            if (type == boolean.class)
+                return false;
+            if (type == char.class)
+                return '\0';
+            if (type == byte.class)
+                return (byte) 0;
+            if (type == short.class)
+                return (short) 0;
+            if (type == int.class)
+                return 0;
+            if (type == long.class)
+                return 0L;
+            if (type == float.class)
+                return 0f;
+            if (type == double.class)
+                return 0d;
+            throw new IllegalArgumentException("Unknown primitive type: " + type);
+        } else {
+            return null;
+        }
     }
 
     private static void add(

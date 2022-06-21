@@ -1,9 +1,36 @@
+/*
+ * Copyright (c) Badbird5907 2022.
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package net.octopvp.commander.command;
 
 import lombok.Getter;
 import lombok.Setter;
 import net.octopvp.commander.Commander;
-import net.octopvp.commander.annotation.*;
+import net.octopvp.commander.annotation.Command;
+import net.octopvp.commander.annotation.Cooldown;
+import net.octopvp.commander.annotation.Dependency;
+import net.octopvp.commander.annotation.Permission;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -37,6 +64,8 @@ public class CommandInfo { //This is the object that is stored in the command ma
     private boolean subCommand = false, parentCommand = false;
     private CommandInfo parent;
     private List<CommandInfo> subCommands;
+    private boolean hasFlags, foundFlagsAlready;
+    private boolean hasSwitches, foundSwitchesAlready;
 
     private Map<Integer, CompleterInfo> completers = new HashMap<>();
 
@@ -51,7 +80,7 @@ public class CommandInfo { //This is the object that is stored in the command ma
         this.commander = commander;
         if (isAnnotationPresent(Permission.class)) {
             this.permission = getAnnotation(Permission.class).value();
-        }else {
+        } else {
             this.permission = null;
         }
         if (isAnnotationPresent(Cooldown.class)) {
@@ -72,6 +101,8 @@ public class CommandInfo { //This is the object that is stored in the command ma
 
     public String getUsage() {
         if (usage == null || usage.equals("<<generate>>")) {
+            String optionalPrefix = commander.getConfig().getOptionalPrefix(), requiredPrefix = commander.getConfig().getRequiredPrefix(),
+                    optionalSuffix = commander.getConfig().getOptionalSuffix(), requiredSuffix = commander.getConfig().getRequiredSuffix();
             if (parentCommand) {
                 StringBuilder builder = new StringBuilder();
                 builder.append(commander.getConfig().getRequiredPrefix());
@@ -87,11 +118,23 @@ public class CommandInfo { //This is the object that is stored in the command ma
                     if (parameter.hideFromUsage()) {
                         continue;
                     }
-                    boolean optional = parameter.isOptional();
-                    builder.append(optional ? commander.getConfig().getOptionalPrefix() : commander.getConfig().getRequiredPrefix())
-                            .append(parameter.getName())
-                            .append(optional ? commander.getConfig().getOptionalSuffix() : commander.getConfig().getRequiredSuffix())
-                            .append(" ");
+                    if (parameter.isSwitch()) {
+                        builder.append(optionalPrefix)
+                                .append("-").append(parameter.getSwitchUsageName())
+                                .append(optionalSuffix)
+                                .append(" ");
+                    } else if (parameter.isFlag()) {
+                        builder.append(optionalPrefix)
+                                .append("-").append(parameter.getFlagUsageName())
+                                .append(optionalSuffix)
+                                .append(" ");
+                    } else {
+                        boolean optional = parameter.isOptional();
+                        builder.append(optional ? optionalPrefix : requiredPrefix)
+                                .append(parameter.getName())
+                                .append(optional ? optionalSuffix : requiredSuffix)
+                                .append(" ");
+                    }
                 }
                 this.usage = builder.toString().trim();
             }
@@ -113,9 +156,6 @@ public class CommandInfo { //This is the object that is stored in the command ma
     public <T extends Annotation> T getAnnotation(Class<T> annotation) {
         return (T) annotations.get(annotation);
     }
-
-    private boolean hasFlags, foundFlagsAlready;
-    private boolean hasSwitches, foundSwitchesAlready;
 
     public boolean hasFlags() {
         if (foundFlagsAlready) {
@@ -151,7 +191,14 @@ public class CommandInfo { //This is the object that is stored in the command ma
         if (cooldownMap == null) {
             return false;
         }
-        return cooldownMap.containsKey(uuid);
+        //check if they are on a cooldown, if so, check if it has expired, if it has expired, remove
+        Long time = cooldownMap.get(uuid);
+        if (time == null) return false;
+        if (time - System.currentTimeMillis() <= 0) { // Cooldown expired
+            cooldownMap.remove(uuid);
+            return false;
+        }
+        return true;
     }
 
     public double getCooldownMillis(UUID uuid) {

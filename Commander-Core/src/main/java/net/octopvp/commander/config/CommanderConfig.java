@@ -1,16 +1,42 @@
+/*
+ * Copyright (c) Badbird5907 2022.
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package net.octopvp.commander.config;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import net.octopvp.commander.lang.ResponseHandler;
+
+import java.util.Locale;
 
 @Getter
 @Setter
 @NoArgsConstructor
 public class CommanderConfig {
     private boolean defaultRequired = true, joinArgsWithQuotes = true, checkPermissionsOnSuggestion = true, showNextSuggestionOnlyIfEndsWithSpace = true,
-    filterSuggestions = true;
+            filterSuggestions = true;
 
     private String optionalPrefix = "[", optionalSuffix = "]";
     private String requiredPrefix = "<", requiredSuffix = ">";
@@ -19,8 +45,12 @@ public class CommanderConfig {
 
     private String commandPrefix = "/";
 
+    private ResponseHandler responseHandler;
+
+    private Locale locale;
+
     public static class Builder {
-        private CommanderConfig config = new CommanderConfig();
+        private final CommanderConfig config = new CommanderConfig();
 
         public Builder setDefaultRequired(boolean defaultRequired) {
             config.setDefaultRequired(defaultRequired);
@@ -79,6 +109,16 @@ public class CommanderConfig {
 
         public Builder setFilterSuggestions(boolean filterSuggestions) {
             config.setFilterSuggestions(filterSuggestions);
+            return this;
+        }
+
+        public Builder setResponseHandler(ResponseHandler responseHandler) {
+            config.setResponseHandler(responseHandler);
+            return this;
+        }
+
+        public Builder setLocale(Locale locale) {
+            config.setLocale(locale);
             return this;
         }
 

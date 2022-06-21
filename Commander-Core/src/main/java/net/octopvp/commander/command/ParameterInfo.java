@@ -1,6 +1,29 @@
+/*
+ * Copyright (c) Badbird5907 2022.
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package net.octopvp.commander.command;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -8,9 +31,10 @@ import net.octopvp.commander.Commander;
 import net.octopvp.commander.annotation.*;
 import net.octopvp.commander.provider.Provider;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -80,10 +104,19 @@ public class ParameterInfo {
     public boolean isFlag() {
         return parameter.isAnnotationPresent(Flag.class);
     }
-    public String getFlag() {
+
+    public List<String> getFlags() {
         if (parameter.isAnnotationPresent(Flag.class)) {
             Flag f = parameter.getAnnotation(Flag.class);
-            return f.value() == null || f.value().isEmpty() ? parameter.getName() : f.value();
+            List<String> flags = new ArrayList<>();
+            flags.add(f.value());
+            for (String alias : f.aliases()) {
+                if (alias != null && !alias.isEmpty()) {
+                    flags.add(alias);
+                }
+            }
+            return flags;
+            //return f.value() == null || f.value().isEmpty() ? parameter.getName() : f.value();
         }
         return null;
     }
@@ -91,16 +124,42 @@ public class ParameterInfo {
     public boolean isSwitch() {
         return parameter.isAnnotationPresent(Switch.class);
     }
-    public String getSwitch() {
+
+    public List<String> getSwitches() {
         if (parameter.isAnnotationPresent(Switch.class)) {
             Switch s = parameter.getAnnotation(Switch.class);
-            return s.value() == null || s.value().isEmpty() ? parameter.getName() : s.value();
+            List<String> switches = new ArrayList<>();
+            for (String alias : s.aliases()) {
+                if (alias != null && !alias.isEmpty()) {
+                    switches.add(alias);
+                }
+            }
+            if (s.value() != null && !s.value().isEmpty()) {
+                switches.add(s.value());
+            }
+            return switches;
+        }
+        return null;
+    }
+
+    public String getSwitchUsageName() {
+        if (parameter.isAnnotationPresent(Switch.class)) {
+            Switch s = parameter.getAnnotation(Switch.class);
+            return s.value();
+        }
+        return null;
+    }
+
+    public String getFlagUsageName() {
+        if (parameter.isAnnotationPresent(Flag.class)) {
+            Flag f = parameter.getAnnotation(Flag.class);
+            return f.value();
         }
         return null;
     }
 
     public boolean hideFromUsage() {
-        return commander.getPlatform().isSenderParameter(this) || parameter.isAnnotationPresent(Dependency.class);
+        return commander.getPlatform().isSenderParameter(this) || parameter.isAnnotationPresent(Dependency.class) || parameter.isAnnotationPresent(GetArgumentFor.class) || parameter.isAnnotationPresent(Hidden.class);
     }
 
     @Override
