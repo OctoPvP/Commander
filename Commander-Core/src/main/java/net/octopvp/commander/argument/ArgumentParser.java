@@ -39,8 +39,9 @@ import net.octopvp.commander.sender.CoreCommandSender;
 import net.octopvp.commander.util.Primitives;
 import net.octopvp.commander.validator.Validator;
 
-import java.util.ArrayList;
+import java.lang.reflect.Parameter;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -134,7 +135,7 @@ public class ArgumentParser {
             return arguments;
         } catch (CommandException e) {
             LocalizedCommandException.checkResponseHandlerNull(e, ctx.getCommandInfo().getCommander().getResponseHandler());
-            ctx.getCommandInfo().getCommander().getPlatform().handleCommandException(ctx, e);
+            ctx.getCommandInfo().getCommander().getPlatform().handleCommandException(ctx.getCommandInfo(), ctx.getCommandSender(), e);
         }
         return null;
     }

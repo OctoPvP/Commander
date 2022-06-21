@@ -63,7 +63,7 @@ public class CommanderImpl implements Commander {
     private final Map<Class<?>, Validator<Object>> validators = new HashMap<>();
     private final ResponseHandler responseHandler;
     private CommanderConfig config;
-  
+
     public CommanderImpl(CommanderPlatform platform) {
         this(platform, new CommanderConfig());
     }
@@ -598,23 +598,6 @@ public class CommanderImpl implements Commander {
             return null;
         }
 
-        ParameterInfo param = null;
-        boolean found = false;
-        while (!found) {
-            param = params[index];
-            if (param.isFlag() || param.isSwitch()) { //TODO add support for flag and switch suggestions
-                if (++index >= params.length) {
-                    return null;
-                }
-                if (param.isFlag()) {
-                    param = params[index];
-                }
-            } else {
-                found = true;
-            }
-        }
-        Provider<?> provider = param.getProvider();
-
         CompleterInfo customCompleter = command.getCompleters().get(index);
         boolean allParams = false;
         if (customCompleter == null) {
@@ -640,10 +623,6 @@ public class CommanderImpl implements Commander {
 
         Collection<String> suggestionsProvided;
         if (customReturn == null) {
-            if (index >= params.length || index < 0) {
-                return null;
-            }
-
             ParameterInfo param = null;
             boolean found = false;
             while (!found) {

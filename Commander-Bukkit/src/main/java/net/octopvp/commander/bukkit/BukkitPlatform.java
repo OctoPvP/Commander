@@ -86,6 +86,7 @@ public class BukkitPlatform implements CommanderPlatform {
     @Override
     public void handleError(String error, CoreCommandSender sender) {
         BukkitCommandSender s = (BukkitCommandSender) sender;
+        System.out.println("err");
         s.sendMessage(ChatColor.RED + error);
     }
 
@@ -103,6 +104,7 @@ public class BukkitPlatform implements CommanderPlatform {
                 Bukkit.getLogger().severe("Could not find a instance of ResponseHandler to handle command exception: " + e.getClass().getName());
                 return;
             }
+            System.out.println("LocalizedCommandException");
             sender.sendMessage(ChatColor.RED + handler.getMessage(lce, lce.getPlaceholders()));
         } else sender.sendMessage(ChatColor.RED + e.getMessage());
     }
