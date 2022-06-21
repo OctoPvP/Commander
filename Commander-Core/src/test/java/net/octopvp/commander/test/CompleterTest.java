@@ -27,6 +27,7 @@ package net.octopvp.commander.test;
 import net.octopvp.commander.Commander;
 import net.octopvp.commander.CommanderImpl;
 import net.octopvp.commander.annotation.Command;
+import net.octopvp.commander.annotation.Completer;
 import net.octopvp.commander.annotation.Sender;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
@@ -53,8 +54,8 @@ public class CompleterTest {
                         .build())
                 .init()
                 .register(this)
-                .registerProvider(TestClass.class,new TestProvider())
-                .registerProvider(TestClassTwo.class,new TestProvider2())
+                .registerProvider(TestClass.class, new TestProvider())
+                .registerProvider(TestClassTwo.class, new TestProvider2())
                 .registerProvider(TestClassThree.class, new TestProvider3())
         ;
         List<String> completions = commander.getSuggestions(new CommandSender(), "test ");
@@ -72,9 +73,26 @@ public class CompleterTest {
         assertFalse(completions3.isEmpty());
         assertTrue(completions3.contains("It Works!") && completions3.contains(":)"));
         System.out.println("Third passed.");
+
+        List<String> completions4 = commander.getSuggestions(new CommandSender(), "t a b ");
+        System.out.println(completions4);
+        assertNotNull(completions4);
+        assertFalse(completions4.isEmpty());
+        assertTrue(completions4.contains("b"));
+        System.out.println("Fourth passed.");
     }
+
     @Command(name = "test")
     public void test(@Sender CommandSender sender, TestClass testClass, TestClassTwo testClassTwo, TestClassThree three) {
+    }
+
+    @Command(name = "t")
+    public void t(@Sender CommandSender sender, String s, String a, String b) {
+    }
+
+    @Completer(name = "t", index = 2)
+    public List<String> t2(@Sender CommandSender sender, String input, String lastArg) {
+        return Arrays.asList("b");
     }
 
     private static class TestProvider implements Provider<TestClass> {
@@ -89,6 +107,7 @@ public class CompleterTest {
             return Arrays.asList("Hello", "World");
         }
     }
+
     private static class TestProvider2 implements Provider<TestClassTwo> {
 
         @Override
@@ -101,6 +120,7 @@ public class CompleterTest {
             return Arrays.asList("Yes", "ABCDEFG");
         }
     }
+
     private static class TestProvider3 implements Provider<TestClassThree> {
 
         @Override
@@ -120,9 +140,11 @@ public class CompleterTest {
             return "Hello World!";
         }
     }
+
     private static class TestClassTwo {
 
     }
+
     private static class TestClassThree {
 
     }
