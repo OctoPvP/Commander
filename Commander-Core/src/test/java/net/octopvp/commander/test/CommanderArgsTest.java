@@ -30,10 +30,10 @@ import net.octopvp.commander.annotation.Command;
 import net.octopvp.commander.annotation.Flag;
 import net.octopvp.commander.annotation.Required;
 import net.octopvp.commander.annotation.Switch;
+import net.octopvp.commander.config.CommanderConfig;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CommanderArgsTest {
     private Commander commander;
@@ -81,7 +81,9 @@ public class CommanderArgsTest {
 
     @Test
     public void testAllStrings() {
-        commander = new CommanderImpl(new TestPlatform()).init();
+        commander = new CommanderImpl(new TestPlatform())
+                .setConfig(new CommanderConfig.Builder().setJoinArgsWithQuotes(true)
+                        .build()).init();
 
         commander.register(this);
 
@@ -89,11 +91,11 @@ public class CommanderArgsTest {
         for (int i = 0; i < args.length; i++) {
             if (i == 0) {
                 assertEquals("arg1", args[i]);
-            }else if (i == 1) {
+            } else if (i == 1) {
                 assertEquals("arg2 arg3 arg4", args[i]);
-            }else if (i == 2) {
+            } else if (i == 2) {
                 assertEquals("arg5", args[i]);
-            }else throw new RuntimeException("Too many args!");
+            } else throw new RuntimeException("Too many args!");
         }
     }
 

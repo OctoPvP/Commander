@@ -29,6 +29,7 @@ import net.octopvp.commander.annotation.Range;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
+import net.octopvp.commander.exception.CommandParseException;
 import net.octopvp.commander.exception.InvalidArgsException;
 import net.octopvp.commander.lang.LocalizedCommandException;
 import net.octopvp.commander.provider.Provider;
@@ -50,7 +51,16 @@ public class LongProvider implements Provider<Long> {
                 }
                 return -1L;
             }
-            return CommanderUtilities.parseTime(arg == null || arg.isEmpty() ? duration.defaultValue() : arg, duration.future());
+            try {
+                return CommanderUtilities.parseTime(arg == null || arg.isEmpty() ? duration.defaultValue() : arg, duration.future());
+            } catch (CommandParseException e) {
+                if (parameterInfo.isOptional() && e.getKey().equals("illegal.date")) {
+                    args.addFirst(arg); // put back the arg
+                    return null;
+                } else {
+                    throw e;
+                }
+            }
         }
         try {
             return Long.parseLong(arg);
@@ -68,7 +78,11 @@ public class LongProvider implements Provider<Long> {
     public Long provideDefault(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
         if (parameterInfo.getParameter().isAnnotationPresent(Duration.class)) {
             Duration duration = parameterInfo.getParameter().getAnnotation(Duration.class);
-            return CommanderUtilities.parseTime(duration.defaultValue(), duration.future());
+            String def = duration.defaultValue();
+            if (def.equalsIgnoreCase("perm") || def.equalsIgnoreCase("permanent")) {
+                return -1L;
+            }
+            return CommanderUtilities.parseTime(def, duration.future());
         }
         if (parameterInfo.getParameter().isAnnotationPresent(Range.class))
             return (long) parameterInfo.getParameter().getAnnotation(Range.class).defaultValue();
