@@ -391,7 +391,20 @@ public class CommanderImpl implements Commander {
     @Override
     public void executeCommand(CoreCommandSender sender, String label, String[] args) throws CommandParseException {
         CommandInfo commandInfo = commandMap.get(label);
+        try {
+            if (commandInfo == null) {
+                throw new CommandNotFoundException("handler.not-found", label.toLowerCase());
+            }
+            if (commandInfo.isAsync()) {
+                getPlatform().runAsync(() -> executeInternally(sender, label, args, commandInfo));
+            } else executeInternally(sender, label, args, commandInfo);
+        } catch (CommandException e) {
+            LocalizedCommandException.checkResponseHandlerNull(e, getResponseHandler());
+            platform.handleCommandException(commandInfo, sender, e);
+        }
+    }
 
+    private void executeInternally(CoreCommandSender sender, String label, String[] args, CommandInfo commandInfo) {
         if (args == null) {
             args = new String[]{};
         }
@@ -486,6 +499,7 @@ public class CommanderImpl implements Commander {
             LocalizedCommandException.checkResponseHandlerNull(e, getResponseHandler());
             platform.handleCommandException(commandInfo, sender, e);
         }
+
     }
 
     private Map<String, String> extractFlags(final List<String> args, final ParameterInfo[] params) {

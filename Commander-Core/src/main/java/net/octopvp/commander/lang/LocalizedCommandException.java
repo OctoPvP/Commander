@@ -17,11 +17,14 @@ public class LocalizedCommandException extends CommandException {
         this.placeholders = placeholders;
     }
 
+    /*
     public LocalizedCommandException(String key, Exception cause, Object... placeholders) {
         super(cause);
         this.key = key;
         this.placeholders = placeholders;
+        //add cause
     }
+     */
 
     public static void checkResponseHandlerNull(Exception e, ResponseHandler responseHandler) {
         if (e instanceof LocalizedCommandException) {

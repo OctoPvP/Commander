@@ -81,4 +81,9 @@ public class TestPlatform implements CommanderPlatform {
             }
         };
     }
+
+    @Override
+    public void runAsync(Runnable runnable) {
+        new Thread(runnable, "Commander Async").start();
+    }
 }

@@ -27,10 +27,7 @@ package net.octopvp.commander.command;
 import lombok.Getter;
 import lombok.Setter;
 import net.octopvp.commander.Commander;
-import net.octopvp.commander.annotation.Command;
-import net.octopvp.commander.annotation.Cooldown;
-import net.octopvp.commander.annotation.Dependency;
-import net.octopvp.commander.annotation.Permission;
+import net.octopvp.commander.annotation.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -67,6 +64,8 @@ public class CommandInfo { //This is the object that is stored in the command ma
     private boolean hasFlags, foundFlagsAlready;
     private boolean hasSwitches, foundSwitchesAlready;
 
+    private boolean async;
+
     private Map<Integer, CompleterInfo> completers = new HashMap<>();
 
     public CommandInfo(ParameterInfo[] parameters, String name, String description, String usage, String[] aliases, Method method, Object instance, Map<Class<? extends Annotation>, Annotation> annotations, Commander commander) {
@@ -87,6 +86,9 @@ public class CommandInfo { //This is the object that is stored in the command ma
             this.cooldown = getAnnotation(Cooldown.class).value();
             this.cooldownUnit = getAnnotation(Cooldown.class).unit();
             this.cooldownMap = new HashMap<>();
+        }
+        if (isAnnotationPresent(Async.class)) {
+            this.async = true;
         }
         //make sure aliases are lowercase
         this.aliases = aliases;

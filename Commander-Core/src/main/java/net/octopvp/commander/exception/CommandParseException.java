@@ -32,7 +32,7 @@ public class CommandParseException extends LocalizedCommandException {
     }
 
     public CommandParseException(Exception cause) {
-        super("parse.fail", cause);
+        super("parse.fail", cause.getLocalizedMessage());
     }
 
     public CommandParseException(Object... placeholders) {

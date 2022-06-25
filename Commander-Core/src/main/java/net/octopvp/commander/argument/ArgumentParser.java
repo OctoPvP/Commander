@@ -104,20 +104,21 @@ public class ArgumentParser {
                     obj = provider.provide(ctx, ctx.getCommandInfo(), parameter, cArgs.getArgs());
                 } catch (Exception e) {
                     //e.printStackTrace();
+                    LocalizedCommandException.checkResponseHandlerNull(e, ctx.getCommandInfo().getCommander().getResponseHandler());
                     if (e instanceof InvalidArgsException) {
-                        throw new CommandParseException(e);
+                        throw new CommandParseException(e.getLocalizedMessage());
                     }
                     if (provider.provideUsageOnException()) {
                         throw new InvalidArgsException(ctx.getCommandInfo());
                     }
                     if (provider.failOnExceptionIgnoreOptional()) {
-                        throw new CommandParseException(parameter.getName(), e);
+                        throw new CommandParseException("parse.fail", e.getMessage());
                     }
                     if (parameter.isOptional()) {
                         obj = null;
-                    } else if (provider.failOnException())
-                        throw new CommandParseException(parameter.getName(), e);
-                    else {
+                    } else if (provider.failOnException()) {
+                        throw new CommandParseException("parse.fail", e.getMessage());
+                    } else {
                         obj = null;
                     }
                 }

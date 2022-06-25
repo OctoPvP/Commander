@@ -34,8 +34,6 @@ import net.octopvp.commander.sender.CoreCommandSender;
 import org.reflections.Reflections;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
 
 public interface CommanderPlatform {
     void handleMessage(String message, CoreCommandSender sender);
@@ -58,17 +56,19 @@ public interface CommanderPlatform {
                 parameterInfo.getParameter().getType().equals(CoreCommandSender.class);
     }
 
-    default String getPrefix(){
+    default String getPrefix() {
         return "/";
     }
 
     HelpService getHelpService();
 
-    default Collection<Class<?>> getClassesInPackage(String packageName){
+    void runAsync(Runnable runnable);
+
+    default Collection<Class<?>> getClassesInPackage(String packageName) {
         return getReflections(packageName).getSubTypesOf(Object.class);
     }
 
-    default Reflections getReflections(String packageName){
+    default Reflections getReflections(String packageName) {
         return new Reflections(packageName);
     }
 }
