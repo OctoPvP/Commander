@@ -24,13 +24,14 @@
 
 package net.octopvp.commander.provider.impl;
 
+import net.octopvp.commander.annotation.DefaultNumber;
 import net.octopvp.commander.annotation.Duration;
-import net.octopvp.commander.annotation.Range;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.exception.CommandParseException;
 import net.octopvp.commander.exception.InvalidArgsException;
+import net.octopvp.commander.exception.ProvideDefaultException;
 import net.octopvp.commander.lang.LocalizedCommandException;
 import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.sender.CoreCommandSender;
@@ -65,6 +66,9 @@ public class LongProvider implements Provider<Long> {
         try {
             return Long.parseLong(arg);
         } catch (NumberFormatException e) {
+            if (parameterInfo.getParameter().isAnnotationPresent(DefaultNumber.class)) {
+                throw new ProvideDefaultException();
+            }
             throw new InvalidArgsException(commandInfo);
         }
     }
@@ -84,8 +88,8 @@ public class LongProvider implements Provider<Long> {
             }
             return CommanderUtilities.parseTime(def, duration.future());
         }
-        if (parameterInfo.getParameter().isAnnotationPresent(Range.class))
-            return (long) parameterInfo.getParameter().getAnnotation(Range.class).defaultValue();
+        if (parameterInfo.getParameter().isAnnotationPresent(DefaultNumber.class))
+            return (long) parameterInfo.getParameter().getAnnotation(DefaultNumber.class).value();
         return -1L;
     }
 

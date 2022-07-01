@@ -27,6 +27,7 @@ package net.octopvp.commander.test;
 import net.octopvp.commander.Commander;
 import net.octopvp.commander.CommanderImpl;
 import net.octopvp.commander.annotation.Command;
+import net.octopvp.commander.annotation.DefaultNumber;
 import net.octopvp.commander.annotation.Range;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
@@ -39,11 +40,15 @@ import org.junit.jupiter.api.Test;
 import java.util.Deque;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ValidatorTest {
     private Commander commander;
     private boolean success = true;
+
+    private int i = 0;
+
     @Test
     public void validateTest() {
         commander = new CommanderImpl(new TestPlatform())
@@ -62,6 +67,9 @@ public class ValidatorTest {
 
         commander.executeCommand(new CommandSender(), "t", new String[]{"1"}); //TODO - chop off trailing decimal places in error
         assertTrue(success);
+
+        commander.executeCommand(new CommandSender(), "testdefault", new String[]{});
+        assertEquals(20, i);
     }
 
     @Command(name = "test")
@@ -73,6 +81,11 @@ public class ValidatorTest {
     @Command(name = "t")
     public void t(@Range(min = 2) int i) {
         success = false;
+    }
+
+    @Command(name = "testdefault")
+    public void testDefault(@DefaultNumber(20) int i) {
+        this.i = i;
     }
 
     private static class TestClass {

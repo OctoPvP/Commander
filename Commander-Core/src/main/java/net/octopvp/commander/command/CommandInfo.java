@@ -146,9 +146,9 @@ public class CommandInfo { //This is the object that is stored in the command ma
 
     public String getFullUsage() {
         if (isSubCommand()) {
-            return commander.getConfig().getCommandPrefix() + getParent().getName() + " " + getName() + " " + getUsage();
+            return (commander.getConfig().getCommandPrefix() + getParent().getName() + " " + getName() + " " + getUsage()).trim();
         }
-        return commander.getConfig().getCommandPrefix() + getName() + " " + getUsage();
+        return (commander.getConfig().getCommandPrefix() + getName() + " " + getUsage()).trim();
     }
 
     public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {

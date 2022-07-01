@@ -127,8 +127,10 @@ public class CommanderImpl implements Commander {
         });
         registerValidator(Number.class, (value, parameter, context) -> {
             Range range = parameter.getParameter().getAnnotation(Range.class);
-            if (range != null && (value.doubleValue() > range.max() || value.doubleValue() < range.min())) {
-                if (value.doubleValue() == range.defaultValue()) { //All number providers should use Range#defaultValue() if the annotation is present
+            boolean passed = range != null && (value.doubleValue() > range.max() || value.doubleValue() < range.min());
+            //System.out.println("Passed: " + passed + " | " + (range != null) + " | " + (value.doubleValue() > range.max()) + " | " + (value.doubleValue() < range.min()));
+            if (passed) {
+                if (parameter.getParameter().isAnnotationPresent(DefaultNumber.class) && value.doubleValue() == parameter.getParameter().getAnnotation(DefaultNumber.class).value()) { //All number providers should use Range#defaultValue() if the annotation is present
                     return; //TODO we gotta find a better way to handle primitives, which cant take null
                 }
                 StringBuilder minMax = new StringBuilder("(");
@@ -150,7 +152,12 @@ public class CommanderImpl implements Commander {
                     minMax.append("max: ").append(max);
                 }
                 minMax.append(")");
-                throw new ValidateException("validate.exception", value.doubleValue(), minMax.toString());
+                String finalMinMax = minMax.toString();
+                if (finalMinMax.equals("()")) {
+                    finalMinMax = "";
+                }
+                //System.out.println("Final: " + finalMinMax);
+                throw new ValidateException("validate.exception", value.doubleValue(), finalMinMax);
             }
         });
         return this;
@@ -420,21 +427,27 @@ public class CommanderImpl implements Commander {
                         return;
                     }
                 }
-                boolean isRootLevel = false;
-                String sub = args[0];
-                commandInfo = commandInfo.getSubCommand(sub);
-                if (commandInfo == null) {
-                    if (sub.equalsIgnoreCase("help")) {
+                boolean isRootLevel = args.length == 0;
+                if (isRootLevel) {
+                    commandInfo = parent.getSubCommand("");
+                    if (commandInfo == null) {
                         getPlatform().getHelpService().sendHelp(parent, sender);
                         return;
                     }
-                    commandInfo = parent.getSubCommand("");
-                    isRootLevel = commandInfo != null;
-                    if (!isRootLevel) {
-                        throw new CommandNotFoundException("subcommand.not-found", sub.toLowerCase(), parent.getName());
+                } else {
+                    String sub = args[0];
+                    commandInfo = commandInfo.getSubCommand(sub);
+                    if (commandInfo == null) {
+                        if (sub.equalsIgnoreCase("help")) {
+                            getPlatform().getHelpService().sendHelp(parent, sender);
+                            return;
+                        }
+                        commandInfo = parent.getSubCommand("");
+                        isRootLevel = commandInfo != null;
+                        if (!isRootLevel) {
+                            throw new CommandNotFoundException("subcommand.not-found", sub.toLowerCase(), parent.getName());
+                        }
                     }
-                }
-                if (!isRootLevel) {
                     String[] newArgs = new String[args.length - 1];
                     System.arraycopy(args, 1, newArgs, 0, args.length - 1);
                     args = newArgs;
@@ -576,9 +589,14 @@ public class CommanderImpl implements Commander {
         if (command.isParentCommand()) {
             parent = command;
             if (split.length == 1) {
-                return parent.getSubCommands().stream().map(CommandInfo::getName).collect(Collectors.toList());
+                List<String> list = parent.getSubCommands().stream().map(CommandInfo::getName).collect(Collectors.toList());
+                if (!list.contains("help"))
+                    list.add("help");
+                return list;
             } else if (split.length == 2 && !input.endsWith(" ")) {
                 List<String> suggestions = parent.getSubCommands().stream().map(CommandInfo::getName).collect(Collectors.toList());
+                if (!suggestions.contains("help"))
+                    suggestions.add("help");
                 suggestions.removeIf(s -> !s.trim().toLowerCase().startsWith(split[1].trim().toLowerCase()));
                 return suggestions;
             }

@@ -24,10 +24,11 @@
 
 package net.octopvp.commander.provider.impl;
 
-import net.octopvp.commander.annotation.Range;
+import net.octopvp.commander.annotation.DefaultNumber;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
+import net.octopvp.commander.exception.ProvideDefaultException;
 import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.sender.CoreCommandSender;
 
@@ -37,8 +38,15 @@ import java.util.List;
 public class ShortProvider implements Provider<Short> {
     @Override
     public Short provide(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
-        String arg = args.poll();
-        return Short.parseShort(arg);
+        try {
+            String arg = args.poll();
+            return Short.parseShort(arg);
+        } catch (NumberFormatException e) {
+            if (parameterInfo.getParameter().isAnnotationPresent(DefaultNumber.class)) {
+                throw new ProvideDefaultException();
+            }
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -48,7 +56,8 @@ public class ShortProvider implements Provider<Short> {
 
     @Override
     public Short provideDefault(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
-        if (parameterInfo.getParameter().isAnnotationPresent(Range.class)) return (short) parameterInfo.getParameter().getAnnotation(Range.class).defaultValue();
+        if (parameterInfo.getParameter().isAnnotationPresent(DefaultNumber.class))
+            return (short) parameterInfo.getParameter().getAnnotation(DefaultNumber.class).value();
         return -1;
     }
 

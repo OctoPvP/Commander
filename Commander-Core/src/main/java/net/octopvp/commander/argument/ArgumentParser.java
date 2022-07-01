@@ -33,6 +33,7 @@ import net.octopvp.commander.command.ParameterInfo;
 import net.octopvp.commander.exception.CommandException;
 import net.octopvp.commander.exception.CommandParseException;
 import net.octopvp.commander.exception.InvalidArgsException;
+import net.octopvp.commander.exception.ProvideDefaultException;
 import net.octopvp.commander.lang.LocalizedCommandException;
 import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.sender.CoreCommandSender;
@@ -108,18 +109,22 @@ public class ArgumentParser {
                     if (e instanceof InvalidArgsException) {
                         throw new CommandParseException(e.getLocalizedMessage());
                     }
-                    if (provider.provideUsageOnException()) {
-                        throw new InvalidArgsException(ctx.getCommandInfo());
-                    }
-                    if (provider.failOnExceptionIgnoreOptional()) {
-                        throw new CommandParseException("parse.fail", e.getMessage());
-                    }
-                    if (parameter.isOptional()) {
+                    if (e instanceof ProvideDefaultException) {
                         obj = null;
-                    } else if (provider.failOnException()) {
-                        throw new CommandParseException("parse.fail", e.getMessage());
                     } else {
-                        obj = null;
+                        if (provider.provideUsageOnException()) {
+                            throw new InvalidArgsException(ctx.getCommandInfo());
+                        }
+                        if (provider.failOnExceptionIgnoreOptional()) {
+                            throw new CommandParseException("parse.fail", e.getMessage());
+                        }
+                        if (parameter.isOptional()) {
+                            obj = null;
+                        } else if (provider.failOnException()) {
+                            throw new CommandParseException("parse.fail", e.getMessage());
+                        } else {
+                            obj = null;
+                        }
                     }
                 }
                 if (obj == null) {
@@ -171,7 +176,7 @@ public class ArgumentParser {
                     break;
                 }
                 default: {
-                    throw new CommandParseException("dependency.too-many-args");
+                    throw new CommandParseException("completer.too-many-args");
                 }
             }
         }

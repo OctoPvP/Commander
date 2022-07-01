@@ -24,12 +24,12 @@
 
 package net.octopvp.commander.provider.impl;
 
-import net.octopvp.commander.annotation.Range;
+import net.octopvp.commander.annotation.DefaultNumber;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.ParameterInfo;
-import net.octopvp.commander.exception.CommandParseException;
 import net.octopvp.commander.exception.InvalidArgsException;
+import net.octopvp.commander.exception.ProvideDefaultException;
 import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.sender.CoreCommandSender;
 
@@ -43,6 +43,9 @@ public class ByteProvider implements Provider<Byte> {
             String arg = args.poll();
             return Byte.parseByte(arg);
         } catch (NumberFormatException e) {
+            if (parameterInfo.getParameter().isAnnotationPresent(DefaultNumber.class)) {
+                throw new ProvideDefaultException();
+            }
             throw new InvalidArgsException(commandInfo);
         }
     }
@@ -54,7 +57,8 @@ public class ByteProvider implements Provider<Byte> {
 
     @Override
     public Byte provideDefault(CommandContext context, CommandInfo commandInfo, ParameterInfo parameterInfo, Deque<String> args) {
-        if (parameterInfo.getParameter().isAnnotationPresent(Range.class)) return (byte) parameterInfo.getParameter().getAnnotation(Range.class).defaultValue();
+        if (parameterInfo.getParameter().isAnnotationPresent(DefaultNumber.class))
+            return (byte) parameterInfo.getParameter().getAnnotation(DefaultNumber.class).value();
         return -1;
     }
 

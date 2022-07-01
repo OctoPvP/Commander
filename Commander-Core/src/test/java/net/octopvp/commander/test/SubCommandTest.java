@@ -40,7 +40,8 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Command(name = "test", description = "test")
 public class SubCommandTest {
@@ -95,9 +96,9 @@ public class SubCommandTest {
     }
 
     @Command(name = "", description = "Testing root level")
-    public void testRoot(String msg) {
-        System.out.println("Root command! " + msg);
-        passed3 = msg.equals("hello_world!");
+    public void testRoot() {
+        System.out.println("Root command! ");
+        passed3 = true;
     }
 
     @Command(name = "completer")
