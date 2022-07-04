@@ -64,7 +64,7 @@ public class CommandInfo { //This is the object that is stored in the command ma
     private boolean hasFlags, foundFlagsAlready;
     private boolean hasSwitches, foundSwitchesAlready;
 
-    private boolean async;
+    private boolean async, registeredWithPlatform;
 
     private Map<Integer, CompleterInfo> completers = new HashMap<>();
 

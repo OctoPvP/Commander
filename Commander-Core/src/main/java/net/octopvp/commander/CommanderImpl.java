@@ -62,6 +62,7 @@ public class CommanderImpl implements Commander {
     private final List<BiConsumer<CommandContext, Object>> postProcessors = new ArrayList<>();
     private final Map<Class<?>, Validator<Object>> validators = new HashMap<>();
     private final ResponseHandler responseHandler;
+    private final Map<Method, Object> completerCache = new HashMap<>();
     private CommanderConfig config;
 
     public CommanderImpl(CommanderPlatform platform) {
@@ -81,8 +82,6 @@ public class CommanderImpl implements Commander {
             this.responseHandler = config.getResponseHandler();
         }
     }
-
-    private final Map<Method, Object> completerCache = new HashMap<>();
 
     @Override
     public Commander register(Object... objects) {
@@ -164,64 +163,76 @@ public class CommanderImpl implements Commander {
     }
 
     private void registerCmd(Object object) {
-        if (object == null) return;
-        List<Annotation> distributedAnnotations = new ArrayList<>();
-        for (Annotation annotation : object.getClass().getDeclaredAnnotations()) {
-            if (annotation.getClass().isAnnotationPresent(DistributeOnMethods.class)) {
-                distributedAnnotations.add(annotation);
-            }
-        }
-        boolean classHasMainCommand = object.getClass().isAnnotationPresent(Command.class);
-        Command parent = null;
-        CommandInfo parentInfo = null;
-        if (classHasMainCommand) {
-            parent = object.getClass().getAnnotation(Command.class);
-            Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
-            for (Annotation declaredAnnotation : object.getClass().getDeclaredAnnotations()) {
-                annotations.put(declaredAnnotation.annotationType(), declaredAnnotation);
-            }
-            for (Annotation distributedAnnotation : distributedAnnotations) {
-                annotations.put(distributedAnnotation.annotationType(), distributedAnnotation);
-            }
-            parentInfo = new CommandInfo(null, parent.name(), parent.description(), parent.usage(), parent.aliases(), null, object, annotations, this);
-            parentInfo.setParentCommand(true);
-            parentInfo.setSubCommands(new ArrayList<>());
-            commandMap.put(parent.name().toLowerCase(), parentInfo);
-            for (String alias : parent.aliases()) {
-                commandMap.put(alias.toLowerCase(), parentInfo);
-            }
-            platform.registerCommand(parentInfo);
-        }
-        for (Method method : object.getClass().getDeclaredMethods()) {
-            if (method.isAnnotationPresent(Command.class)) {
-                Command command = method.getAnnotation(Command.class);
-                String name = command.name();
-                List<ParameterInfo> parameters = new ArrayList<>();
-                for (Parameter parameter : method.getParameters()) {
-                    parameters.add(new ParameterInfo(parameter, this));
+        try {
+            if (object == null) return;
+            List<Annotation> distributedAnnotations = new ArrayList<>();
+            for (Annotation annotation : object.getClass().getDeclaredAnnotations()) {
+                if (annotation.getClass().isAnnotationPresent(DistributeOnMethods.class)) {
+                    distributedAnnotations.add(annotation);
                 }
+            }
+            boolean classHasMainCommand = object.getClass().isAnnotationPresent(Command.class);
+            Command parent = null;
+            CommandInfo parentInfo = null;
+            if (classHasMainCommand) {
+                parent = object.getClass().getAnnotation(Command.class);
                 Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
-                for (Annotation declaredAnnotation : method.getDeclaredAnnotations()) {
+                for (Annotation declaredAnnotation : object.getClass().getDeclaredAnnotations()) {
                     annotations.put(declaredAnnotation.annotationType(), declaredAnnotation);
                 }
                 for (Annotation distributedAnnotation : distributedAnnotations) {
                     annotations.put(distributedAnnotation.annotationType(), distributedAnnotation);
                 }
-                CommandInfo commandInfo = new CommandInfo(parameters.toArray(new ParameterInfo[0]), name, command.description(), command.usage(), command.aliases(), method, object, annotations, this);
-                if (classHasMainCommand) {
-                    commandInfo.setSubCommand(true);
-                    commandInfo.setParent(parentInfo);
-                    parentInfo.getSubCommands().add(commandInfo);
-                } else {
-                    commandMap.put(name.toLowerCase(), commandInfo);
-                    for (String alias : command.aliases()) {
-                        commandMap.put(alias.toLowerCase(), commandInfo);
-                    }
-                    platform.registerCommand(commandInfo);
+                parentInfo = commandMap.get(parent.name().toLowerCase());
+                if (parentInfo == null)
+                    parentInfo = new CommandInfo(null, parent.name(), parent.description(), parent.usage(), parent.aliases(), null, object, annotations, this);
+                parentInfo.setParentCommand(true);
+                if (parentInfo.getSubCommands() == null) parentInfo.setSubCommands(new ArrayList<>());
+                commandMap.put(parent.name().toLowerCase(), parentInfo);
+                for (String alias : parent.aliases()) {
+                    commandMap.put(alias.toLowerCase(), parentInfo);
                 }
-            } else if (method.isAnnotationPresent(Completer.class)) {
-                completerCache.put(method, object);
+                if (!object.getClass().isAnnotationPresent(SecondaryParent.class)) {
+                    platform.registerCommand(parentInfo);
+                    parentInfo.setRegisteredWithPlatform(true);
+                }
             }
+            for (Method method : object.getClass().getDeclaredMethods()) {
+                if (method.isAnnotationPresent(Command.class)) {
+                    Command command = method.getAnnotation(Command.class);
+                    String name = command.name();
+                    System.out.println("3 " + object.getClass().getName() + " | " + name + (parentInfo != null ? " | " + parentInfo.getName() + " | " + parentInfo.isRegisteredWithPlatform() : ""));
+                    List<ParameterInfo> parameters = new ArrayList<>();
+                    for (Parameter parameter : method.getParameters()) {
+                        parameters.add(new ParameterInfo(parameter, this));
+                    }
+                    Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
+                    for (Annotation declaredAnnotation : method.getDeclaredAnnotations()) {
+                        annotations.put(declaredAnnotation.annotationType(), declaredAnnotation);
+                    }
+                    for (Annotation distributedAnnotation : distributedAnnotations) {
+                        annotations.put(distributedAnnotation.annotationType(), distributedAnnotation);
+                    }
+                    CommandInfo commandInfo = new CommandInfo(parameters.toArray(new ParameterInfo[0]), name, command.description(), command.usage(), command.aliases(), method, object, annotations, this);
+                    if (classHasMainCommand) {
+                        System.out.println("a | " + name + " - " + parentInfo.getName());
+                        commandInfo.setSubCommand(true);
+                        commandInfo.setParent(parentInfo);
+                        parentInfo.getSubCommands().add(commandInfo);
+                    } else {
+                        System.out.println("b | " + name);
+                        commandMap.put(name.toLowerCase(), commandInfo);
+                        for (String alias : command.aliases()) {
+                            commandMap.put(alias.toLowerCase(), commandInfo);
+                        }
+                        platform.registerCommand(commandInfo);
+                    }
+                } else if (method.isAnnotationPresent(Completer.class)) {
+                    completerCache.put(method, object);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -293,9 +304,7 @@ public class CommanderImpl implements Commander {
 
     @Override
     public Commander registerPackage(String packageName) {
-        register(platform.getClassesInPackage(packageName).stream().filter(clazz -> {
-            return !clazz.isAnnotationPresent(DontAutoInit.class);
-        }).map(clazz -> {
+        register(platform.getClassesInPackage(packageName).stream().filter(clazz -> !clazz.isAnnotationPresent(DontAutoInit.class)).map(clazz -> {
             try {
                 if (clazz.isEnum()) return null;
                 boolean isCommandClass = false;
@@ -645,7 +654,7 @@ public class CommanderImpl implements Commander {
                 Object result = method.invoke(customCompleter.getInstance(), args);
                 if (result instanceof Collection) {
                     customReturn = (Collection<String>) result;
-                }else {
+                } else {
                     throw new SuggestionException("suggestion.completer-must-return-string");
                 }
             } catch (InvocationTargetException | IllegalAccessException e) {
@@ -681,7 +690,7 @@ public class CommanderImpl implements Commander {
             if (suggestionsProvided == null) {
                 return null;
             }
-        }else suggestionsProvided = customReturn;
+        } else suggestionsProvided = customReturn;
         List<String> suggestions = new ArrayList<>(suggestionsProvided);
         if (config.isFilterSuggestions() && !input.endsWith(" ")) {
             suggestions.removeIf(s -> !s.trim().toLowerCase().startsWith(lastArg.trim().toLowerCase()));
