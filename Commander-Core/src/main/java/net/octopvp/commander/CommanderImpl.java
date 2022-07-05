@@ -201,7 +201,6 @@ public class CommanderImpl implements Commander {
                 if (method.isAnnotationPresent(Command.class)) {
                     Command command = method.getAnnotation(Command.class);
                     String name = command.name();
-                    System.out.println("3 " + object.getClass().getName() + " | " + name + (parentInfo != null ? " | " + parentInfo.getName() + " | " + parentInfo.isRegisteredWithPlatform() : ""));
                     List<ParameterInfo> parameters = new ArrayList<>();
                     for (Parameter parameter : method.getParameters()) {
                         parameters.add(new ParameterInfo(parameter, this));
@@ -215,12 +214,10 @@ public class CommanderImpl implements Commander {
                     }
                     CommandInfo commandInfo = new CommandInfo(parameters.toArray(new ParameterInfo[0]), name, command.description(), command.usage(), command.aliases(), method, object, annotations, this);
                     if (classHasMainCommand) {
-                        System.out.println("a | " + name + " - " + parentInfo.getName());
                         commandInfo.setSubCommand(true);
                         commandInfo.setParent(parentInfo);
                         parentInfo.getSubCommands().add(commandInfo);
                     } else {
-                        System.out.println("b | " + name);
                         commandMap.put(name.toLowerCase(), commandInfo);
                         for (String alias : command.aliases()) {
                             commandMap.put(alias.toLowerCase(), commandInfo);
