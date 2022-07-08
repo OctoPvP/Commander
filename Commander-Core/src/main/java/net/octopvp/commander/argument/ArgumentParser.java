@@ -30,10 +30,7 @@ import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.command.CompleterInfo;
 import net.octopvp.commander.command.ParameterInfo;
-import net.octopvp.commander.exception.CommandException;
-import net.octopvp.commander.exception.CommandParseException;
-import net.octopvp.commander.exception.InvalidArgsException;
-import net.octopvp.commander.exception.ProvideDefaultException;
+import net.octopvp.commander.exception.*;
 import net.octopvp.commander.lang.LocalizedCommandException;
 import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.sender.CoreCommandSender;
@@ -108,6 +105,9 @@ public class ArgumentParser {
                     LocalizedCommandException.checkResponseHandlerNull(e, ctx.getCommandInfo().getCommander().getResponseHandler());
                     if (e instanceof InvalidArgsException) {
                         throw new CommandParseException(e.getLocalizedMessage());
+                    }
+                    if (e instanceof MessageException) {
+                        throw e;
                     }
                     if (e instanceof ProvideDefaultException) {
                         obj = null;

@@ -68,6 +68,11 @@ public class TestPlatform implements CommanderPlatform {
     }
 
     @Override
+    public void updateCommandAliases(CommandInfo commandInfo) {
+
+    }
+
+    @Override
     public HelpService getHelpService() {
         return new HelpService() {
             @Override

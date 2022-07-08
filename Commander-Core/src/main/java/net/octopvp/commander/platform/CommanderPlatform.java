@@ -44,11 +44,13 @@ public interface CommanderPlatform {
 
     void handleCommandException(CommandInfo info, CoreCommandSender sender, CommandException e);
 
-    default boolean hasPermission(CoreCommandSender sender, String permission){
+    default boolean hasPermission(CoreCommandSender sender, String permission) {
         return sender.hasPermission(permission);
     }
 
     void registerCommand(CommandInfo command);
+
+    void updateCommandAliases(CommandInfo commandInfo);
 
     default boolean isSenderParameter(ParameterInfo parameterInfo) {
         return parameterInfo.getParameter().isAnnotationPresent(Sender.class) ||

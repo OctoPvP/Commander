@@ -42,7 +42,6 @@ import net.octopvp.commander.platform.CommanderPlatform;
 import net.octopvp.commander.sender.CoreCommandSender;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
@@ -52,6 +51,7 @@ import org.reflections.vfs.Vfs;
 
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -116,9 +116,17 @@ public class BukkitPlatform implements CommanderPlatform {
     @Override
     public void registerCommand(CommandInfo command) {
         if (commandMap.getCommand(command.getName()) == null) {
-            Command cmd = new BukkitCommandWrapper(command);
+            BukkitCommandWrapper cmd = new BukkitCommandWrapper(command);
             commandMap.register(plugin.getName(), cmd);
+            command.setPlatformCommandObject(cmd);
         }
+    }
+
+    @Override
+    public void updateCommandAliases(CommandInfo commandInfo) {
+        Object obj = commandInfo.getPlatformCommandObject();
+        BukkitCommandWrapper cmd = (BukkitCommandWrapper) obj;
+        cmd.setAliases(Arrays.asList(commandInfo.getAliases()));
     }
 
     @Override

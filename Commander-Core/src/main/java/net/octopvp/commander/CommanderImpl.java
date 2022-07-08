@@ -192,7 +192,11 @@ public class CommanderImpl implements Commander {
                 for (String alias : parent.aliases()) {
                     commandMap.put(alias.toLowerCase(), parentInfo);
                 }
-                if (!object.getClass().isAnnotationPresent(SecondaryParent.class)) {
+                if (object.getClass().isAnnotationPresent(SecondaryParent.class)) {
+                    if (parentInfo.isRegisteredWithPlatform()) {
+                        getPlatform().updateCommandAliases(parentInfo);
+                    }
+                } else {
                     platform.registerCommand(parentInfo);
                     parentInfo.setRegisteredWithPlatform(true);
                 }
@@ -509,6 +513,11 @@ public class CommanderImpl implements Commander {
                 }
             } catch (CommandException e) {
                 LocalizedCommandException.checkResponseHandlerNull(e, getResponseHandler());
+                if (e instanceof MessageException) {
+                    MessageException me = (MessageException) e;
+                    getPlatform().handleMessage(me.getMessage(), sender);
+                    return;
+                }
                 platform.handleCommandException(context, e);
             } catch (Exception e) {
                 System.err.println("An error occurred while executing command \"" + label + "\"");
