@@ -24,7 +24,6 @@
 
 package net.octopvp.commander.bukkit;
 
-import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
 import lombok.Setter;
 import net.octopvp.commander.Commander;
@@ -101,8 +100,7 @@ public class BukkitPlatform implements CommanderPlatform {
             LocalizedCommandException lce = (LocalizedCommandException) e;
             ResponseHandler handler = lce.getResponseHandler();
             if (handler == null) {
-                Bukkit.getLogger().severe("Could not find a instance of ResponseHandler to handle command exception: " + e.getClass().getName());
-                return;
+                throw new NullPointerException("Could not find a instance of ResponseHandler to handle command exception: " + e.getClass().getName());
             }
             sender.sendMessage(ChatColor.RED + handler.getMessage(lce, lce.getPlaceholders()));
         } else sender.sendMessage(ChatColor.RED + e.getMessage());
@@ -164,6 +162,6 @@ public class BukkitPlatform implements CommanderPlatform {
                 dir.close();
             }
         }
-        return ImmutableSet.copyOf(classes);
+        return classes;
     }
 }

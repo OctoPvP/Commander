@@ -502,9 +502,11 @@ public class CommanderImpl implements Commander {
                 try {
                     result = context.getCommandInfo().getMethod().invoke(context.getCommandInfo().getInstance(), arguments);
                 } catch (IllegalAccessException | IllegalArgumentException e) {
+                    LocalizedCommandException.checkResponseHandlerNull(e, getResponseHandler());
                     e.printStackTrace();
                 } catch (InvocationTargetException e) {
                     if (e.getCause() != null && e.getCause() instanceof CommandException) {
+                        LocalizedCommandException.checkResponseHandlerNull((Exception) e.getCause(), getResponseHandler());
                         platform.handleCommandException(context, (CommandException) e.getCause());
                     }
                 }
@@ -521,6 +523,7 @@ public class CommanderImpl implements Commander {
                 platform.handleCommandException(context, e);
             } catch (Exception e) {
                 System.err.println("An error occurred while executing command \"" + label + "\"");
+                LocalizedCommandException.checkResponseHandlerNull(e, getResponseHandler());
                 e.printStackTrace();
             }
         } catch (CommandException e) {
