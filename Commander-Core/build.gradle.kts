@@ -27,7 +27,7 @@ plugins {
 }
 
 group = "net.octopvp"
-version = "1.0-SNAPSHOT"
+version = "0.0.1-DEV"
 
 repositories {
     mavenCentral()

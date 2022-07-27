@@ -29,7 +29,7 @@ plugins {
 }
 
 group = "net.octopvp"
-version = "1.0-SNAPSHOT"
+version = "0.0.1-DEV"
 description = "A universal command parsing library"
 
 repositories {
@@ -52,8 +52,23 @@ tasks.compileJava {
     targetCompatibility = "1.8"
     options.compilerArgs.add("-parameters")
 }
-
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+val nexusUsername: String by project
+val nexusPassword: String by project
 subprojects {
+
+    val sourcesJar = tasks.register("sourcesJar", Jar::class.java) {
+        classifier = "sources"
+        from(sourceSets.main.get().allSource)
+    }
+    val javadocJar = tasks.register("javadocJar", Jar::class.java) {
+        classifier = "javadoc"
+        from(sourceSets.main.get().allJava)
+    }
+
     apply(plugin = "java")
     apply(plugin = "maven-publish")
     apply(plugin = "signing")
@@ -62,22 +77,64 @@ subprojects {
         repositories {
             maven {
                 mavenLocal()
+                val releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2"
+                val snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+                //url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+                setUrl(releasesRepoUrl)
+                credentials {
+                    username = nexusUsername
+                    password = nexusPassword
+                }
             }
         }
         publications {
-            create<MavenPublication>("maven") {
-                from(components["java"])
+            create<MavenPublication>("mavenJava") {
+                pom {
+                    name.set("Commander")
+                    description.set("Java annotation-based command parsing library")
+                    url.set("https://github.com/OctoPvP/Commander")
+                    from(components["java"])
+                    artifact(sourcesJar)
+                    artifact(javadocJar)
+                    scm {
+                        url.set("https://github.com/OctoPvP/Commander.git")
+                    }
 
+                    licenses {
+                        license {
+                            name.set("MIT License")
+                            url.set("https://opensource.org/licenses/MIT/")
+                            distribution.set("repo")
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id.set("Badbird5907")
+                            name.set("Badbird5907")
+                            email.set("badbird@badbird5907.net")
+                        }
+                    }
+                }
             }
         }
     }
-    tasks.compileJava {
-        options.compilerArgs.add("-parameters")
+    signing {
+        sign(publishing.publications["mavenJava"])
     }
-    tasks.jar {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        from({
-            configurations.runtimeClasspath.get().map { if (it.isDirectory()) it else zipTree(it) }
-        })
+    tasks {
+        artifacts {
+            archives(javadocJar)
+            archives(sourcesJar)
+        }
+        jar {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+            from({
+                configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) }
+            })
+        }
+        compileJava {
+            options.compilerArgs.add("-parameters")
+        }
     }
 }
