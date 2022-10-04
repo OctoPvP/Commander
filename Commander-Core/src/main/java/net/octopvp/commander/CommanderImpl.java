@@ -246,19 +246,24 @@ public class CommanderImpl implements Commander {
                 Method method = entry.getKey();
                 Completer completer = method.getAnnotation(Completer.class);
                 String targetCommand = completer.name();
+                boolean isInParentCommand = method.getDeclaringClass().isAnnotationPresent(Command.class);
+                Command parentCommand = method.getDeclaringClass().getAnnotation(Command.class);
                 int[] indexes = completer.index();
+
                 for (int index : indexes) {
-                    if (index < 0) {
-                        throw new IllegalArgumentException("Completer index must be greater than 0!");
+                    if (index < -1) {
+                        throw new IllegalArgumentException("Completer index must be greater than -1!"); // -1 is the catch all
                     }
                 }
                 if (targetCommand.equals("")) {
                     throw new IllegalArgumentException("Completer name cannot be empty!");
                 }
                 String[] split = targetCommand.toLowerCase().split(" ");
-                boolean isSubCommand = split.length > 1;
+                boolean isSubCommand = isInParentCommand || split.length > 1;
 
-                CommandInfo command = getCommand(split[0]), parent;
+                CommandInfo command, parent;
+                if (!isSubCommand) command = getCommand(split[0]);
+                else command = getCommand(parentCommand.name());
                 if (command == null) return;
 
                 if (isSubCommand && !command.isParentCommand())
@@ -269,7 +274,11 @@ public class CommanderImpl implements Commander {
                 CompleterInfo completerInfo;
                 if (isSubCommand) {
                     parent = command;
-                    command = parent.getSubCommand(split[1]);
+                    if (split.length > 1) {
+                        command = parent.getSubCommand(split[split.length - 1]);
+                    } else if (split.length == 1) {
+                        command = parent.getSubCommand(split[0]);
+                    }
                     if (command == null)
                         throw new IllegalArgumentException("Completer references a subcommand, which does not exist!");
                     completerInfo = new CompleterInfo(
@@ -591,7 +600,7 @@ public class CommanderImpl implements Commander {
     }
 
     @Override
-    public List<String> getSuggestions(CoreCommandSender sender, final String input) {
+    public List<String> getSuggestions(CoreCommandSender sender, final String input, Object senderWrapper) {
         String[] split = input.split(" ");
         if (split.length == 0) {
             return null;
@@ -657,7 +666,7 @@ public class CommanderImpl implements Commander {
         Collection<String> customReturn = null;
         if (customCompleter != null) {
             Method method = customCompleter.getMethod();
-            Object[] args = ArgumentParser.parseCompleterArguments(customCompleter, command, sender, method.getParameters(), input, label, lastArg, split, allParams ? -1 : index);
+            Object[] args = ArgumentParser.parseCompleterArguments(customCompleter, command, sender, method.getParameters(), input, label, lastArg, split, allParams ? -1 : index, senderWrapper);
             if (args == null) return null;
             try {
                 Object result = method.invoke(customCompleter.getInstance(), args);
@@ -773,9 +782,8 @@ public class CommanderImpl implements Commander {
     }
 
     @Override
-    public List<String> getSuggestions(CoreCommandSender sender, String prefix, String[] args) {
+    public List<String> getSuggestions(CoreCommandSender sender, String prefix, String[] args, Object wrapper) {
         String full = prefix + " " + String.join(" ", args); //Avoiding String#split at all costs because it compiles regex
-        List<String> suggestions = getSuggestions(sender, full);
-        return suggestions;
+        return getSuggestions(sender, full, wrapper);
     }
 }

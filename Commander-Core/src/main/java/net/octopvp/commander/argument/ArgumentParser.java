@@ -146,7 +146,7 @@ public class ArgumentParser {
         return null;
     }
 
-    public static Object[] parseCompleterArguments(CompleterInfo completerInfo, CommandInfo commandInfo, CoreCommandSender sender, Parameter[] parameters, String input, String label, String lastArg, String[] split, int index) {
+    public static Object[] parseCompleterArguments(CompleterInfo completerInfo, CommandInfo commandInfo, CoreCommandSender sender, Parameter[] parameters, String input, String label, String lastArg, String[] split, int index, Object senderWrapper) {
         Object[] arguments = new Object[parameters.length];
         int paramIndex = 0;
         for (int i = 0; i < parameters.length; i++) {
@@ -158,6 +158,11 @@ public class ArgumentParser {
                     throw new CommandParseException("dependency.not-found", classType.getName()); //maybe let the user control this?
                 }
                 arguments[i] = supplier.get();
+                continue;
+            }
+            //check if senderWrapper is an instance of the parameter, if so, return it
+            if (senderWrapper != null && parameter.getType().isAssignableFrom(senderWrapper.getClass())) {
+                arguments[i] = senderWrapper;
                 continue;
             }
 

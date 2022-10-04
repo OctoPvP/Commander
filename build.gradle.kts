@@ -29,7 +29,6 @@ plugins {
 }
 
 group = "net.octopvp"
-version = "0.0.1-DEV"
 description = "A universal command parsing library"
 
 repositories {

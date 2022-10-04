@@ -38,6 +38,7 @@ import net.octopvp.commander.sender.CoreCommandSender;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 
@@ -58,23 +59,23 @@ public class CompleterTest {
                 .registerProvider(TestClassTwo.class, new TestProvider2())
                 .registerProvider(TestClassThree.class, new TestProvider3())
         ;
-        List<String> completions = commander.getSuggestions(new CommandSender(), "test ");
+        List<String> completions = commander.getSuggestions(new CommandSender(), "test ", null);
         assertNotNull(completions);
         assertFalse(completions.isEmpty());
         assertTrue(completions.contains("Hello") && completions.contains("World"));
         System.out.println("First passed.");
-        List<String> completions2 = commander.getSuggestions(new CommandSender(), "test abcd ");
+        List<String> completions2 = commander.getSuggestions(new CommandSender(), "test abcd ", null);
         assertNotNull(completions2);
         assertFalse(completions2.isEmpty());
         assertTrue(completions2.contains("Yes") && completions2.contains("ABCDEFG"));
         System.out.println("Second passed.");
-        List<String> completions3 = commander.getSuggestions(new CommandSender(), "test abcd def ");
+        List<String> completions3 = commander.getSuggestions(new CommandSender(), "test abcd def ", null);
         assertNotNull(completions3);
         assertFalse(completions3.isEmpty());
         assertTrue(completions3.contains("It Works!") && completions3.contains(":)"));
         System.out.println("Third passed.");
 
-        List<String> completions4 = commander.getSuggestions(new CommandSender(), "t a b ");
+        List<String> completions4 = commander.getSuggestions(new CommandSender(), "t a b ", null);
         System.out.println(completions4);
         assertNotNull(completions4);
         assertFalse(completions4.isEmpty());
@@ -92,7 +93,7 @@ public class CompleterTest {
 
     @Completer(name = "t", index = 2)
     public List<String> t2(@Sender CommandSender sender, String input, String lastArg) {
-        return Arrays.asList("b");
+        return Collections.singletonList("b");
     }
 
     private static class TestProvider implements Provider<TestClass> {

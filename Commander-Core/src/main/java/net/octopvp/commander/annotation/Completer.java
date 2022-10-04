@@ -9,5 +9,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface Completer {
     String name();
-    int[] index();
+
+    int[] index() default {-1};
 }

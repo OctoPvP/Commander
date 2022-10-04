@@ -69,15 +69,15 @@ public class SubCommandTest {
         commander.executeCommand(new CommandSender(), "test", new String[]{"hello_world!"});
         assertTrue(passed3);
 
-        List<String> completions = commander.getSuggestions(new CommandSender(), "test completer ");
+        List<String> completions = commander.getSuggestions(new CommandSender(), "test completer ", null);
         assertNotNull(completions);
         assertTrue(completions.contains("Hello") && completions.contains("World"));
 
-        List<String> completions2 = commander.getSuggestions(new CommandSender(), "test completer abcd ");
+        List<String> completions2 = commander.getSuggestions(new CommandSender(), "test completer abcd ", null);
         assertNotNull(completions2);
         assertTrue(completions2.contains("Yes") && completions2.contains("ABCDEFG"));
 
-        List<String> completions3 = commander.getSuggestions(new CommandSender(), "test completer abcd def ");
+        List<String> completions3 = commander.getSuggestions(new CommandSender(), "test completer abcd def ", null);
         assertNotNull(completions3);
         assertTrue(completions3.contains("It Works!") && completions3.contains(":)"));
     }

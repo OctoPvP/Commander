@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class BukkitCommandWrapper extends org.bukkit.command.Command {
-    private CommandInfo commandInfo;
+    private final CommandInfo commandInfo;
 
     public BukkitCommandWrapper(CommandInfo command) {
         super(command.getName(), command.getDescription(), command.getUsage(), Arrays.asList(command.getAliases()));
@@ -51,6 +51,6 @@ public class BukkitCommandWrapper extends org.bukkit.command.Command {
 
     @Override
     public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
-        return commandInfo.getCommander().getSuggestions(new BukkitCommandSenderImpl(sender), alias, args);
+        return commandInfo.getCommander().getSuggestions(new BukkitCommandSenderImpl(sender), alias, args, sender);
     }
 }

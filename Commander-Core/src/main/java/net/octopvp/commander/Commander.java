@@ -82,7 +82,7 @@ public interface Commander {
 
     void executeCommand(CoreCommandSender sender, String label, String[] args) throws CommandException;
 
-    List<String> getSuggestions(CoreCommandSender sender, String command);
+    List<String> getSuggestions(CoreCommandSender sender, String command, Object senderWrapper);
 
-    List<String> getSuggestions(CoreCommandSender sender, String prefix, String[] args);
+    List<String> getSuggestions(CoreCommandSender sender, String prefix, String[] args, Object senderWrapper);
 }
