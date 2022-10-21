@@ -90,8 +90,8 @@ public class CommandInfo { //This is the object that is stored in the command ma
             this.cooldownMap = new HashMap<>();
         }
         if (isAnnotationPresent(Async.class)) {
-            this.async = true;
-        }
+            this.async = getAnnotation(Async.class).value();
+        } else this.async = commander.getConfig().isDefaultAsync();
         //make sure aliases are lowercase
         this.aliases = aliases;
         for (int i = 0; i < aliases.length; i++) {

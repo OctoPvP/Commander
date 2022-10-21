@@ -24,6 +24,7 @@
 
 package net.octopvp.commander.config;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,7 +37,7 @@ import java.util.Locale;
 @NoArgsConstructor
 public class CommanderConfig {
     private boolean defaultRequired = true, joinArgsWithQuotes = false, checkPermissionsOnSuggestion = true, showNextSuggestionOnlyIfEndsWithSpace = true,
-            filterSuggestions = true;
+            filterSuggestions = true, defaultAsync = false;
 
     private String optionalPrefix = "[", optionalSuffix = "]";
     private String requiredPrefix = "<", requiredSuffix = ">";
@@ -119,6 +120,11 @@ public class CommanderConfig {
 
         public Builder setLocale(Locale locale) {
             config.setLocale(locale);
+            return this;
+        }
+
+        public Builder setDefaultAsync(boolean defaultAsync) {
+            config.setDefaultAsync(defaultAsync);
             return this;
         }
 
