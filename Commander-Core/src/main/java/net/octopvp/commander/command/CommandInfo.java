@@ -56,7 +56,7 @@ public class CommandInfo { //This is the object that is stored in the command ma
     private double cooldown;
     private TimeUnit cooldownUnit;
 
-    private Map<UUID, Long> cooldownMap;
+    private Map<Object, Long> cooldownMap;
 
     private boolean subCommand = false, parentCommand = false;
     private CommandInfo parent;
@@ -191,36 +191,36 @@ public class CommandInfo { //This is the object that is stored in the command ma
         return cooldown > 0;
     }
 
-    public boolean isOnCooldown(UUID uuid) {
+    public boolean isOnCooldown(Object o) {
         if (cooldownMap == null) {
             return false;
         }
         //check if they are on a cooldown, if so, check if it has expired, if it has expired, remove
-        Long time = cooldownMap.get(uuid);
+        Long time = cooldownMap.get(o);
         if (time == null) return false;
         if (time - System.currentTimeMillis() <= 0) { // Cooldown expired
-            cooldownMap.remove(uuid);
+            cooldownMap.remove(o);
             return false;
         }
         return true;
     }
 
-    public double getCooldownMillis(UUID uuid) {
+    public double getCooldownMillis(Object o) {
         if (cooldownMap == null) {
             return 0;
         }
-        return cooldownMap.get(uuid) - System.currentTimeMillis();
+        return cooldownMap.get(o) - System.currentTimeMillis();
     }
 
-    public double getCooldownSeconds(UUID uuid) {
-        return getCooldownMillis(uuid) / 1000d;
+    public double getCooldownSeconds(Object o) {
+        return getCooldownMillis(o) / 1000d;
     }
 
-    public void addCooldown(UUID uuid) {
+    public void addCooldown(Object o) {
         if (cooldownMap == null) {
             return;
         }
-        cooldownMap.put(uuid, System.currentTimeMillis() + cooldownUnit.toMillis((long) cooldown));
+        cooldownMap.put(o, System.currentTimeMillis() + cooldownUnit.toMillis((long) cooldown));
     }
 
     public boolean isNormalCommand() {

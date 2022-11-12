@@ -24,12 +24,10 @@
 
 package net.octopvp.commander.sender;
 
-import java.util.UUID;
-
 public interface CoreCommandSender {
     boolean hasPermission(String permission);
 
-    UUID getIdentifier();
+    Object getIdentifier();
 
     void sendMessage(String message);
 }
