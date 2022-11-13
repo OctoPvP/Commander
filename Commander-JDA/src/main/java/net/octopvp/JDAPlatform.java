@@ -1,5 +1,6 @@
 package net.octopvp;
 
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.octopvp.commander.command.CommandContext;
 import net.octopvp.commander.command.CommandInfo;
 import net.octopvp.commander.exception.CommandException;
@@ -9,18 +10,9 @@ import net.octopvp.commander.sender.CoreCommandSender;
 
 public class JDAPlatform implements CommanderPlatform {
     @Override
-    public void handleMessage(String message, CoreCommandSender sender) {
-
-    }
-
-    @Override
-    public void handleError(String error, CoreCommandSender sender) {
-
-    }
-
-    @Override
-    public void handleCommandException(CommandContext ctx, CommandException e) {
-
+    public void handleMessage(CommandContext context, String message, CoreCommandSender sender) {
+        SlashCommandInteractionEvent event = (SlashCommandInteractionEvent) context.getExtraData();
+        event.reply(message).queue();
     }
 
     @Override

@@ -36,11 +36,13 @@ import org.reflections.Reflections;
 import java.util.Collection;
 
 public interface CommanderPlatform {
-    void handleMessage(String message, CoreCommandSender sender);
+    void handleMessage(CommandContext context, String message, CoreCommandSender sender);
 
-    void handleError(String error, CoreCommandSender sender);
+    //void handleError(String error, CoreCommandSender sender);
 
-    void handleCommandException(CommandContext ctx, CommandException e);
+    default void handleCommandException(CommandContext ctx, CommandException e) {
+        handleCommandException(ctx.getCommandInfo(), ctx.getCommandSender(), e);
+    }
 
     void handleCommandException(CommandInfo info, CoreCommandSender sender, CommandException e);
 

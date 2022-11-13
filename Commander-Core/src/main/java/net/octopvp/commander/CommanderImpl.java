@@ -526,7 +526,7 @@ public class CommanderImpl implements Commander {
                 LocalizedCommandException.checkResponseHandlerNull(e, getResponseHandler());
                 if (e instanceof MessageException) {
                     MessageException me = (MessageException) e;
-                    getPlatform().handleMessage(me.getMessage(), sender);
+                    getPlatform().handleMessage(context, me.getMessage(), sender);
                     return;
                 }
                 platform.handleCommandException(context, e);

@@ -77,22 +77,16 @@ public class BukkitPlatform implements CommanderPlatform {
     }
 
     @Override
-    public void handleMessage(String message, CoreCommandSender sender) {
+    public void handleMessage(CommandContext context, String message, CoreCommandSender sender) {
         BukkitCommandSender s = (BukkitCommandSender) sender;
         s.sendMessage(message);
     }
 
-    @Override
-    public void handleError(String error, CoreCommandSender sender) {
-        BukkitCommandSender s = (BukkitCommandSender) sender;
-        s.sendMessage(ChatColor.RED + error);
-    }
-
-    @Override
-    public void handleCommandException(CommandContext ctx, CommandException e) {
-        handleCommandException(ctx.getCommandInfo(), ctx.getCommandSender(), e);
-        //handleError(e.getMessage(), ctx.getCommandSender());
-    }
+    //@Override
+    //public void handleError(String error, CoreCommandSender sender) {
+    //    BukkitCommandSender s = (BukkitCommandSender) sender;
+    //    s.sendMessage(ChatColor.RED + error);
+    //}
 
     @Override
     public void handleCommandException(CommandInfo info, CoreCommandSender sender, CommandException e) {

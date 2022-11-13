@@ -29,8 +29,6 @@ import lombok.Setter;
 import net.octopvp.commander.argument.CommandArgs;
 import net.octopvp.commander.sender.CoreCommandSender;
 
-import java.util.Deque;
-
 @Getter
 @Setter
 public class CommandContext {
@@ -40,6 +38,7 @@ public class CommandContext {
     private CoreCommandSender commandSender;
     private String permission;
     private CommandArgs args;
+    private Object extraData; // not the best way, but it allows custom platforms to store data, such as JDA
 
     public CommandContext(CommandInfo commandInfo, String label, String[] originalArgs, CoreCommandSender commandSender, CommandArgs commandArgs) {
         this.commandInfo = commandInfo;

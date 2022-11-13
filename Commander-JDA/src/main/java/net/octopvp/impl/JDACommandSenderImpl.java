@@ -7,6 +7,20 @@ import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.octopvp.JDACommandSender;
 
 public class JDACommandSenderImpl implements JDACommandSender {
+
+    private final User user;
+    private Member member;
+
+    public JDACommandSenderImpl(User user) {
+        this.user = user;
+    }
+
+    public JDACommandSenderImpl(Member member) {
+        this.member = member;
+        this.user = member.getUser();
+    }
+
+
     @Override
     public boolean hasPermission(String permissionStr) {
         Permission permission = null;
@@ -23,46 +37,46 @@ public class JDACommandSenderImpl implements JDACommandSender {
 
     @Override
     public Object getIdentifier() {
-        return null;
+        return user.getIdLong();
     }
 
     @Override
     public void sendMessage(String message) {
-
+        user.openPrivateChannel().queue(channel -> channel.sendMessage(message).queue());
     }
 
     @Override
     public User getUser() {
-        return null;
+        return user;
     }
 
     @Override
     public Member getMember() {
-        return null;
+        return member;
     }
 
     @Override
     public UserSnowflake getUserSnowflake() {
-        return null;
+        return user;
     }
 
     @Override
     public long getIDLong() {
-        return 0;
+        return user.getIdLong();
     }
 
     @Override
     public String getID() {
-        return null;
+        return user.getId();
     }
 
     @Override
     public String getAsMention() {
-        return null;
+        return user.getAsMention();
     }
 
     @Override
     public String getAsTag() {
-        return null;
+        return user.getAsTag();
     }
 }

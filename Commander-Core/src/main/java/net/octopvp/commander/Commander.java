@@ -40,6 +40,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 public interface Commander {
 
     Commander init();

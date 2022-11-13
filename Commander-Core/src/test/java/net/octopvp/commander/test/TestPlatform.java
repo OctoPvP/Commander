@@ -36,13 +36,8 @@ import net.octopvp.commander.sender.CoreCommandSender;
 public class TestPlatform implements CommanderPlatform {
 
     @Override
-    public void handleMessage(String message, CoreCommandSender sender) {
+    public void handleMessage(CommandContext context, String message, CoreCommandSender sender) {
         System.out.println(message);
-    }
-
-    @Override
-    public void handleError(String error, CoreCommandSender sender) {
-        System.err.println(error);
     }
 
     @Override
