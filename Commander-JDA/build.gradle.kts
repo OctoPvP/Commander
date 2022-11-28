@@ -14,7 +14,7 @@ dependencies {
     implementation(project(":Commander-Core"))
 
     // JDA
-    implementation("net.dv8tion:JDA:5.0.0-alpha.22")
+    implementation("net.dv8tion:JDA:5.0.0-beta.1")
 
     // Tests
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
