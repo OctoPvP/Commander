@@ -40,7 +40,7 @@ dependencies {
     implementation(project(":Commander-Core"))
 
     //Server API
-    compileOnly("org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT")
+    compileOnly("org.spigotmc:spigot-api:1.19.3-R0.1-SNAPSHOT")
 
     //Testing
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
