@@ -44,6 +44,18 @@ public interface CommanderPlatform {
 
     void handleCommandException(CommandInfo info, CoreCommandSender sender, CommandException e);
 
+    /**
+     * Handle an exception that occurred during command execution
+     *
+     * @param ctx
+     * @param e
+     * @param sender
+     * @return true if the exception should be propagated
+     */
+    default boolean handleExecutionException(CommandContext ctx, Exception e, CoreCommandSender sender) {
+        return true;
+    }
+
     default boolean hasPermission(CoreCommandSender sender, String permission) {
         return sender.hasPermission(permission);
     }

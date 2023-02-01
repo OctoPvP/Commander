@@ -514,9 +514,14 @@ public class CommanderImpl implements Commander {
                     LocalizedCommandException.checkResponseHandlerNull(e, getResponseHandler());
                     e.printStackTrace();
                 } catch (InvocationTargetException e) {
-                    if (e.getCause() != null && e.getCause() instanceof CommandException) {
-                        LocalizedCommandException.checkResponseHandlerNull((Exception) e.getCause(), getResponseHandler());
-                        platform.handleCommandException(context, (CommandException) e.getCause());
+                    if (e.getCause() != null) {
+                        if (e.getCause() instanceof CommandException) {
+                            LocalizedCommandException.checkResponseHandlerNull((Exception) e.getCause(), getResponseHandler());
+                            platform.handleCommandException(context, (CommandException) e.getCause());
+                        } else {
+                            platform.handleExecutionException(context, e, sender);
+                            throw e;
+                        }
                     }
                 }
                 for (BiConsumer<CommandContext, Object> postProcessor : postProcessors) {

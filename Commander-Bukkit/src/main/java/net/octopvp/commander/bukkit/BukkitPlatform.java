@@ -107,6 +107,12 @@ public class BukkitPlatform implements CommanderPlatform {
     }
 
     @Override
+    public boolean handleExecutionException(CommandContext ctx, Exception e, CoreCommandSender sender) {
+        sender.sendMessage(ChatColor.RED + commander.getResponseHandler().getMessage("command.error", ctx.getCommandInfo().getName()));
+        return true;
+    }
+
+    @Override
     public void runAsync(Runnable runnable) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, runnable);
     }
