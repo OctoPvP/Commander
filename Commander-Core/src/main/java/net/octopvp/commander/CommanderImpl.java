@@ -114,6 +114,19 @@ public class CommanderImpl implements Commander {
         registerProvider(CoreCommandSender.class, new SenderProvider());
         registerProvider(String.class, new StringProvider());
         registerProvider(String[].class, new StringArrayProvider());
+        registerCommandPreProcessor(context -> {
+            CommandInfo commandInfo = context.getCommandInfo();
+            CoreCommandSender sender = context.getCommandSender();
+            if (commandInfo.isSubCommand()) {
+                if (commandInfo.getPermission() != null && !sender.hasPermission(commandInfo.getPermission())) {
+                    throw new NoPermissionException();
+                }
+                if (commandInfo.getParent().getPermission() != null && !sender.hasPermission(commandInfo.getParent().getPermission()))
+                    throw new NoPermissionException();
+            } else if (commandInfo.getPermission() != null && !sender.hasPermission(commandInfo.getPermission())) {
+                throw new NoPermissionException();
+            }
+        });
         registerCommandPreProcessor(context -> { //Cooldown preprocessor
             if (context.getCommandInfo().cooldownEnabled() && context.getCommandInfo().isOnCooldown(context.getCommandSender().getIdentifier())) {
                 throw new CooldownException(context.getCommandInfo().getCooldownSeconds(context.getCommandSender().getIdentifier()));
@@ -491,16 +504,6 @@ public class CommanderImpl implements Commander {
             try {
                 for (Consumer<CommandContext> preProcessor : preProcessors) {
                     preProcessor.accept(context);
-                }
-
-                if (commandInfo.isSubCommand()) {
-                    if (commandInfo.getPermission() != null && !sender.hasPermission(commandInfo.getPermission())) {
-                        throw new NoPermissionException();
-                    }
-                    if (commandInfo.getParent().getPermission() != null && !sender.hasPermission(commandInfo.getParent().getPermission()))
-                        throw new NoPermissionException();
-                } else if (commandInfo.getPermission() != null && !sender.hasPermission(commandInfo.getPermission())) {
-                    throw new NoPermissionException();
                 }
 
                 Object[] arguments = ArgumentParser.parseArguments(context, cArgs);
