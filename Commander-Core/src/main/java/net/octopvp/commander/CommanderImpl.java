@@ -116,7 +116,6 @@ public class CommanderImpl implements Commander {
         registerProvider(String[].class, new StringArrayProvider());
         registerProvider(CommandInfo.class, new CommandInfoProvider());
         registerCommandPreProcessor(context -> {
-            System.out.println("Preprocessor (perm)");
             CommandInfo commandInfo = context.getCommandInfo();
             CoreCommandSender sender = context.getCommandSender();
             if (commandInfo.isSubCommand()) {
@@ -130,7 +129,6 @@ public class CommanderImpl implements Commander {
             }
         });
         registerCommandPreProcessor(context -> { //Cooldown preprocessor
-            System.out.println("Preprocessor (cooldown)");
             if (context.getCommandInfo().cooldownEnabled() && context.getCommandInfo().isOnCooldown(context.getCommandSender().getIdentifier())) {
                 throw new CooldownException(context.getCommandInfo().getCooldownSeconds(context.getCommandSender().getIdentifier()));
             }
