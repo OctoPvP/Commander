@@ -562,8 +562,9 @@ public class CommanderImpl implements Commander {
                 if (flags.containsKey(flag)) {
                     throw new CommandParseException("flags.multiple", flag);
                 }
-                if (paramsList.stream().noneMatch(p -> p.isFlag() && p.getFlags().contains(flag)))
+                if (paramsList.stream().noneMatch(p -> p.isFlag() && p.getFlags().contains(flag))) {
                     continue;
+                }
                 iterator.remove();
                 if (iterator.hasNext()) {
                     String value = iterator.next();
@@ -588,8 +589,9 @@ public class CommanderImpl implements Commander {
                 if (switches.containsKey(commandSwitch)) {
                     throw new CommandParseException("switches.multiple", commandSwitch);
                 }
-                if (paramsList.stream().noneMatch(p -> p.isSwitch() && p.getSwitches().contains(commandSwitch)))
+                if (paramsList.stream().noneMatch(p -> p.isSwitch() && p.getSwitches().contains(commandSwitch))) {
                     continue;
+                }
                 iterator.remove();
                 switches.put(commandSwitch, true);
 
