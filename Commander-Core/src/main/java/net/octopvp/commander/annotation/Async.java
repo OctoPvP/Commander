@@ -31,6 +31,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
+@DistributeOnMethods
 public @interface Async {
     boolean value() default true;
 }
