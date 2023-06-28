@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Badbird5907 2022.
+ * Copyright (c) Badbird5907 2023.
  * MIT License
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,8 +28,6 @@ import lombok.Getter;
 import lombok.Setter;
 import net.octopvp.commander.argument.CommandArgs;
 import net.octopvp.commander.sender.CoreCommandSender;
-
-import java.util.Deque;
 
 @Getter
 @Setter

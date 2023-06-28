@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Badbird5907 2022.
+ * Copyright (c) Badbird5907 2023.
  * MIT License
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -127,8 +127,7 @@ public final class Primitives {
             // type is a normal class.
             return (Class<?>) type;
 
-        } else if (type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) type;
+        } else if (type instanceof ParameterizedType parameterizedType) {
 
             // I'm not exactly sure why getRawType() returns Type instead of Class.
             // Neal isn't either but suspects some pathological case related

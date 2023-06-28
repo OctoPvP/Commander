@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Badbird5907 2022.
+ * Copyright (c) Badbird5907 2023.
  * MIT License
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DependencyTest {
     private Commander commander;
-    private static TestStaticDependency staticDep = new TestStaticDependency();
+    private static final TestStaticDependency staticDep = new TestStaticDependency();
     private String arg;
     private boolean passedDep1, passedDep2;
     private static String s;
@@ -71,7 +71,7 @@ public class DependencyTest {
     }
     private static class TestDependency {
         public String returnThing() {
-            return s = System.currentTimeMillis() + "";
+            return s = String.valueOf(System.currentTimeMillis());
         }
     }
 }

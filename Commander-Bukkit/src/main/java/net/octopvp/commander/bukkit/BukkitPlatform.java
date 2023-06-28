@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Badbird5907 2022.
+ * Copyright (c) Badbird5907 2023.
  * MIT License
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -64,8 +64,7 @@ public class BukkitPlatform implements CommanderPlatform {
 
     public BukkitPlatform(Plugin plugin) {
         this.plugin = plugin;
-        if (plugin.getServer().getPluginManager() instanceof SimplePluginManager) {
-            SimplePluginManager manager = (SimplePluginManager) plugin.getServer().getPluginManager();
+        if (plugin.getServer().getPluginManager() instanceof SimplePluginManager manager) {
             try {
                 Field field = SimplePluginManager.class.getDeclaredField("commandMap");
                 field.setAccessible(true);
@@ -96,8 +95,7 @@ public class BukkitPlatform implements CommanderPlatform {
 
     @Override
     public void handleCommandException(CommandInfo info, CoreCommandSender sender, CommandException e) {
-        if (e instanceof LocalizedCommandException) {
-            LocalizedCommandException lce = (LocalizedCommandException) e;
+        if (e instanceof LocalizedCommandException lce) {
             ResponseHandler handler = lce.getResponseHandler();
             if (handler == null) {
                 throw new NullPointerException("Could not find a instance of ResponseHandler to handle command exception: " + e.getClass().getName());

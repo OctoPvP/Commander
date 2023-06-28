@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Badbird5907 2022.
+ * Copyright (c) Badbird5907 2023.
  * MIT License
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -44,7 +44,7 @@ public class BukkitHelpService implements HelpService {
 
     @Override
     public void sendHelp(CommandInfo info, CoreCommandSender sender) {
-        sender.sendMessage(ChatColor.GRAY + "" + ChatColor.STRIKETHROUGH + "--------------------------------");
+        sender.sendMessage(ChatColor.GRAY + String.valueOf(ChatColor.STRIKETHROUGH) + "--------------------------------");
         sender.sendMessage(ChatColor.AQUA + "Help for " + ChatColor.GOLD + info.getName() + ChatColor.GRAY + " - " + info.getDescription());
         if (info.isParentCommand()) {
             for (CommandInfo subCommand : info.getSubCommands()) {
@@ -54,6 +54,6 @@ public class BukkitHelpService implements HelpService {
                 sender.sendMessage(ChatColor.GRAY + " " + subCommand.getFullUsage() + (subCommand.getDescription() != null || subCommand.getDescription().isEmpty() ? ChatColor.GRAY + " - " + subCommand.getDescription() : ""));
             }
         }
-        sender.sendMessage(ChatColor.GRAY + "" + ChatColor.STRIKETHROUGH + "--------------------------------");
+        sender.sendMessage(ChatColor.GRAY + String.valueOf(ChatColor.STRIKETHROUGH) + "--------------------------------");
     }
 }

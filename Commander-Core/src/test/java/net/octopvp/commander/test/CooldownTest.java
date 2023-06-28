@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Badbird5907 2022.
+ * Copyright (c) Badbird5907 2023.
  * MIT License
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,8 +29,6 @@ import net.octopvp.commander.CommanderImpl;
 import net.octopvp.commander.annotation.Command;
 import net.octopvp.commander.annotation.Cooldown;
 import org.junit.jupiter.api.Test;
-
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

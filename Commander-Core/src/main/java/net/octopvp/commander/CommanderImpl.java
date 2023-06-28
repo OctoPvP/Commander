@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Badbird5907 2022.
+ * Copyright (c) Badbird5907 2023.
  * MIT License
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -148,7 +148,7 @@ public class CommanderImpl implements Commander {
                 }
                 StringBuilder minMax = new StringBuilder("(");
                 if (range.min() != Double.MIN_VALUE) {
-                    String min = range.min() + "";
+                    String min = String.valueOf(range.min());
                     if (min.endsWith(".0")) {
                         min = min.substring(0, min.length() - 2);
                     }
@@ -158,7 +158,7 @@ public class CommanderImpl implements Commander {
                     if (minMax.length() > 1) {
                         minMax.append(" | ");
                     }
-                    String max = range.max() + "";
+                    String max = String.valueOf(range.max());
                     if (max.endsWith(".0")) {
                         max = max.substring(0, max.length() - 2);
                     }
@@ -533,8 +533,7 @@ public class CommanderImpl implements Commander {
                 }
             } catch (CommandException e) {
                 LocalizedCommandException.checkResponseHandlerNull(e, getResponseHandler());
-                if (e instanceof MessageException) {
-                    MessageException me = (MessageException) e;
+                if (e instanceof MessageException me) {
                     getPlatform().handleMessage(me.getMessage(), sender);
                     return;
                 }

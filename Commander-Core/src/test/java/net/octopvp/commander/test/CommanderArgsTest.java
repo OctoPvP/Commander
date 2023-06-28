@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Badbird5907 2022.
+ * Copyright (c) Badbird5907 2023.
  * MIT License
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -106,7 +106,7 @@ public class CommanderArgsTest {
 
     @Command(name = "testswitches")
     public void testSwitches(@Switch("s") boolean sw) {
-        this.arg = sw + "";
+        this.arg = String.valueOf(sw);
     }
 
     @Command(name = "testswitchesandflags")
