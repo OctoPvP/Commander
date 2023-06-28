@@ -64,11 +64,11 @@ public class BukkitPlatform implements CommanderPlatform {
 
     public BukkitPlatform(Plugin plugin) {
         this.plugin = plugin;
-        if (plugin.getServer().getPluginManager() instanceof SimplePluginManager manager) {
+        if (plugin.getServer().getPluginManager() instanceof SimplePluginManager) {
             try {
                 Field field = SimplePluginManager.class.getDeclaredField("commandMap");
                 field.setAccessible(true);
-                commandMap = (CommandMap) field.get(manager);
+                commandMap = (CommandMap) field.get(plugin.getServer().getPluginManager());
             } catch (IllegalArgumentException | NoSuchFieldException | IllegalAccessException | SecurityException e) {
                 e.printStackTrace();
             }
@@ -95,7 +95,8 @@ public class BukkitPlatform implements CommanderPlatform {
 
     @Override
     public void handleCommandException(CommandInfo info, CoreCommandSender sender, CommandException e) {
-        if (e instanceof LocalizedCommandException lce) {
+        if (e instanceof LocalizedCommandException) {
+            LocalizedCommandException lce = (LocalizedCommandException) e;
             ResponseHandler handler = lce.getResponseHandler();
             if (handler == null) {
                 throw new NullPointerException("Could not find a instance of ResponseHandler to handle command exception: " + e.getClass().getName());
