@@ -55,10 +55,12 @@ java {
     withJavadocJar()
     withSourcesJar()
 }
+
+val octomcRepository = hasProperty("octomcUsername") && hasProperty("octomcPassword")
 val nexusUsername: String by project
 val nexusPassword: String by project
-subprojects {
 
+subprojects {
     val sourcesJar = tasks.register("sourcesJar", Jar::class.java) {
         classifier = "sources"
         from(sourceSets.main.get().allSource)
@@ -83,6 +85,15 @@ subprojects {
                 credentials {
                     username = nexusUsername
                     password = nexusPassword
+                }
+            }
+            if (octomcRepository) {
+                maven ("https://repo.octopvp.net/repo"){
+                    name = "octomc"
+                    credentials(PasswordCredentials::class)
+                    authentication {
+                        create<BasicAuthentication>("basic")
+                    }
                 }
             }
         }
@@ -113,6 +124,26 @@ subprojects {
                             name.set("Badbird5907")
                             email.set("badbird@badbird5907.net")
                         }
+                    }
+                }
+            }
+            if (octomcRepository) {
+                create<MavenPublication>("maven") {
+                    from(components["java"])
+                    artifact(sourcesJar)
+                    artifact(javadocJar)
+                    versionMapping {
+                        usage("java-api") {
+                            fromResolutionOf("runtimeClasspath")
+                        }
+                        usage("java-runtime") {
+                            fromResolutionResult()
+                        }
+                    }
+                    pom {
+                        name.set("Commander")
+                        description.set("Java annotation-based command parsing library")
+                        url.set("https://github.com/OctoPvP/Commander")
                     }
                 }
             }
