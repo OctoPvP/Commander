@@ -122,7 +122,7 @@ subprojects {
                         developer {
                             id.set("Badbird5907")
                             name.set("Badbird5907")
-                            email.set("badbird@badbird5907.net")
+                            email.set("contact@badbird.dev")
                         }
                     }
                 }
@@ -164,7 +164,15 @@ subprojects {
             })
         }
         compileJava {
+            sourceCompatibility = "1.8"
+            targetCompatibility = "1.8"
             options.compilerArgs.add("-parameters")
         }
+    }
+}
+allprojects {
+    tasks.withType<JavaCompile> {
+        sourceCompatibility = "1.8"
+        targetCompatibility = "1.8"
     }
 }
