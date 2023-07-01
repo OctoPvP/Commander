@@ -17,7 +17,7 @@ dependencies {
     implementation("net.dv8tion:JDA:5.0.0-beta.7")
 
     // Tests
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.3")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
 }
 
