@@ -558,9 +558,12 @@ public class CommanderImpl implements Commander {
         Iterator<String> iterator = args.iterator();
         while (iterator.hasNext()) {
             String arg = iterator.next();
+            System.out.println("arg - " + arg);
             boolean matchDouble = config.isMatchDoubleFlagAndSwitch() && arg.startsWith(CommanderUtilities.repeat(config.getFlagPrefix(), 2));
+            System.out.println("  - " + matchDouble);
             if (arg.startsWith(config.getFlagPrefix()) || matchDouble) {
                 String flag = arg.substring(config.getFlagPrefix().length() + (matchDouble ? 1 : 0));
+                System.out.println("  - " + flag);
                 if (flags.containsKey(flag)) {
                     throw new CommandParseException("flags.multiple", flag);
                 }
@@ -570,8 +573,9 @@ public class CommanderImpl implements Commander {
                 iterator.remove();
                 if (iterator.hasNext()) {
                     String value = iterator.next();
+                    System.out.println("  - " + value);
                     iterator.remove();
-                    flags.put(flag, value);
+                    flags.put(flagAliasToName(flag, params), value);
                 } else {
                     throw new CommandParseException("flags.requires-value", flag);
                 }
@@ -580,6 +584,14 @@ public class CommanderImpl implements Commander {
         return flags;
     }
 
+    private String flagAliasToName(String alias, ParameterInfo[] params) { // TODO this is a hot fix, need to properly implement a faster solution
+        for (ParameterInfo param : params) {
+            if (param.isFlag() && param.getFlags().contains(alias)) {
+                return param.getParameter().getAnnotation(Flag.class).value();
+            }
+        }
+        return alias; // likely not a alias then
+    }
     private Map<String, Boolean> extractSwitches(final List<String> args, final ParameterInfo[] params) {
         List<ParameterInfo> paramsList = Arrays.asList(params);
         Map<String, Boolean> switches = new HashMap<>();
