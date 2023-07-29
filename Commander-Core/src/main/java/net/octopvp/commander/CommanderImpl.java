@@ -558,12 +558,9 @@ public class CommanderImpl implements Commander {
         Iterator<String> iterator = args.iterator();
         while (iterator.hasNext()) {
             String arg = iterator.next();
-            System.out.println("arg - " + arg);
             boolean matchDouble = config.isMatchDoubleFlagAndSwitch() && arg.startsWith(CommanderUtilities.repeat(config.getFlagPrefix(), 2));
-            System.out.println("  - " + matchDouble);
             if (arg.startsWith(config.getFlagPrefix()) || matchDouble) {
                 String flag = arg.substring(config.getFlagPrefix().length() + (matchDouble ? 1 : 0));
-                System.out.println("  - " + flag);
                 if (flags.containsKey(flag)) {
                     throw new CommandParseException("flags.multiple", flag);
                 }
@@ -573,7 +570,6 @@ public class CommanderImpl implements Commander {
                 iterator.remove();
                 if (iterator.hasNext()) {
                     String value = iterator.next();
-                    System.out.println("  - " + value);
                     iterator.remove();
                     flags.put(flagAliasToName(flag, params), value);
                 } else {
