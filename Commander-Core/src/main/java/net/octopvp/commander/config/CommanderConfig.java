@@ -36,7 +36,7 @@ import java.util.Locale;
 @NoArgsConstructor
 public class CommanderConfig {
     private boolean defaultRequired = true, joinArgsWithQuotes = false, checkPermissionsOnSuggestion = true, showNextSuggestionOnlyIfEndsWithSpace = true,
-            filterSuggestions = true, defaultAsync = false;
+            filterSuggestions = true, defaultAsync = false, matchDoubleFlagAndSwitch = true;
 
     private String optionalPrefix = "[", optionalSuffix = "]";
     private String requiredPrefix = "<", requiredSuffix = ">";
@@ -124,6 +124,11 @@ public class CommanderConfig {
 
         public Builder setDefaultAsync(boolean defaultAsync) {
             config.setDefaultAsync(defaultAsync);
+            return this;
+        }
+
+        public Builder setMatchDoubleFlagAndSwitch(boolean matchDoubleFlagAndSwitch) {
+            config.setMatchDoubleFlagAndSwitch(matchDoubleFlagAndSwitch);
             return this;
         }
 

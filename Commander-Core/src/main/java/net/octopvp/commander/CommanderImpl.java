@@ -40,6 +40,7 @@ import net.octopvp.commander.platform.CommanderPlatform;
 import net.octopvp.commander.provider.Provider;
 import net.octopvp.commander.provider.impl.*;
 import net.octopvp.commander.sender.CoreCommandSender;
+import net.octopvp.commander.util.CommanderUtilities;
 import net.octopvp.commander.util.Primitives;
 import net.octopvp.commander.validator.Validator;
 
@@ -557,8 +558,9 @@ public class CommanderImpl implements Commander {
         Iterator<String> iterator = args.iterator();
         while (iterator.hasNext()) {
             String arg = iterator.next();
-            if (arg.startsWith(config.getFlagPrefix())) {
-                String flag = arg.substring(config.getFlagPrefix().length());
+            boolean matchDouble = config.isMatchDoubleFlagAndSwitch() && arg.startsWith(CommanderUtilities.repeat(config.getFlagPrefix(), 2));
+            if (arg.startsWith(config.getFlagPrefix()) || matchDouble) {
+                String flag = arg.substring(config.getFlagPrefix().length() + (matchDouble ? 1 : 0));
                 if (flags.containsKey(flag)) {
                     throw new CommandParseException("flags.multiple", flag);
                 }
@@ -584,8 +586,9 @@ public class CommanderImpl implements Commander {
         Iterator<String> iterator = args.iterator();
         while (iterator.hasNext()) {
             String arg = iterator.next();
-            if (arg.startsWith(config.getSwitchPrefix())) {
-                String commandSwitch = arg.substring(config.getSwitchPrefix().length());
+            boolean matchDouble = config.isMatchDoubleFlagAndSwitch() && arg.startsWith(CommanderUtilities.repeat(config.getSwitchPrefix(), 2));
+            if (arg.startsWith(config.getSwitchPrefix()) || matchDouble) {
+                String commandSwitch = arg.substring(config.getSwitchPrefix().length() + (matchDouble ? 1 : 0));
                 if (switches.containsKey(commandSwitch)) {
                     throw new CommandParseException("switches.multiple", commandSwitch);
                 }
@@ -658,9 +661,9 @@ public class CommanderImpl implements Commander {
 
         //remove switches and flags from the index
         for (int i = 0; i < index; i++) {
-            if (split[i].startsWith(config.getFlagPrefix())) {
+            if (split[i].startsWith(config.getFlagPrefix()) || config.isMatchDoubleFlagAndSwitch() && split[i].startsWith(CommanderUtilities.repeat(config.getFlagPrefix(), 2))) {
                 index--;
-            } else if (split[i].startsWith(config.getSwitchPrefix())) {
+            } else if (split[i].startsWith(config.getSwitchPrefix()) || config.isMatchDoubleFlagAndSwitch() && split[i].startsWith(CommanderUtilities.repeat(config.getSwitchPrefix(), 2))) {
                 index--;
             }
         }

@@ -97,4 +97,11 @@ public class CommanderUtilities {
         return calendar.after(max) ? max.getTimeInMillis() : calendar.getTimeInMillis();
     }
 
+    public static String repeat(String str, int times) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < times; i++) {
+            builder.append(str);
+        }
+        return builder.toString();
+    }
 }
