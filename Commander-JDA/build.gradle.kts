@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "net.octopvp"
-version = "0.0.8-REL"
+version = "0.0.9-REL"
 
 repositories {
     mavenCentral()

@@ -46,19 +46,17 @@ public class PlayerProvider implements Provider<Player> {
 
     @Override
     public List<String> provideSuggestions(String input, String lastArg, CoreCommandSender s)  {
-        return suggest(input, s);
+        return suggest(s);
     }
 
-    public static List<String> suggest(String input, CoreCommandSender s) {
+    public static List<String> suggest(CoreCommandSender s) {
         List<String> list = new ArrayList<>();
         BukkitCommandSenderImpl sender = (BukkitCommandSenderImpl) s;
         if (sender instanceof Player) {
             Player p = sender.getPlayer();
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (p.canSee(onlinePlayer)) {
-                    if (onlinePlayer.getName().toLowerCase().startsWith(input.toLowerCase())) {
-                        list.add(playerNameFunction.apply(onlinePlayer));
-                    }
+                    list.add(playerNameFunction.apply(onlinePlayer));
                 }
             }
         } else {
