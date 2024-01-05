@@ -45,7 +45,11 @@ public class PlayerProvider implements Provider<Player> {
     }
 
     @Override
-    public List<String> provideSuggestions(String input, String lastArg, CoreCommandSender s) {
+    public List<String> provideSuggestions(String input, String lastArg, CoreCommandSender s)  {
+        return suggest(input, s);
+    }
+
+    public static List<String> suggest(String input, CoreCommandSender s) {
         List<String> list = new ArrayList<>();
         BukkitCommandSenderImpl sender = (BukkitCommandSenderImpl) s;
         if (sender instanceof Player) {
