@@ -52,7 +52,7 @@ public class PlayerProvider implements Provider<Player> {
     public static List<String> suggest(CoreCommandSender s) {
         List<String> list = new ArrayList<>();
         BukkitCommandSenderImpl sender = (BukkitCommandSenderImpl) s;
-        if (sender instanceof Player) {
+        if (sender.isPlayer()) {
             Player p = sender.getPlayer();
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (p.canSee(onlinePlayer)) {
