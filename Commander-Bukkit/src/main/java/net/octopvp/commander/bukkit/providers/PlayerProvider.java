@@ -54,11 +54,7 @@ public class PlayerProvider implements Provider<Player> {
         BukkitCommandSenderImpl sender = (BukkitCommandSenderImpl) s;
         if (sender.isPlayer()) {
             Player p = sender.getPlayer();
-            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                if (p.canSee(onlinePlayer)) {
-                    list.add(playerNameFunction.apply(onlinePlayer));
-                }
-            }
+            Bukkit.getOnlinePlayers().stream().filter(p::canSee).forEach(onlinePlayer -> list.add(playerNameFunction.apply(onlinePlayer)));
         } else {
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 list.add(playerNameFunction.apply(onlinePlayer));
