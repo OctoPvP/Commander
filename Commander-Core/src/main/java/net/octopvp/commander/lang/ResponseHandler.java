@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Badbird5907 2023.
+ * Copyright (c) Evan Yu 2024.
  * MIT License
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
