@@ -45,8 +45,8 @@ import java.util.ResourceBundle;
 
 public class BukkitCommander {
     public static BukkitHelpService HELP_SERVICE = BukkitHelpService.INSTANCE;
-    public static Commander getCommander(Plugin plugin) {
-        BukkitPlatform platform = new BukkitPlatform(plugin);
+
+    public static Commander getCommander(BukkitPlatform platform) {
         Commander impl = new CommanderImpl(platform)
                 .init()
                 .registerProvider(Player.class, new PlayerProvider())
@@ -61,7 +61,7 @@ public class BukkitCommander {
                         if (!sender.isPlayer()) {
                             throw new LocalizedCommandException("must-be.player");
                         }
-                    }else if (ctx.getCommandInfo().isAnnotationPresent(ConsoleOnly.class)) {
+                    } else if (ctx.getCommandInfo().isAnnotationPresent(ConsoleOnly.class)) {
                         BukkitCommandSender sender = (BukkitCommandSender) ctx.getCommandSender();
                         if (!sender.isConsole()) {
                             throw new LocalizedCommandException("must-be.console");
@@ -76,5 +76,10 @@ public class BukkitCommander {
         platform.setCommander(impl);
         impl.getResponseHandler().addBundle(ResourceBundle.getBundle("bukkit", impl.getResponseHandler().getLocale()));
         return impl;
+    }
+
+    public static Commander getCommander(Plugin plugin) {
+        BukkitPlatform platform = new BukkitPlatform(plugin);
+        return getCommander(platform);
     }
 }
