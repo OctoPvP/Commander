@@ -88,7 +88,7 @@ subprojects {
                 }
             }
             if (octomcRepository) {
-                maven ("https://repo.octopvp.net/repo"){
+                maven ("https://repo.octopvp.net/public"){
                     name = "octomc"
                     credentials(PasswordCredentials::class)
                     authentication {
