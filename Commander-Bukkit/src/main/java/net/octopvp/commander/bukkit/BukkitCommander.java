@@ -34,6 +34,7 @@ import net.octopvp.commander.bukkit.impl.BukkitHelpService;
 import net.octopvp.commander.bukkit.providers.CommandSenderProviders;
 import net.octopvp.commander.bukkit.providers.OfflinePlayerProvider;
 import net.octopvp.commander.bukkit.providers.PlayerProvider;
+import net.octopvp.commander.config.CommanderConfig;
 import net.octopvp.commander.lang.LocalizedCommandException;
 import net.octopvp.commander.sender.CoreCommandSender;
 import org.bukkit.OfflinePlayer;
@@ -47,7 +48,10 @@ public class BukkitCommander {
     public static BukkitHelpService HELP_SERVICE = BukkitHelpService.INSTANCE;
 
     public static Commander getCommander(BukkitPlatform platform) {
-        Commander impl = new CommanderImpl(platform)
+        return getCommander(platform, new CommanderConfig());
+    }
+    public static Commander getCommander(BukkitPlatform platform, CommanderConfig config) {
+        Commander impl = new CommanderImpl(platform, config)
                 .init()
                 .registerProvider(Player.class, new PlayerProvider())
                 .registerProvider(OfflinePlayer.class, new OfflinePlayerProvider())
